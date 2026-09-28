@@ -2,16 +2,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/local_storage.dart';
 import '../../authentication/presentation/auth_provider.dart';
-import 'avatar_selector_sheet.dart';
 
 /// Default avatar shown when the user has not picked one yet.
-const String kDefaultAvatarId = AvatarSelectorSheet.fallbackAvatar;
+const String kDefaultAvatarId = 'male_cricket_champ';
+
+bool isValidAvatarId(String id) =>
+    maleAvatars.contains(id) || femaleAvatars.contains(id);
+
+const List<String> maleAvatars = [
+  'male_cricket_champ',
+  'male_football_pro',
+  'male_fit_fierce',
+  'male_urban_explorer',
+];
+
+const List<String> femaleAvatars = [
+  'female_cricket_queen',
+  'female_fit_fabulous',
+  'female_trendy_vibes',
+  'female_urban_chic',
+];
+
+const Map<String, String> avatarLabels = {
+  'male_cricket_champ': 'Cricket Champ',
+  'male_football_pro': 'Football Pro',
+  'male_fit_fierce': 'Fit & Fierce',
+  'male_urban_explorer': 'Urban Explorer',
+  'female_cricket_queen': 'Cricket Queen',
+  'female_fit_fabulous': 'Fit & Fabulous',
+  'female_trendy_vibes': 'Trendy Vibes',
+  'female_urban_chic': 'Urban Chic',
+};
+
+String assetFor(String id) {
+  if (isValidAvatarId(id)) return 'assets/images/avatars/$id.svg';
+  return 'assets/images/avatars/$kDefaultAvatarId.svg';
+}
+
+const String fallbackAvatar = kDefaultAvatarId;
 
 /// Single source of truth for the current user's avatar.
-///
-/// The selection is persisted per logged-in user id in [LocalStorage] so it
-/// survives app restarts and re-logins, and is shared by the Home header,
-/// Profile card, and Edit Profile screen (instant sync, no restart needed).
 class AvatarNotifier extends StateNotifier<String> {
   AvatarNotifier() : super(kDefaultAvatarId);
 
@@ -22,13 +52,13 @@ class AvatarNotifier extends StateNotifier<String> {
   void loadForUser(String? userId) {
     final uid = userId ?? 'guest';
     final stored = LocalStorage.getAvatarForUser(uid);
-    if (stored != null && AvatarSelectorSheet.isValidAvatarId(stored)) {
+    if (stored != null && isValidAvatarId(stored)) {
       state = stored;
       return;
     }
     final legacy = LocalStorage.avatarStyle;
     if (legacy == 'female') {
-      state = 'female_1';
+      state = 'female_cricket_queen';
       return;
     }
     state = kDefaultAvatarId;
@@ -36,7 +66,7 @@ class AvatarNotifier extends StateNotifier<String> {
 
   /// Selects [avatarId] for the current user and persists it.
   Future<void> setAvatar(String avatarId) async {
-    if (!AvatarSelectorSheet.isValidAvatarId(avatarId)) return;
+    if (!isValidAvatarId(avatarId)) return;
     state = avatarId;
     final uid = LocalStorage.getUserId() ?? 'guest';
     await LocalStorage.setAvatarForUser(uid, avatarId);
@@ -46,6 +76,7 @@ class AvatarNotifier extends StateNotifier<String> {
   }
 }
 
+/// Single source of truth for the current user's avatar.
 final avatarProvider = StateNotifierProvider<AvatarNotifier, String>((ref) {
   final notifier = AvatarNotifier();
   ref.listen(authProvider, (previous, next) {

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400" viewBox="0 0 200 400">
+  <defs>
+    <linearGradient id="bg6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8F5E9"/>
+      <stop offset="1" stop-color="#C8E6C9"/>
+    </linearGradient>
+    <linearGradient id="skin6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F7D3B5"/>
+      <stop offset="1" stop-color="#F0C49F"/>
+    </linearGradient>
+    <linearGradient id="top6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B5E20"/>
+      <stop offset="1" stop-color="#2E7D32"/>
+    </linearGradient>
+    <linearGradient id="legs6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#333"/>
+      <stop offset="1" stop-color="#1A1A1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#F5F5F5"/>
+  <g transform="translate(50,20)">
+    <ellipse cx="100" cy="50" rx="42" ry="48" fill="url(#skin6)"/>
+    <path d="M100 90 Q90 120 88 145 L98 145 Q100 130 102 145 L112 120 Q110 90 100 90Z" fill="#1B5E20"/>
+    <path d="M100 90 Q90 120 88 145" stroke="#E0996B" stroke-width="2" fill="none"/>
+    <path d="M100 90 Q110 120 112 145" stroke="#E0996B" stroke-width="2" fill="none"/>
+    <ellipse cx="82" cy="45" rx="9" ry="11" fill="#F7D3B5"/>
+    <ellipse cx="118" cy="45" rx="9" ry="11" fill="#F7D3B5"/>
+    <circle cx="78" cy="42" r="3.8" fill="#FFF"/>
+    <circle cx="78" cy="42" r="2.4" fill="#2C1F17"/>
+    <circle cx="78" cy="42" r="1" fill="#1B1B1B"/>
+    <circle cx="122" cy="42" r="3.8" fill="#FFF"/>
+    <circle cx="122" cy="42" r="2.4" fill="#2C1F17"/>
+    <circle cx="122" cy="42" r="1" fill="#1B1B1B"/>
+    <path d="M93 55 Q100 59 107 55" stroke="#2C1F17" stroke-width="1.5" fill="none"/>
+    <path d="M85 145 Q92 150 100 150 Q108 150 115 145 L110 175 Q105 185 100 185 Q95 185 90 175Z" fill="#2E7D32"/>
+    <path d="M85 175 L70 210 L95 210 L100 250" fill="#1B5E20"/>
+    <path d="M115 175 L130 210 L105 210 L100 250" fill="#1B5E20"/>
+    <rect x="70" y="145" width="60" height="30" rx="3" fill="#1B5E20"/>
+    <rect x="65" y="170" width="70" height="10" rx="2" fill="#2E7D32"/>
+    <path d="M70 210 L60 350 L95 350 L100 270" fill="#333"/>
+    <path d="M130 210 L140 350 L105 350 L100 270" fill="#333"/>
+    <ellipse cx="85" cy="365" rx="13" ry="9" fill="#333"/>
+    <ellipse cx="115" cy="365" rx="13" ry="9" fill="#333"/>
+    <circle cx="100" cy="155" r="5" fill="#FFE44D"/>
+    <circle cx="100" cy="155" r="2.5" fill="#1B5E20"/>
+  </g>
+  <circle cx="100" cy="10" r="5" fill="#FFE44D"/>
+  <text x="100" y="15" text-anchor="middle" font-size="8" font-weight="bold" fill="#333">FIT &amp; FABULOUS</text>
+</svg>

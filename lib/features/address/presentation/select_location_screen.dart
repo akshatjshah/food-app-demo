@@ -3,12 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/searchable_options_sheet.dart';
 import '../data/models/address.dart';
-import '../data/models/india_locations.dart';
 import '../data/models/recent_location.dart';
 import '../data/repositories/places_repository.dart';
-import '../data/services/device_location_service.dart';
 import 'address_actions.dart';
 import 'address_prefill.dart';
 import 'address_provider.dart';
@@ -27,7 +24,6 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
   final _debouncer = _SearchDebouncer(const Duration(milliseconds: 400));
 
   bool _isSearching = false;
-  bool _isGettingLocation = false;
   List<PlaceResult> _results = const [];
   String? _searchError;
   String _activeQuery = '';
@@ -106,121 +102,9 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
     }
   }
 
-  Future<void> _useCurrentLocation() async {
-    if (_isGettingLocation) return;
-    setState(() => _isGettingLocation = true);
-    try {
-      final position = await DeviceLocationService.getCurrentPosition();
-      if (!mounted) return;
-      context.push(
-        '/addresses/add',
-        extra: AddressPrefill(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          reverseGeocode: true,
-          title: 'Current location',
-        ),
-      );
-    } on LocationException catch (e) {
-      if (!mounted) return;
-      await handleLocationException(context, e);
-    } finally {
-      if (mounted) setState(() => _isGettingLocation = false);
-    }
-  }
-
   void _selectSavedAddress(Address address) {
     ref.read(addressNotifierProvider.notifier).selectAddress(address);
     _popOrHome();
-  }
-
-  Future<void> _pickCityOrState() async {
-    final picked = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.s24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Browse by city or state',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: AppSpacing.s8),
-                const Text(
-                  'Pick a state or city to prefill your address details.',
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-                ElevatedButton(
-                  onPressed: () async {
-                    final state = await SearchableOptionsSheet.show(
-                      sheetContext,
-                      title: 'Select State',
-                      options: IndiaLocations.states,
-                      searchHint: 'Search state...',
-                    );
-                    if (state == null || !sheetContext.mounted) return;
-                    Navigator.pop(sheetContext, 'state:$state');
-                  },
-                  child: const Text('Choose State'),
-                ),
-                const SizedBox(height: AppSpacing.s12),
-                OutlinedButton(
-                  onPressed: () async {
-                    final state = await SearchableOptionsSheet.show(
-                      sheetContext,
-                      title: 'Select State',
-                      options: IndiaLocations.states,
-                      searchHint: 'Search state first...',
-                    );
-                    if (state == null || !sheetContext.mounted) return;
-                    final city = await SearchableOptionsSheet.show(
-                      sheetContext,
-                      title: 'Select City',
-                      options: IndiaLocations.citiesFor(state),
-                      searchHint: 'Search city...',
-                    );
-                    if (city == null || !sheetContext.mounted) return;
-                    Navigator.pop(sheetContext, 'city:$city|$state');
-                  },
-                  child: const Text('Choose City'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (picked == null || !mounted) return;
-
-    if (picked.startsWith('city:')) {
-      final rest = picked.substring('city:'.length);
-      final parts = rest.split('|');
-      context.push(
-        '/addresses/add',
-        extra: AddressPrefill(
-          city: parts.isNotEmpty ? parts[0] : null,
-          state: parts.length > 1 ? parts[1] : null,
-          title: parts.isNotEmpty ? parts[0] : null,
-        ),
-      );
-    } else if (picked.startsWith('state:')) {
-      context.push(
-        '/addresses/add',
-        extra: AddressPrefill(
-          state: picked.substring('state:'.length),
-          title: picked.substring('state:'.length),
-        ),
-      );
-    }
   }
 
   Future<void> _onPlaceTapped(PlaceResult place) async {
@@ -350,27 +234,6 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
           icon: Icons.add_location_alt_rounded,
           label: 'Add New Address',
           onTap: () => context.push('/addresses/add'),
-        ),
-        const SizedBox(height: AppSpacing.s12),
-        Row(
-          children: [
-            Expanded(
-              child: _QuickActionButton(
-                icon: Icons.my_location_rounded,
-                label:
-                    _isGettingLocation ? 'Locating...' : 'Use Current Location',
-                onTap: _isGettingLocation ? null : _useCurrentLocation,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: _QuickActionButton(
-                icon: Icons.location_city_rounded,
-                label: 'Pick City / State',
-                onTap: _pickCityOrState,
-              ),
-            ),
-          ],
         ),
       ],
     );

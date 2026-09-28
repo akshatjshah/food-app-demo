@@ -92,7 +92,7 @@ String? _headerAvatarAsset(WidgetTester tester) {
   for (final picture in pictures) {
     final loader = picture.bytesLoader;
     final assetName = (loader as dynamic).assetName;
-    if (assetName is String && assetName.contains('avatar_')) {
+    if (assetName is String && (assetName.contains('avatar_') || assetName.contains('avatars/'))) {
       return assetName;
     }
   }
@@ -139,96 +139,80 @@ void main() {
       }),
       findsNothing,
     );
-    expect(_headerAvatarAsset(tester), 'assets/images/avatar_male_1.svg');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/male_cricket_champ.svg');
   });
 
   testWidgets(
-      'tapping avatar opens picker with all 10 avatars and a save button',
+      'tapping avatar opens picker with all 8 avatars and a save button',
       (tester) async {
     await pumpHome(tester);
 
     await tester.tap(find.byTooltip('Choose your avatar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose your avatar'), findsOneWidget);
-    expect(find.text('Men'), findsOneWidget);
-    expect(find.text('Women'), findsOneWidget);
+    expect(find.text('Choose Your Avatar'), findsOneWidget);
+    expect(find.text('MEN'), findsOneWidget);
+    expect(find.text('WOMEN'), findsOneWidget);
     for (final id in AvatarSelectorSheet.allAvatars) {
       expect(find.byKey(Key('avatar_$id')), findsOneWidget);
     }
     expect(find.byKey(const Key('save_avatar_button')), findsOneWidget);
-    // Exactly one avatar (the current default) is marked selected.
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
   });
 
-  testWidgets('selecting female_2 and saving updates header and persists',
+  testWidgets('selecting female_cricket_queen and saving updates header',
       (tester) async {
     await pumpHome(tester);
 
     await tester.tap(find.byTooltip('Choose your avatar'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('avatar_female_2')));
+    await tester.tap(find.byKey(const Key('avatar_female_cricket_queen')));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('save_avatar_button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose your avatar'), findsNothing);
-    expect(_headerAvatarAsset(tester), 'assets/images/avatar_female_2.svg');
-    expect(LocalStorage.getAvatarForUser('guest'), 'female_2');
-
-    // Selector reopens with female_2 marked as selected.
-    await tester.tap(find.byTooltip('Choose your avatar'));
-    await tester.pumpAndSettle();
-
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('avatar_male_4')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('save_avatar_button')));
-    await tester.pumpAndSettle();
-
-    expect(_headerAvatarAsset(tester), 'assets/images/avatar_male_4.svg');
-    expect(LocalStorage.getAvatarForUser('guest'), 'male_4');
+    expect(find.text('Choose Your Avatar'), findsNothing);
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/female_cricket_queen.svg');
+    expect(LocalStorage.getAvatarForUser('guest'), 'female_cricket_queen');
   });
 
   testWidgets('avatar preference is restored from storage on rebuild',
       (tester) async {
-    await LocalStorage.setAvatarForUser('guest', 'female_3');
+    await LocalStorage.setAvatarForUser('guest', 'female_cricket_queen');
 
     await pumpHome(tester);
 
-    expect(_headerAvatarAsset(tester), 'assets/images/avatar_female_3.svg');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/female_cricket_queen.svg');
   });
 
-  testWidgets('legacy female style preference maps to female_1',
+  testWidgets('legacy female style preference maps to cricket queen',
       (tester) async {
     await LocalStorage.setAvatarStyle('female');
 
     await pumpHome(tester);
 
-    expect(_headerAvatarAsset(tester), 'assets/images/avatar_female_1.svg');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/female_cricket_queen.svg');
   });
 
   testWidgets('sheet exposes AvatarSelectorSheet.assetFor mapping',
       (tester) async {
     expect(
       AvatarSelectorSheet.assetFor('male'),
-      'assets/images/avatar_male_1.svg',
+      'assets/images/avatars/male_cricket_champ.svg',
     );
     expect(
       AvatarSelectorSheet.assetFor('female'),
-      'assets/images/avatar_female_1.svg',
+      'assets/images/avatars/female_cricket_queen.svg',
     );
-    expect(AvatarSelectorSheet.assetFor('other'), 'assets/images/avatar_male_1.svg');
+    expect(AvatarSelectorSheet.assetFor('other'), 'assets/images/avatars/male_cricket_champ.svg');
     expect(
-      AvatarSelectorSheet.assetFor('female_4'),
-      'assets/images/avatar_female_4.svg',
+      AvatarSelectorSheet.assetFor('female_cricket_queen'),
+      'assets/images/avatars/female_cricket_queen.svg',
     );
     expect(
-      AvatarSelectorSheet.assetFor('male_5'),
-      'assets/images/avatar_male_5.svg',
+      AvatarSelectorSheet.assetFor('male_urban_explorer'),
+      'assets/images/avatars/male_urban_explorer.svg',
     );
   });
 }

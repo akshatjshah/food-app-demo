@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../authentication/presentation/auth_provider.dart';
 import '../../home/presentation/avatar_provider.dart';
-import '../../home/presentation/avatar_selector_sheet.dart';
+import '../../home/presentation/avatar_selection_page.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -38,10 +38,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _pickAvatar() async {
-    final picked = await AvatarSelectorSheet.show(
-      context,
-      selected: ref.read(avatarProvider),
-    );
+    final picked = await AvatarSelectionPage.show(context);
     if (picked == null || !mounted) return;
     await ref.read(avatarProvider.notifier).setAvatar(picked);
     if (mounted) {
@@ -107,7 +104,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             width: 100,
                             height: 100,
                             child: SvgPicture.asset(
-                              AvatarSelectorSheet.assetFor(avatarId),
+                               AvatarSelectionPage.assetForStatic(avatarId),
                               fit: BoxFit.cover,
                             ),
                           ),

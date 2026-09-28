@@ -9,7 +9,7 @@ import '../../address/data/models/address.dart';
 import '../../address/presentation/address_provider.dart';
 import '../../cart/presentation/cart_provider.dart';
 import 'avatar_provider.dart';
-import 'avatar_selector_sheet.dart';
+import 'avatar_selection_page.dart';
 import 'home_provider.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
@@ -82,10 +82,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   }
 
   Future<void> _openAvatarSelector() async {
-    final picked = await AvatarSelectorSheet.show(
-      context,
-      selected: ref.read(avatarProvider),
-    );
+    final picked = await AvatarSelectionPage.show(context);
     if (picked == null) return;
     await ref.read(avatarProvider.notifier).setAvatar(picked);
   }
@@ -115,10 +112,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                           width: 2,
                         ),
                       ),
-                      child: SvgPicture.asset(
-                        AvatarSelectorSheet.assetFor(avatarId),
-                        fit: BoxFit.cover,
-                      ),
+                        child: SvgPicture.asset(
+                          AvatarSelectionPage.assetForStatic(avatarId),
+                          fit: BoxFit.cover,
+                        ),
                     ),
                   ),
                 ),

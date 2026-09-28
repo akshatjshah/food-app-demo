@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400" viewBox="0 0 200 400">
+  <defs>
+    <linearGradient id="bg8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F3E5F5"/>
+      <stop offset="1" stop-color="#E1BEE7"/>
+    </linearGradient>
+    <linearGradient id="skin8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F7D3B5"/>
+      <stop offset="1" stop-color="#F0C49F"/>
+    </linearGradient>
+    <linearGradient id="coat8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#263238"/>
+      <stop offset="1" stop-color="#37474F"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#F5F5F5"/>
+  <g transform="translate(50,20)">
+    <ellipse cx="100" cy="50" rx="42" ry="48" fill="url(#skin8)"/>
+    <path d="M100 90 Q92 110 88 135 L96 135 Q100 122 104 135 L112 110 Q108 90 100 90Z" fill="#263238"/>
+    <path d="M100 90 Q92 110 88 135" stroke="#E0996B" stroke-width="2" fill="none"/>
+    <path d="M100 90 Q108 110 112 135" stroke="#E0996B" stroke-width="2" fill="none"/>
+    <ellipse cx="82" cy="45" rx="9" ry="11" fill="#F7D3B5"/>
+    <ellipse cx="118" cy="45" rx="9" ry="11" fill="#F7D3B5"/>
+    <circle cx="78" cy="42" r="3.8" fill="#FFF"/>
+    <circle cx="78" cy="42" r="2.4" fill="#2C1F17"/>
+    <circle cx="78" cy="42" r="1" fill="#1B1B1B"/>
+    <circle cx="122" cy="42" r="3.8" fill="#FFF"/>
+    <circle cx="122" cy="42" r="2.4" fill="#2C1F17"/>
+    <circle cx="122" cy="42" r="1" fill="#1B1B1B"/>
+    <path d="M93 55 Q100 59 107 55" stroke="#2C1F17" stroke-width="1.5" fill="none"/>
+    <path d="M100 90 Q92 110 88 135 L90 200 Q95 220 100 225 Q105 220 110 200 L112 135 Q108 110 100 90Z" fill="#263238"/>
+    <path d="M88 200 L70 350 L100 350 L100 240" fill="#263238"/>
+    <path d="M112 200 L130 350 L100 350 L100 240" fill="#263238"/>
+    <path d="M70 350 L60 370 L90 370 L100 355" fill="#37474F"/>
+    <path d="M130 350 L140 370 L110 370 L100 355" fill="#37474F"/>
+    <rect x="85" y="210" width="30" height="10" rx="2" fill="#FF6F00"/>
+    <circle cx="100" cy="150" r="5" fill="#FF6F00"/>
+    <circle cx="100" cy="150" r="2.5" fill="#263238"/>
+    <ellipse cx="85" cy="365" rx="13" ry="9" fill="#333"/>
+    <ellipse cx="115" cy="365" rx="13" ry="9" fill="#333"/>
+    <path d="M85 365 Q100 355 115 365" stroke="#333" stroke-width="1" fill="none"/>
+  </g>
+  <circle cx="100" cy="10" r="5" fill="#FFE44D"/>
+  <text x="100" y="15" text-anchor="middle" font-size="7" font-weight="bold" fill="#333">URBAN CHIC</text>
+</svg>

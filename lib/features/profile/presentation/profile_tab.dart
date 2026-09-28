@@ -6,7 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../authentication/presentation/auth_provider.dart';
 import '../../home/presentation/avatar_provider.dart';
-import '../../home/presentation/avatar_selector_sheet.dart';
+import '../../home/presentation/avatar_selection_page.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -51,7 +51,7 @@ class ProfileTab extends ConsumerWidget {
                 width: 72,
                 height: 72,
                 child: SvgPicture.asset(
-                  AvatarSelectorSheet.assetFor(avatarId),
+                  AvatarSelectionPage.assetForStatic(avatarId),
                   fit: BoxFit.cover,
                 ),
               ),
