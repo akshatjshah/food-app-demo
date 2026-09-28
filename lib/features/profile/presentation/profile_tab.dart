@@ -7,14 +7,40 @@ import '../../../core/theme/theme_provider.dart';
 import '../../authentication/presentation/auth_provider.dart';
 import '../../home/presentation/avatar_provider.dart';
 import '../../home/presentation/avatar_selection_page.dart';
+import '../../subscription/data/models/subscription.dart';
+import '../../subscription/presentation/subscription_provider.dart';
 
-class ProfileTab extends ConsumerWidget {
+class ProfileTab extends ConsumerStatefulWidget {
   const ProfileTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends ConsumerState<ProfileTab> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(subscriptionNotifierProvider.notifier).loadMySubscriptions();
+    });
+  }
+
+  String? _getActiveSubscriptionName(List<UserSubscription> subs) {
+    try {
+      final active = subs.firstWhere((s) => s.status == 'active');
+      return active.subscription?.name;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final themeMode = ref.watch(themeProvider);
+    final subState = ref.watch(subscriptionNotifierProvider);
+    final activePlanName = _getActiveSubscriptionName(subState.mySubscriptions);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -27,9 +53,7 @@ class ProfileTab extends ConsumerWidget {
         padding: const EdgeInsets.only(left: 24, right: 24, bottom: 120),
         child: Column(
           children: [
-            _buildProfileCard(context, ref, authState),
-            const SizedBox(height: AppSpacing.s24),
-            _buildWalletCard(context, authState),
+            _buildProfileCard(context, ref, authState, activePlanName),
             const SizedBox(height: AppSpacing.s24),
             _buildSettingsList(context, ref, themeMode),
           ],
@@ -38,7 +62,7 @@ class ProfileTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileCard(BuildContext context, WidgetRef ref, AuthState state) {
+  Widget _buildProfileCard(BuildContext context, WidgetRef ref, AuthState state, String? activePlanName) {
     final avatarId = ref.watch(avatarProvider);
 
     return Card(
@@ -66,10 +90,18 @@ class ProfileTab extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
-                  Text('+91 ${state.user?.phoneNumber ?? '9876543210'}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
                   Text(
-                    state.user?.role == 'guest' ? 'Guest Account' : 'Gold Member',
-                    style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 11),
+                    state.user?.phoneNumber ?? '9876543210',
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    state.user?.role == 'guest' ? 'Guest Account' : (activePlanName ?? 'No Active Subscription'),
+                    style: TextStyle(
+                      color: state.user?.role == 'guest' ? Colors.grey : AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -96,46 +128,6 @@ class ProfileTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildWalletCard(BuildContext context, AuthState authState) {
-    return Card(
-      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.r20),
-        side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.s20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Parabdi Cash Wallet', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                const SizedBox(height: 4),
-                Text(
-                  '₹${(authState.user?.walletBalance ?? 0.0).toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r12)),
-              ),
-              child: const Text('Add Money', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildSettingsList(BuildContext context, WidgetRef ref, ThemeMode themeMode) {
     return Card(
       child: Column(
@@ -152,7 +144,7 @@ class ProfileTab extends ConsumerWidget {
             ),
           ),
           const Divider(height: 1),
-          
+
           ListTile(
             leading: const Icon(Icons.location_on_outlined),
             title: const Text('Addresses Manager', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -160,7 +152,7 @@ class ProfileTab extends ConsumerWidget {
             onTap: () => context.push('/addresses'),
           ),
           const Divider(height: 1),
-          
+
           ListTile(
             leading: const Icon(Icons.payment_rounded),
             title: const Text('Saved Payments', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -168,7 +160,7 @@ class ProfileTab extends ConsumerWidget {
             onTap: () {},
           ),
           const Divider(height: 1),
-          
+
           ListTile(
             leading: const Icon(Icons.card_membership_rounded),
             title: const Text('My Subscriptions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -176,15 +168,7 @@ class ProfileTab extends ConsumerWidget {
             onTap: () {},
           ),
           const Divider(height: 1),
-          
-          ListTile(
-            leading: const Icon(Icons.monetization_on_outlined),
-            title: const Text('Refer & Earn Coins', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          
+
           ListTile(
             leading: const Icon(Icons.help_outline_rounded),
             title: const Text('Help & Chat Support', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -192,7 +176,7 @@ class ProfileTab extends ConsumerWidget {
             onTap: () {},
           ),
           const Divider(height: 1),
-          
+
           ListTile(
             leading: const Icon(Icons.logout_rounded, color: Colors.red),
             title: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14)),
