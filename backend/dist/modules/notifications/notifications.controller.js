@@ -47,11 +47,14 @@ let NotificationsController = class NotificationsController {
     async getUnreadCount(req) {
         return this.notificationsService.getUnreadCount(req.user.id);
     }
-    async markRead(id) {
-        return this.notificationsService.markRead(id);
+    async markRead(req, id) {
+        return this.notificationsService.markRead(id, req.user.id);
     }
     async markAllRead(req) {
         return this.notificationsService.markAllRead(req.user.id);
+    }
+    async removeAll(req) {
+        return this.notificationsService.removeAll(req.user.id);
     }
     async sendTest(dto) {
         const sent = await this.notificationsService.sendPushNotification(dto.userId, dto.title, dto.body);
@@ -85,9 +88,10 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(':id/read'),
     (0, swagger_1.ApiOperation)({ summary: 'Mark notification as read' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], NotificationsController.prototype, "markRead", null);
 __decorate([
@@ -98,6 +102,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], NotificationsController.prototype, "markAllRead", null);
+__decorate([
+    (0, common_1.Delete)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Remove all notifications for the signed-in customer' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationsController.prototype, "removeAll", null);
 __decorate([
     (0, common_1.Post)('send-test'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),

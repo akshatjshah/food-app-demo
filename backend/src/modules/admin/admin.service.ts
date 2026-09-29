@@ -1,9 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+
+const VALID_ORDER_STATUSES = [
+  'pending_payment',
+  'placed',
+  'confirmed',
+  'preparing',
+  'ready',
+  'rider_assigned',
+  'picked_up',
+  'out_for_delivery',
+  'delivered',
+  'cancelled',
+  'rejected',
+];
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async getDashboard() {
     const today = new Date();
@@ -129,8 +147,53 @@ export class AdminService {
     });
   }
 
-  async updateOrderStatus(orderId: string, status: string) {
-    return this.prisma.order.update({ where: { id: orderId }, data: { status: status as any } });
+  async updateOrderStatus(orderId: string, status: string, triggeredBy?: string) {
+    if (!VALID_ORDER_STATUSES.includes(status)) {
+      throw new BadRequestException(`Invalid order status: ${status}`);
+    }
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: status as any },
+    });
+
+    await this.prisma.orderStatusHistory.create({
+      data: {
+        orderId,
+        fromStatus: order.status,
+        toStatus: status as any,
+        triggeredBy,
+      },
+    });
+
+    // Notify the customer about the new status (best-effort).
+    await this.notificationsService.sendOrderStatusUpdate(order.userId, orderId, status);
+
+    return updated;
+  }
+
+  /**
+   * Admin announcement / offer broadcast.
+   * When userIds is omitted, all customers are targeted.
+   */
+  async broadcastAnnouncement(
+    title: string,
+    body: string,
+    type: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT' = 'ANNOUNCEMENT',
+    userIds?: string[],
+    referenceId?: string,
+  ) {
+    let targets = userIds;
+    if (!targets || targets.length === 0) {
+      const customers = await this.prisma.user.findMany({
+        where: { role: 'customer' },
+        select: { id: true },
+      });
+      targets = customers.map((c) => c.id);
+    }
+    return this.notificationsService.sendBulkNotification(targets, title, body, type, referenceId);
   }
 
   async logAudit(adminId: string, data: { action: string; entity: string; entityId?: string; oldValue?: any; newValue?: any; ipAddress?: string }) {

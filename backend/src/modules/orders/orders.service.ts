@@ -1,10 +1,14 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
 import { OrderStatus } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async create(userId: string, dto: {
     addressId: string;
@@ -156,6 +160,9 @@ export class OrdersService {
       return newOrder;
     });
 
+    // In-app notification for order placed (best-effort, never breaks checkout).
+    await this.notificationsService.sendOrderStatusUpdate(userId, order.id, 'placed');
+
     return {
       id: order.id,
       status: order.status,
@@ -247,16 +254,20 @@ export class OrdersService {
       throw new BadRequestException('Order cannot be cancelled');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.order.update({
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const next = await tx.order.update({
         where: { id },
         data: { status: 'cancelled' },
       });
       await tx.orderStatusHistory.create({
         data: { orderId: id, fromStatus: order.status, toStatus: 'cancelled', triggeredBy: userId },
       });
-      return updated;
+      return next;
     });
+
+    await this.notificationsService.sendOrderStatusUpdate(userId, id, 'cancelled');
+
+    return updated;
   }
 
   async reorder(userId: string, orderId: string) {

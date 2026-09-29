@@ -10,8 +10,16 @@ class WishlistItem with _$WishlistItem {
     @JsonKey(name: 'food_item') required WishlistFoodItem foodItem,
   }) = _WishlistItem;
 
-  factory WishlistItem.fromJson(Map<String, dynamic> json) =>
-      _$WishlistItemFromJson(json);
+  factory WishlistItem.fromJson(Map<String, dynamic> json) {
+    // Backend (Prisma) emits camelCase `foodItem`; older payloads / docs
+    // use snake_case `food_item`. Accept both so favorites never break.
+    final normalized = Map<String, dynamic>.from(json);
+    if (!normalized.containsKey('food_item') &&
+        normalized.containsKey('foodItem')) {
+      normalized['food_item'] = normalized['foodItem'];
+    }
+    return _$WishlistItemFromJson(normalized);
+  }
 }
 
 @freezed
@@ -25,6 +33,22 @@ class WishlistFoodItem with _$WishlistFoodItem {
     @JsonKey(name: 'is_veg') @Default(true) bool isVeg,
   }) = _WishlistFoodItem;
 
-  factory WishlistFoodItem.fromJson(Map<String, dynamic> json) =>
-      _$WishlistFoodItemFromJson(json);
+  factory WishlistFoodItem.fromJson(Map<String, dynamic> json) {
+    // Accept camelCase (Prisma) and snake_case (API docs) keys, plus
+    // Decimal-as-string numbers from the backend.
+    final normalized = Map<String, dynamic>.from(json);
+    if (!normalized.containsKey('image_urls') &&
+        normalized.containsKey('imageUrls')) {
+      normalized['image_urls'] = normalized['imageUrls'];
+    }
+    if (!normalized.containsKey('is_veg') &&
+        normalized.containsKey('isVeg')) {
+      normalized['is_veg'] = normalized['isVeg'];
+    }
+    for (final k in ['price', 'rating']) {
+      final v = normalized[k];
+      if (v is String) normalized[k] = double.tryParse(v);
+    }
+    return _$WishlistFoodItemFromJson(normalized);
+  }
 }

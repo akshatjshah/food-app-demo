@@ -12,9 +12,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../config/prisma.service");
+const notifications_service_1 = require("../notifications/notifications.service");
+const VALID_ORDER_STATUSES = [
+    'pending_payment',
+    'placed',
+    'confirmed',
+    'preparing',
+    'ready',
+    'rider_assigned',
+    'picked_up',
+    'out_for_delivery',
+    'delivered',
+    'cancelled',
+    'rejected',
+];
 let AdminService = class AdminService {
-    constructor(prisma) {
+    constructor(prisma, notificationsService) {
         this.prisma = prisma;
+        this.notificationsService = notificationsService;
     }
     async getDashboard() {
         const today = new Date();
@@ -123,8 +138,38 @@ let AdminService = class AdminService {
             take: params.take || 20,
         });
     }
-    async updateOrderStatus(orderId, status) {
-        return this.prisma.order.update({ where: { id: orderId }, data: { status: status } });
+    async updateOrderStatus(orderId, status, triggeredBy) {
+        if (!VALID_ORDER_STATUSES.includes(status)) {
+            throw new common_1.BadRequestException(`Invalid order status: ${status}`);
+        }
+        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        if (!order)
+            throw new common_1.NotFoundException('Order not found');
+        const updated = await this.prisma.order.update({
+            where: { id: orderId },
+            data: { status: status },
+        });
+        await this.prisma.orderStatusHistory.create({
+            data: {
+                orderId,
+                fromStatus: order.status,
+                toStatus: status,
+                triggeredBy,
+            },
+        });
+        await this.notificationsService.sendOrderStatusUpdate(order.userId, orderId, status);
+        return updated;
+    }
+    async broadcastAnnouncement(title, body, type = 'ANNOUNCEMENT', userIds, referenceId) {
+        let targets = userIds;
+        if (!targets || targets.length === 0) {
+            const customers = await this.prisma.user.findMany({
+                where: { role: 'customer' },
+                select: { id: true },
+            });
+            targets = customers.map((c) => c.id);
+        }
+        return this.notificationsService.sendBulkNotification(targets, title, body, type, referenceId);
     }
     async logAudit(adminId, data) {
         return this.prisma.adminAuditLog.create({ data: { adminId, ...data } });
@@ -141,6 +186,7 @@ let AdminService = class AdminService {
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        notifications_service_1.NotificationsService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

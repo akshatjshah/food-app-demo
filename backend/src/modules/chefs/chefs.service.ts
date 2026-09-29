@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ChefsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async findByPin(pin: string) {
     return this.prisma.user.findFirst({ where: { role: 'chef', phoneNumber: pin } });
@@ -47,24 +51,30 @@ export class ChefsService {
   }
 
   async acceptOrder(orderId: string, chefId: string) {
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: { status: 'confirmed', chefId },
     });
+    await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'confirmed');
+    return updated;
   }
 
   async startPreparing(orderId: string) {
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: { status: 'preparing' },
     });
+    await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'preparing');
+    return updated;
   }
 
   async markReady(orderId: string) {
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: { status: 'ready' },
     });
+    await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'ready');
+    return updated;
   }
 
   async toggleFoodStock(foodItemId: string) {

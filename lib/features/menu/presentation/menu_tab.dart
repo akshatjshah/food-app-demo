@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../cart/presentation/cart_provider.dart';
+import '../../wishlist/presentation/wishlist_screen.dart';
 import '../data/models/menu_food.dart';
 import '../data/models/menu_category.dart';
 import 'menu_providers.dart';
@@ -24,7 +25,22 @@ class _MenuTabState extends ConsumerState<MenuTab> {
   bool _searchMode = false;
   Timer? _searchDebounce;
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _wishlist = [];
+  bool _wishlistLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Favorites persist server-side per customer: load once so menu cards
+    // share the same state as Food Details, Home sections and My Favorites.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_wishlistLoaded) {
+        _wishlistLoaded = true;
+        try {
+          ref.read(wishlistProvider.notifier).loadWishlist();
+        } catch (_) {}
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -514,7 +530,10 @@ class _MenuTabState extends ConsumerState<MenuTab> {
   }
 
   Widget _buildFoodCard(BuildContext context, MenuFood food) {
-    final isWishlisted = _wishlist.contains(food.id);
+    // Single source of truth: backend-backed wishlist, shared with
+    // Food Details, Home sections and Profile → My Favorites.
+    final favoriteIds = ref.watch(wishlistIdsProvider);
+    final isWishlisted = favoriteIds.contains(food.id);
     final imageUrl =
         food.imageUrls.isNotEmpty ? food.imageUrls.first : '';
 
@@ -598,14 +617,37 @@ class _MenuTabState extends ConsumerState<MenuTab> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (isWishlisted) {
-                                _wishlist.remove(food.id);
-                              } else {
-                                _wishlist.add(food.id);
-                              }
-                            });
+                          onTap: () async {
+                            try {
+                              await ref
+                                  .read(wishlistProvider.notifier)
+                                  .toggleWishlist(food.id);
+                              if (!context.mounted) return;
+                              final nowFav = ref
+                                  .read(wishlistIdsProvider)
+                                  .contains(food.id);
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(
+                                  SnackBar(
+                                    content: Text(nowFav
+                                        ? 'Added to favorites'
+                                        : 'Removed from favorites'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                            } catch (_) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Could not update favorites. Try again.'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                            }
                           },
                           child: Icon(
                             isWishlisted

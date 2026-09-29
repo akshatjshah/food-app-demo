@@ -2,21 +2,20 @@ import { PrismaService } from '../../config/prisma.service';
 export declare class WishlistService {
     private prisma;
     constructor(prisma: PrismaService);
-    findAll(userId: string): Promise<({
+    findAll(userId: string): Promise<{
         foodItem: {
-            name: string;
+            price: number;
+            rating: number | null;
             id: string;
-            isVeg: boolean;
-            price: import("@prisma/client/runtime/library").Decimal;
+            name: string;
             imageUrls: import("@prisma/client/runtime/library").JsonValue;
-            rating: import("@prisma/client/runtime/library").Decimal;
+            isVeg: boolean;
         };
-    } & {
         id: string;
-        createdAt: Date;
         userId: string;
         foodItemId: string;
-    })[]>;
+        createdAt: Date;
+    }[]>;
     toggle(userId: string, foodItemId: string): Promise<{
         added: boolean;
     }>;

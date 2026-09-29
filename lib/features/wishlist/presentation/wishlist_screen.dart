@@ -16,11 +16,15 @@ class WishlistState {
   final List<WishlistItem> items;
   final bool isLoading;
   final String? error;
+  // Ids optimistically marked favorite before the silent reload finishes,
+  // so hearts update immediately even though POST carries no food payload.
+  final Set<String> optimisticIds;
 
   WishlistState({
     this.items = const [],
     this.isLoading = false,
     this.error,
+    this.optimisticIds = const {},
   });
 
   WishlistState copyWith({
@@ -28,11 +32,13 @@ class WishlistState {
     bool? isLoading,
     String? error,
     bool clearError = false,
+    Set<String>? optimisticIds,
   }) {
     return WishlistState(
       items: items ?? this.items,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
+      optimisticIds: optimisticIds ?? this.optimisticIds,
     );
   }
 }
@@ -42,12 +48,26 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
 
   WishlistNotifier(this._repo) : super(WishlistState());
 
-  Future<void> loadWishlist() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+  Future<void> loadWishlist({bool silent = false}) async {
+    // Silent background refresh must never flash a full-screen spinner
+    // over an existing list (e.g. right after tapping a heart).
+    final showSpinner = !silent || state.items.isEmpty;
+    if (showSpinner) {
+      state = state.copyWith(isLoading: true, clearError: true);
+    } else {
+      state = state.copyWith(clearError: true);
+    }
     try {
       final items = await _repo.getWishlist();
-      state = state.copyWith(items: items, isLoading: false);
-    } on Exception catch (e) {
+      state = state.copyWith(
+        items: items,
+        isLoading: false,
+        optimisticIds: const {},
+        clearError: true,
+      );
+    } catch (e) {
+      // Catch ALL throwables (TypeError is Error, not Exception) so the
+      // favorites screen can never get stuck on an infinite spinner.
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -55,23 +75,83 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
     }
   }
 
-  Future<void> toggleWishlist(String foodItemId) async {
+  /// Returns true when the item ends up favorited, false when unfavorited.
+  /// Throws on API failure after reverting any optimistic change.
+  Future<bool> toggleWishlist(String foodItemId) async {
+    final wasFav = state.items.any((i) => i.foodItem.id == foodItemId) ||
+        state.optimisticIds.contains(foodItemId);
+    if (!wasFav) {
+      // Optimistic add: heart turns red immediately.
+      state = state.copyWith(
+        optimisticIds: {...state.optimisticIds, foodItemId},
+        clearError: true,
+      );
+    } else {
+      // Optimistic remove: heart clears immediately.
+      state = state.copyWith(
+        items: state.items
+            .where((item) => item.foodItem.id != foodItemId)
+            .toList(),
+        optimisticIds:
+            state.optimisticIds.where((id) => id != foodItemId).toSet(),
+        clearError: true,
+      );
+    }
     try {
       final added = await _repo.toggleWishlist(foodItemId);
       if (!added) {
+        // Server confirms removal: ensure local state matches.
         state = state.copyWith(
-          items: state.items.where((item) => item.foodItem.id != foodItemId).toList(),
+          items: state.items
+              .where((item) => item.foodItem.id != foodItemId)
+              .toList(),
+          optimisticIds:
+              state.optimisticIds.where((id) => id != foodItemId).toSet(),
         );
+        return false;
+      } else {
+        // Server confirms add: silent reload brings the real payload
+        // without flashing a full-screen spinner.
+        await loadWishlist(silent: true);
+        return true;
       }
-    } on Exception catch (e) {
-      state = state.copyWith(error: e.toString());
+    } catch (e) {
+      // Revert optimistic change so heart state stays truthful.
+      if (!wasFav) {
+        state = state.copyWith(
+          optimisticIds:
+              state.optimisticIds.where((id) => id != foodItemId).toSet(),
+          error: e.toString(),
+        );
+      } else {
+        // Re-fetch to restore the removed row; on failure keep error.
+        try {
+          await loadWishlist(silent: true);
+        } catch (_) {}
+        state = state.copyWith(error: e.toString());
+      }
+      rethrow;
     }
+  }
+
+  /// Drop cached items on logout/login so one customer never sees another's
+  /// favorites. Server data is per-user; this only clears the local copy.
+  void clear() {
+    state = WishlistState();
   }
 }
 
 final wishlistProvider = StateNotifierProvider<WishlistNotifier, WishlistState>((ref) {
   final repo = ref.read(wishlistRepositoryProvider);
   return WishlistNotifier(repo);
+});
+
+/// Shared favorite-id set so menu cards, food details, home sections and
+/// My Favorites all render the same favorite state from one source of truth
+/// (server items plus immediately-applied optimistic taps).
+final wishlistIdsProvider = Provider<Set<String>>((ref) {
+  final s = ref.watch(wishlistProvider);
+  return {...s.items.map((i) => i.foodItem.id), ...s.optimisticIds};
 });
 
 class WishlistScreen extends ConsumerStatefulWidget {
@@ -107,11 +187,12 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
   }
 
   Widget _buildBody(WishlistState state) {
-    if (state.isLoading) {
+    // Full shimmer only on initial load; silent refreshes keep the list.
+    if (state.isLoading && state.items.isEmpty) {
       return _buildLoadingShimmer();
     }
 
-    if (state.error != null) {
+    if (state.error != null && state.items.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -260,11 +341,29 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                   top: 8,
                   right: 8,
                   child: GestureDetector(
-                    onTap: () {
-                      ref.read(wishlistProvider.notifier).toggleWishlist(food.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Removed from wishlist')),
-                      );
+                    onTap: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        await ref
+                            .read(wishlistProvider.notifier)
+                            .toggleWishlist(food.id);
+                        if (!context.mounted) return;
+                        messenger
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                                content: Text('Removed from wishlist')),
+                          );
+                      } catch (_) {
+                        if (!context.mounted) return;
+                        messenger
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Could not update favorites. Try again.')),
+                          );
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.all(6),

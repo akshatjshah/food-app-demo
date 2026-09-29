@@ -1,7 +1,9 @@
 import { PrismaService } from '../../config/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class AdminService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private notificationsService;
+    constructor(prisma: PrismaService, notificationsService: NotificationsService);
     getDashboard(): Promise<{
         totalOrders: number;
         revenueToday: number;
@@ -75,7 +77,7 @@ export declare class AdminService {
         chefId: string | null;
         deliveryBoyId: string | null;
     })[]>;
-    updateOrderStatus(orderId: string, status: string): Promise<{
+    updateOrderStatus(orderId: string, status: string, triggeredBy?: string): Promise<{
         deliverySlot: string;
         updatedAt: Date;
         id: string;
@@ -96,6 +98,10 @@ export declare class AdminService {
         addressId: string | null;
         chefId: string | null;
         deliveryBoyId: string | null;
+    }>;
+    broadcastAnnouncement(title: string, body: string, type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT', userIds?: string[], referenceId?: string): Promise<{
+        sent: number;
+        failed: number;
     }>;
     logAudit(adminId: string, data: {
         action: string;

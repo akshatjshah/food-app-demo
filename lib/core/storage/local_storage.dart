@@ -81,6 +81,70 @@ class LocalStorage {
   static Future<void> setRecentLocationsJson(String json) =>
       _prefs.setString('recent_locations_json', json);
 
+  // Notification preferences — per customer. There is no backend prefs
+  // endpoint, so choices are stored on-device keyed by userId and applied
+  // to local notification presentation (list + badge filtering).
+  // Transactional vs promotional stay logically separated in UI.
+  // Legacy global keys are read as fallback for upgrades.
+  static String _notifKey(String base) {
+    final uid = getUserId();
+    return uid == null || uid.isEmpty ? base : '${base}_$uid';
+  }
+
+  static bool _notifGet(String base) {
+    if (_prefs.containsKey(_notifKey(base))) {
+      return _prefs.getBool(_notifKey(base)) ?? true;
+    }
+    return _prefs.getBool(base) ?? true;
+  }
+
+  static Future<void> _notifSet(String base, bool v) =>
+      _prefs.setBool(_notifKey(base), v);
+
+  static bool get notifOrderUpdates => _notifGet('notif_order_updates');
+  static Future<void> setNotifOrderUpdates(bool v) =>
+      _notifSet('notif_order_updates', v);
+
+  static bool get notifDeliveryUpdates =>
+      _notifGet('notif_delivery_updates');
+  static Future<void> setNotifDeliveryUpdates(bool v) =>
+      _notifSet('notif_delivery_updates', v);
+
+  static bool get notifSubscriptionUpdates =>
+      _notifGet('notif_subscription_updates');
+  static Future<void> setNotifSubscriptionUpdates(bool v) =>
+      _notifSet('notif_subscription_updates', v);
+
+  static bool get notifOffersPromotions =>
+      _notifGet('notif_offers_promotions');
+  static Future<void> setNotifOffersPromotions(bool v) =>
+      _notifSet('notif_offers_promotions', v);
+
+  // Local-only app rating (no general app-rating backend endpoint exists;
+  // per-order reviews go through /reviews with an orderId). Scoped per
+  // customer so shared devices don't leak ratings across accounts.
+  static String _ratingKey(String base) {
+    final uid = getUserId();
+    return uid == null || uid.isEmpty ? base : '${base}_$uid';
+  }
+
+  static int get appRating {
+    final key = _ratingKey('app_rating');
+    if (_prefs.containsKey(key)) return _prefs.getInt(key) ?? 0;
+    return _prefs.getInt('app_rating') ?? 0;
+  }
+
+  static Future<void> setAppRating(int v) =>
+      _prefs.setInt(_ratingKey('app_rating'), v);
+  static String? get appFeedback {
+    final key = _ratingKey('app_feedback');
+    if (_prefs.containsKey(key)) return _prefs.getString(key);
+    return _prefs.getString('app_feedback');
+  }
+
+  static Future<void> setAppFeedback(String v) =>
+      _prefs.setString(_ratingKey('app_feedback'), v);
+
   static Future<void> clearAuth() async {
     await _prefs.remove('access_token');
     await _prefs.remove('refresh_token');

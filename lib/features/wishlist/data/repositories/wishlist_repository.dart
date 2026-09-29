@@ -8,15 +8,26 @@ class WishlistRepository {
 
   Future<List<WishlistItem>> getWishlist() async {
     final response = await _dio.get('/wishlist');
-    final data = response.data['data'];
+    final payload = response.data;
+    final dynamic data = payload is Map ? payload['data'] ?? payload : payload;
+    final List list;
     if (data is List) {
-      return data.map((e) => WishlistItem.fromJson(e as Map<String, dynamic>)).toList();
+      list = data;
+    } else if (data is Map) {
+      list = (data['items'] ?? data['wishlist'] ?? []) as List;
+    } else {
+      list = const [];
     }
-    return [];
+    return list
+        .map((e) => WishlistItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<bool> toggleWishlist(String foodItemId) async {
     final response = await _dio.post('/wishlist/$foodItemId');
-    return response.data['data']['added'] ?? false;
+    final payload = response.data;
+    final dynamic data = payload is Map ? payload['data'] ?? payload : payload;
+    if (data is Map && data['added'] is bool) return data['added'] as bool;
+    return false;
   }
 }

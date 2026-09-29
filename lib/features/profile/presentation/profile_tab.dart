@@ -10,6 +10,10 @@ import '../../home/presentation/avatar_selection_page.dart';
 import '../../subscription/data/models/subscription.dart';
 import '../../subscription/presentation/subscription_provider.dart';
 
+/// Profile Settings — exact row order:
+/// 1 Dark Mode, 2 Addresses Manager, 3 Saved Payments, 4 My Subscriptions,
+/// 5 Notification Preferences, 6 My Favorites, 7 Help & Chat Support,
+/// 8 Privacy & Security, 9 Rate Parabdi, 10 About Parabdi, 11 Logout.
 class ProfileTab extends ConsumerStatefulWidget {
   const ProfileTab({super.key});
 
@@ -62,8 +66,18 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     );
   }
 
-  Widget _buildProfileCard(BuildContext context, WidgetRef ref, AuthState state, String? activePlanName) {
+  Widget _buildProfileCard(BuildContext context, WidgetRef ref,
+      AuthState state, String? activePlanName) {
     final avatarId = ref.watch(avatarProvider);
+    final isGuest = state.user?.role == 'guest';
+    // Name and phone come only from the authenticated user.
+    final displayName = (state.user?.fullName?.isNotEmpty == true)
+        ? state.user!.fullName!
+        : (isGuest ? 'Guest Foodie' : 'Parabdi Foodie');
+    final phone = state.user?.phoneNumber ?? '';
+    final planLabel = isGuest
+        ? 'Guest Account'
+        : (activePlanName ?? 'No Active Subscription');
 
     return Card(
       child: Padding(
@@ -86,19 +100,29 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    state.user?.fullName ?? 'Rohan Patel',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    displayName,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
+                  // Phone number shown exactly once (never split into
+                  // country code + number). Hidden for guests with no number.
+                  if (phone.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      phone,
+                      style:
+                          const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
-                    state.user?.phoneNumber ?? '9876543210',
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    state.user?.role == 'guest' ? 'Guest Account' : (activePlanName ?? 'No Active Subscription'),
+                    planLabel,
                     style: TextStyle(
-                      color: state.user?.role == 'guest' ? Colors.grey : AppColors.accent,
+                      color: isGuest || activePlanName == null
+                          ? Colors.grey
+                          : AppColors.accent,
                       fontWeight: FontWeight.bold,
                       fontSize: 11,
                     ),
@@ -112,7 +136,10 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -128,14 +155,19 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     );
   }
 
-  Widget _buildSettingsList(BuildContext context, WidgetRef ref, ThemeMode themeMode) {
+  Widget _buildSettingsList(
+      BuildContext context, WidgetRef ref, ThemeMode themeMode) {
+    const titleStyle =
+        TextStyle(fontWeight: FontWeight.bold, fontSize: 14);
+    const chevron = Icon(Icons.arrow_forward_ios, size: 14);
+
     return Card(
       child: Column(
         children: [
-          // Dark Mode Switch
+          // 1. Dark Mode (switch on the right, no chevron)
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined),
-            title: const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            title: const Text('Dark Mode', style: titleStyle),
             trailing: Switch(
               value: themeMode == ThemeMode.dark,
               onChanged: (val) {
@@ -145,48 +177,129 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
           ),
           const Divider(height: 1),
 
+          // 2. Addresses Manager
           ListTile(
             leading: const Icon(Icons.location_on_outlined),
-            title: const Text('Addresses Manager', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            title: const Text('Addresses Manager', style: titleStyle),
+            trailing: chevron,
             onTap: () => context.push('/addresses'),
           ),
           const Divider(height: 1),
 
+          // 3. Saved Payments
           ListTile(
             leading: const Icon(Icons.payment_rounded),
-            title: const Text('Saved Payments', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-            onTap: () {},
+            title: const Text('Saved Payments', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/profile/saved-payments'),
           ),
           const Divider(height: 1),
 
+          // 4. My Subscriptions
           ListTile(
             leading: const Icon(Icons.card_membership_rounded),
-            title: const Text('My Subscriptions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-            onTap: () {},
+            title: const Text('My Subscriptions', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/my-subscriptions'),
           ),
           const Divider(height: 1),
 
+          // 5. Notification Preferences
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title:
+                const Text('Notification Preferences', style: titleStyle),
+            trailing: chevron,
+            onTap: () =>
+                context.push('/profile/notification-preferences'),
+          ),
+          const Divider(height: 1),
+
+          // 6. My Favorites
+          ListTile(
+            leading: const Icon(Icons.favorite_border_rounded),
+            title: const Text('My Favorites', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/profile/favorites'),
+          ),
+          const Divider(height: 1),
+
+          // 7. Help & Chat Support
           ListTile(
             leading: const Icon(Icons.help_outline_rounded),
-            title: const Text('Help & Chat Support', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-            onTap: () {},
+            title:
+                const Text('Help & Chat Support', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/profile/help-support'),
           ),
           const Divider(height: 1),
 
+          // 8. Privacy & Security
           ListTile(
-            leading: const Icon(Icons.logout_rounded, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14)),
-            onTap: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) context.go('/auth');
-            },
+            leading: const Icon(Icons.shield_outlined),
+            title: const Text('Privacy & Security', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/profile/privacy-security'),
+          ),
+          const Divider(height: 1),
+
+          // 9. Rate Parabdi
+          ListTile(
+            leading: const Icon(Icons.star_border_rounded),
+            title: const Text('Rate Parabdi', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/profile/rate'),
+          ),
+          const Divider(height: 1),
+
+          // 10. About Parabdi
+          ListTile(
+            leading: const Icon(Icons.info_outline_rounded),
+            title: const Text('About Parabdi', style: titleStyle),
+            trailing: chevron,
+            onTap: () => context.push('/profile/about'),
+          ),
+          const Divider(height: 1),
+
+          // 11. Logout (visually distinct, no chevron)
+          ListTile(
+            leading:
+                const Icon(Icons.logout_rounded, color: Colors.red),
+            title: const Text('Logout',
+                style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14)),
+            onTap: () => _confirmLogout(context, ref),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout?'),
+        content:
+            const Text('You will need an OTP to sign in again.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style:
+                TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(authProvider.notifier).logout();
+    if (context.mounted) context.go('/auth');
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../cart/presentation/cart_provider.dart';
+import '../../wishlist/presentation/wishlist_screen.dart';
 import '../data/models/menu_food.dart';
 import 'menu_providers.dart';
 
@@ -19,6 +20,17 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
   final TextEditingController _notesController = TextEditingController();
   int _quantity = 1;
   final Map<String, List<String>> _selectedCustomizations = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Share favorite state with menu cards, home sections and My Favorites.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        ref.read(wishlistProvider.notifier).loadWishlist();
+      } catch (_) {}
+    });
+  }
 
   @override
   void dispose() {
@@ -136,6 +148,7 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
   Widget _buildSliverAppBar(BuildContext context, MenuFood food) {
     final imageUrl =
         food.imageUrls.isNotEmpty ? food.imageUrls.first : '';
+    final isFav = ref.watch(wishlistIdsProvider).contains(food.id);
 
     return SliverAppBar(
       expandedHeight: 300,
@@ -149,6 +162,53 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
           onPressed: () => context.pop(),
         ),
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: CircleAvatar(
+            backgroundColor: Colors.black.withValues(alpha: 0.4),
+            child: IconButton(
+              tooltip: isFav ? 'Remove from favorites' : 'Add to favorites',
+              icon: Icon(
+                isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                color: isFav ? Colors.red.shade300 : Colors.white,
+                size: 20,
+              ),
+              onPressed: () async {
+                try {
+                  await ref
+                      .read(wishlistProvider.notifier)
+                      .toggleWishlist(food.id);
+                  if (!context.mounted) return;
+                  final nowFav =
+                      ref.read(wishlistIdsProvider).contains(food.id);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(
+                        content: Text(nowFav
+                            ? 'Added to favorites'
+                            : 'Removed from favorites'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                } catch (_) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('Could not update favorites. Try again.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                }
+              },
+            ),
+          ),
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,

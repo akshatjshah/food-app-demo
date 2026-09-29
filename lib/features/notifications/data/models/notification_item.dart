@@ -15,5 +15,19 @@ class NotificationItem with _$NotificationItem {
     @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _NotificationItem;
 
-  factory NotificationItem.fromJson(Map<String, dynamic> json) => _$NotificationItemFromJson(json);
+  /// Tolerant parser: accepts both snake_case (current API) and
+  /// camelCase (legacy) keys so real backend payloads always load.
+  factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    final m = Map<String, dynamic>.from(json);
+    m['reference_id'] ??= m['referenceId'];
+    m['is_read'] ??= m['isRead'];
+    final created = m['created_at'] ?? m['createdAt'];
+    if (created is int) {
+      m['created_at'] =
+          DateTime.fromMillisecondsSinceEpoch(created).toIso8601String();
+    } else if (created != null) {
+      m['created_at'] = created.toString();
+    }
+    return _$NotificationItemFromJson(m);
+  }
 }

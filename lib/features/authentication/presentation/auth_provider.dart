@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/local_storage.dart';
 import '../../address/presentation/address_provider.dart';
+import '../../wishlist/presentation/wishlist_screen.dart';
 import '../data/models/user.dart';
 import '../data/repositories/auth_repository.dart';
 
@@ -193,6 +194,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await LocalStorage.setPhoneNumber(user.phoneNumber);
       await LocalStorage.setUserRole(user.role);
       _ref.read(addressNotifierProvider.notifier).clear();
+      // Favorites are per-customer server-side: drop the previous user's
+      // cached wishlist so the new session reloads its own.
+      try {
+        _ref.read(wishlistProvider.notifier).clear();
+      } catch (_) {}
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: true,
@@ -237,6 +243,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await LocalStorage.setPhoneNumber(user.phoneNumber);
       await LocalStorage.setUserRole(user.role);
       _ref.read(addressNotifierProvider.notifier).clear();
+      // Favorites are per-customer server-side: drop the previous user's
+      // cached wishlist so the new session reloads its own.
+      try {
+        _ref.read(wishlistProvider.notifier).clear();
+      } catch (_) {}
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: true,
@@ -254,6 +265,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await LocalStorage.clearAuth();
     _ref.read(addressNotifierProvider.notifier).clear();
+    try {
+      _ref.read(wishlistProvider.notifier).clear();
+    } catch (_) {}
     state = AuthState();
     try {
       _repo.logout();

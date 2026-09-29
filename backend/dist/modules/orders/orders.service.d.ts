@@ -1,7 +1,9 @@
 import { PrismaService } from '../../config/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class OrdersService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private notificationsService;
+    constructor(prisma: PrismaService, notificationsService: NotificationsService);
     create(userId: string, dto: {
         addressId: string;
         deliverySlot: string;

@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubscriptionsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../config/prisma.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 let SubscriptionsService = class SubscriptionsService {
-    constructor(prisma) {
+    constructor(prisma, notificationsService) {
         this.prisma = prisma;
+        this.notificationsService = notificationsService;
     }
     async findAll() {
         return this.prisma.subscription.findMany({ where: { isActive: true } });
@@ -33,7 +35,7 @@ let SubscriptionsService = class SubscriptionsService {
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + subscription.durationDays);
-        return this.prisma.userSubscription.create({
+        const created = await this.prisma.userSubscription.create({
             data: {
                 userId,
                 subscriptionId,
@@ -44,33 +46,51 @@ let SubscriptionsService = class SubscriptionsService {
             },
             include: { subscription: true },
         });
+        await this.notificationsService.sendSubscriptionUpdate(userId, 'created', subscription.name || 'Subscription', created.id);
+        return created;
     }
     async pause(id, userId) {
-        const sub = await this.prisma.userSubscription.findUnique({ where: { id } });
+        const sub = await this.prisma.userSubscription.findUnique({
+            where: { id },
+            include: { subscription: true },
+        });
         if (!sub || sub.userId !== userId)
             throw new common_1.BadRequestException('Not found');
-        return this.prisma.userSubscription.update({ where: { id }, data: { status: 'paused' } });
+        const updated = await this.prisma.userSubscription.update({ where: { id }, data: { status: 'paused' } });
+        await this.notificationsService.sendSubscriptionUpdate(userId, 'paused', sub.subscription?.name || 'Subscription', id);
+        return updated;
     }
     async resume(id, userId) {
-        const sub = await this.prisma.userSubscription.findUnique({ where: { id } });
+        const sub = await this.prisma.userSubscription.findUnique({
+            where: { id },
+            include: { subscription: true },
+        });
         if (!sub || sub.userId !== userId)
             throw new common_1.BadRequestException('Not found');
-        return this.prisma.userSubscription.update({ where: { id }, data: { status: 'active' } });
+        const updated = await this.prisma.userSubscription.update({ where: { id }, data: { status: 'active' } });
+        await this.notificationsService.sendSubscriptionUpdate(userId, 'resumed', sub.subscription?.name || 'Subscription', id);
+        return updated;
     }
     async skipDay(id, userId, date) {
-        const sub = await this.prisma.userSubscription.findUnique({ where: { id } });
+        const sub = await this.prisma.userSubscription.findUnique({
+            where: { id },
+            include: { subscription: true },
+        });
         if (!sub || sub.userId !== userId)
             throw new common_1.BadRequestException('Not found');
         const skipDates = Array.isArray(sub.skipDates) ? sub.skipDates : [];
-        return this.prisma.userSubscription.update({
+        const updated = await this.prisma.userSubscription.update({
             where: { id },
             data: { skipDates: [...skipDates, date] },
         });
+        await this.notificationsService.sendSubscriptionUpdate(userId, 'skipped', sub.subscription?.name || 'Subscription', id);
+        return updated;
     }
 };
 exports.SubscriptionsService = SubscriptionsService;
 exports.SubscriptionsService = SubscriptionsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        notifications_service_1.NotificationsService])
 ], SubscriptionsService);
 //# sourceMappingURL=subscriptions.service.js.map

@@ -9,29 +9,31 @@ export declare class NotificationsController {
     constructor(notificationsService: NotificationsService);
     findAll(req: any, skip?: string, take?: string): Promise<{
         id: string;
-        createdAt: Date;
-        userId: string;
-        type: string;
         title: string;
         body: string;
-        referenceId: string | null;
-        isRead: boolean;
+        type: string;
+        reference_id: string | null;
+        is_read: boolean;
+        created_at: Date;
     }[]>;
     getUnreadCount(req: any): Promise<{
         count: number;
     }>;
-    markRead(id: string): Promise<{
+    markRead(req: any, id: string): Promise<{
         id: string;
-        createdAt: Date;
-        userId: string;
-        type: string;
         title: string;
         body: string;
-        referenceId: string | null;
-        isRead: boolean;
+        type: string;
+        reference_id: string | null;
+        is_read: boolean;
+        created_at: Date;
     }>;
     markAllRead(req: any): Promise<{
         message: string;
+    }>;
+    removeAll(req: any): Promise<{
+        message: string;
+        count: number;
     }>;
     sendTest(dto: SendTestDto): Promise<{
         success: boolean;

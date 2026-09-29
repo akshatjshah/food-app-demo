@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -62,8 +62,26 @@ export class AdminController {
 
   @Patch('orders/:orderId/status')
   @ApiOperation({ summary: 'Update order status (admin)' })
-  async updateOrderStatus(@Param('orderId') orderId: string, @Body('status') status: string) {
-    return this.adminService.updateOrderStatus(orderId, status);
+  async updateOrderStatus(
+    @Param('orderId') orderId: string,
+    @Body('status') status: string,
+    @Request() req,
+  ) {
+    return this.adminService.updateOrderStatus(orderId, status, req.user?.id);
+  }
+
+  @Post('notifications/broadcast')
+  @ApiOperation({ summary: 'Broadcast an announcement/offer to customers (admin)' })
+  async broadcast(
+    @Body() body: { title: string; body: string; type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT'; userIds?: string[]; referenceId?: string },
+  ) {
+    return this.adminService.broadcastAnnouncement(
+      body.title,
+      body.body,
+      body.type || 'ANNOUNCEMENT',
+      body.userIds,
+      body.referenceId,
+    );
   }
 
   @Get('audit-logs')

@@ -8,6 +8,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../address/data/models/address.dart';
 import '../../address/presentation/address_provider.dart';
 import '../../cart/presentation/cart_provider.dart';
+import '../../notifications/presentation/notifications_provider.dart';
+import '../../subscription/presentation/subscription_provider.dart';
+import '../../wishlist/presentation/wishlist_screen.dart';
 import 'avatar_provider.dart';
 import 'avatar_selection_page.dart';
 import 'home_provider.dart';
@@ -28,6 +31,17 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           !ref.read(addressNotifierProvider).isLoading) {
         ref.read(addressNotifierProvider.notifier).loadAddresses();
       }
+      // Load the real unread badge (server-persisted across restarts),
+      // filtered by the customer's notification preferences.
+      ref.invalidate(unreadCountProvider);
+      ref.invalidate(filteredUnreadCountProvider);
+      // Shared favorites + subscription source of truth for home sections.
+      try {
+        ref.read(wishlistProvider.notifier).loadWishlist();
+      } catch (_) {}
+      try {
+        ref.read(subscriptionNotifierProvider.notifier).loadMySubscriptions();
+      } catch (_) {}
     });
   }
 
@@ -162,22 +176,50 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 ],
               ),
               Stack(
+                clipBehavior: Clip.none,
                 children: [
                   IconButton(
-                    onPressed: () => _showNotificationsBottomSheet(context),
-                    icon: const Icon(Icons.notifications_outlined, size: 28),
+                    onPressed: () => _openNotifications(context),
+                    icon:
+                        const Icon(Icons.notifications_outlined, size: 28),
+                    tooltip: 'Notifications',
                   ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final unreadAsync =
+                          ref.watch(filteredUnreadCountProvider);
+                      final count =
+                          unreadAsync.valueOrNull ?? 0;
+                      if (count <= 0) return const SizedBox.shrink();
+                      return Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: Theme.of(context)
+                                    .scaffoldBackgroundColor,
+                                width: 1.5),
+                          ),
+                          constraints:
+                              const BoxConstraints(minWidth: 18),
+                          child: Text(
+                            count > 99 ? '99+' : '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              height: 1.2,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -447,6 +489,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           itemBuilder: (context, index) {
             final meal = homeState.bestsellers[index];
             final imageUrl = meal.imageUrls.isNotEmpty ? meal.imageUrls.first : '';
+            final isFav = ref.watch(wishlistIdsProvider).contains(meal.id);
             return Card(
               margin: const EdgeInsets.only(bottom: AppSpacing.s16),
               child: InkWell(
@@ -511,6 +554,31 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    try {
+                                      await ref
+                                          .read(wishlistProvider.notifier)
+                                          .toggleWishlist(meal.id);
+                                    } catch (_) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Could not update favorites. Try again.')),
+                                        );
+                                    }
+                                  },
+                                  child: Icon(
+                                    isFav
+                                        ? Icons.favorite_rounded
+                                        : Icons.favorite_border_rounded,
+                                    color: isFav ? Colors.red : Colors.grey,
+                                    size: 20,
                                   ),
                                 ),
                               ],
@@ -592,6 +660,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             itemBuilder: (context, index) {
               final meal = homeState.healthyPicks[index];
               final imageUrl = meal.imageUrls.isNotEmpty ? meal.imageUrls.first : '';
+              final isFav = ref.watch(wishlistIdsProvider).contains(meal.id);
               return Container(
                 width: 180,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -603,21 +672,62 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: imageUrl.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(color: Colors.grey[300]),
-                                  errorWidget: (context, url, error) => Container(
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.restaurant),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              imageUrl.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(color: Colors.grey[300]),
+                                      errorWidget: (context, url, error) => Container(
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.restaurant),
+                                      ),
+                                    )
+                                  : Container(
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.restaurant),
+                                    ),
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    try {
+                                      await ref
+                                          .read(wishlistProvider.notifier)
+                                          .toggleWishlist(meal.id);
+                                    } catch (_) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Could not update favorites. Try again.')),
+                                        );
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      isFav
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_border_rounded,
+                                      color: isFav ? Colors.red : Colors.grey,
+                                      size: 16,
+                                    ),
                                   ),
-                                )
-                              : Container(
-                                  color: Colors.grey[300],
-                                  child: const Icon(Icons.restaurant),
                                 ),
+                              ),
+                            ],
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(AppSpacing.s12),
@@ -667,6 +777,26 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   }
 
   Widget _buildSubscriptionBanner(BuildContext context) {
+    // Same source of truth as Profile header and the Subscription screen:
+    // active subscription from subscriptionNotifierProvider (GET /subscriptions/my).
+    final subState = ref.watch(subscriptionNotifierProvider);
+    String? activeName;
+    String? activeStatus;
+    try {
+      final active = subState.mySubscriptions.firstWhere(
+        (s) => s.status == 'active',
+      );
+      activeName = active.subscription?.name;
+      activeStatus = active.status;
+    } catch (_) {
+      activeName = null;
+    }
+    final hasActive = activeName != null && activeName.isNotEmpty;
+    final bannerTitle = hasActive ? activeName : 'Subscribe & Save';
+    final bannerSubtitle = hasActive
+        ? 'Status: ${activeStatus ?? 'active'} — manage renewals, pauses and skipped meals.'
+        : 'Get organic meals delivered daily at up to 20% discount.';
+
     return Container(
       margin: const EdgeInsets.all(AppSpacing.s24),
       padding: const EdgeInsets.all(AppSpacing.s20),
@@ -685,26 +815,26 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Subscribe & Save',
+                  bannerTitle,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Get organic meals delivered daily at up to 20% discount.',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                Text(
+                  bannerSubtitle,
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.s16),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () => context.push('/my-subscriptions'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r12)),
             ),
-            child: const Text('View Plans', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(hasActive ? 'Manage' : 'View Plans', style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -827,35 +957,11 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  void _showNotificationsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.r24)),
-        ),
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Notifications', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-                TextButton(onPressed: () {}, child: const Text('Mark all read')),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s16),
-            const Expanded(
-              child: Center(
-                child: Text('No notifications yet'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  /// Open the real notifications screen, then refresh the badge on return
+  /// so read changes are reflected instantly.
+  void _openNotifications(BuildContext context) {
+    context.push('/notifications').then((_) {
+      if (mounted) refreshNotifications(ref);
+    });
   }
 }

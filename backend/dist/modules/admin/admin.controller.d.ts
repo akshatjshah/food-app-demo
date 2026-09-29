@@ -70,7 +70,7 @@ export declare class AdminController {
         chefId: string | null;
         deliveryBoyId: string | null;
     })[]>;
-    updateOrderStatus(orderId: string, status: string): Promise<{
+    updateOrderStatus(orderId: string, status: string, req: any): Promise<{
         deliverySlot: string;
         updatedAt: Date;
         id: string;
@@ -91,6 +91,16 @@ export declare class AdminController {
         addressId: string | null;
         chefId: string | null;
         deliveryBoyId: string | null;
+    }>;
+    broadcast(body: {
+        title: string;
+        body: string;
+        type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT';
+        userIds?: string[];
+        referenceId?: string;
+    }): Promise<{
+        sent: number;
+        failed: number;
     }>;
     getAuditLogs(skip?: string, take?: string): Promise<({
         admin: {

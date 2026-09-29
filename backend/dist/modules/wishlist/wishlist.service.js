@@ -17,7 +17,7 @@ let WishlistService = class WishlistService {
         this.prisma = prisma;
     }
     async findAll(userId) {
-        return this.prisma.wishlist.findMany({
+        const items = await this.prisma.wishlist.findMany({
             where: { userId },
             include: {
                 foodItem: {
@@ -26,6 +26,19 @@ let WishlistService = class WishlistService {
             },
             orderBy: { createdAt: 'desc' },
         });
+        return items.map((w) => ({
+            ...w,
+            foodItem: w.foodItem
+                ? {
+                    ...w.foodItem,
+                    price: Number(w.foodItem.price),
+                    rating: w.foodItem.rating === null ||
+                        w.foodItem.rating === undefined
+                        ? null
+                        : Number(w.foodItem.rating),
+                }
+                : w.foodItem,
+        }));
     }
     async toggle(userId, foodItemId) {
         const existing = await this.prisma.wishlist.findUnique({

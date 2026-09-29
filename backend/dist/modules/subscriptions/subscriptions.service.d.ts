@@ -1,7 +1,9 @@
 import { PrismaService } from '../../config/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class SubscriptionsService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private notificationsService;
+    constructor(prisma: PrismaService, notificationsService: NotificationsService);
     findAll(): Promise<{
         description: string | null;
         name: string;

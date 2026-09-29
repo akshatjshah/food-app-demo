@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../config/prisma.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 let OrdersService = class OrdersService {
-    constructor(prisma) {
+    constructor(prisma, notificationsService) {
         this.prisma = prisma;
+        this.notificationsService = notificationsService;
     }
     async create(userId, dto) {
         const address = await this.prisma.address.findFirst({
@@ -138,6 +140,7 @@ let OrdersService = class OrdersService {
             await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
             return newOrder;
         });
+        await this.notificationsService.sendOrderStatusUpdate(userId, order.id, 'placed');
         return {
             id: order.id,
             status: order.status,
@@ -226,16 +229,18 @@ let OrdersService = class OrdersService {
         if (!['placed', 'confirmed'].includes(order.status)) {
             throw new common_1.BadRequestException('Order cannot be cancelled');
         }
-        return this.prisma.$transaction(async (tx) => {
-            const updated = await tx.order.update({
+        const updated = await this.prisma.$transaction(async (tx) => {
+            const next = await tx.order.update({
                 where: { id },
                 data: { status: 'cancelled' },
             });
             await tx.orderStatusHistory.create({
                 data: { orderId: id, fromStatus: order.status, toStatus: 'cancelled', triggeredBy: userId },
             });
-            return updated;
+            return next;
         });
+        await this.notificationsService.sendOrderStatusUpdate(userId, id, 'cancelled');
+        return updated;
     }
     async reorder(userId, orderId) {
         const order = await this.prisma.order.findUnique({
@@ -269,6 +274,7 @@ let OrdersService = class OrdersService {
 exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        notifications_service_1.NotificationsService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

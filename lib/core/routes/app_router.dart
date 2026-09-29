@@ -19,6 +19,14 @@ import '../../features/wishlist/presentation/wishlist_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/reviews/presentation/rating_screen.dart';
 import '../../features/profile/presentation/edit_profile_screen.dart';
+import '../../features/profile/presentation/notification_preferences_screen.dart';
+import '../../features/profile/presentation/my_favorites_screen.dart';
+import '../../features/profile/presentation/saved_payments_screen.dart';
+import '../../features/profile/presentation/help_support_screen.dart';
+import '../../features/profile/presentation/privacy_security_screen.dart';
+import '../../features/profile/presentation/rate_parabdi_screen.dart';
+import '../../features/profile/presentation/about_parabdi_screen.dart';
+import '../../features/subscription/presentation/subscription_tab.dart';
 import '../../features/subscription/presentation/subscription_detail_screen.dart';
 import '../../features/subscription/presentation/subscription_provider.dart';
 import '../../features/chef/presentation/chef_login_screen.dart';
@@ -119,6 +127,40 @@ class AppRouter {
       GoRoute(
         path: '/profile/edit',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/my-subscriptions',
+        builder: (context, state) =>
+            const SubscriptionTab(showBackButton: true),
+      ),
+      GoRoute(
+        path: '/profile/notification-preferences',
+        builder: (context, state) =>
+            const NotificationPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/profile/favorites',
+        builder: (context, state) => const MyFavoritesScreen(),
+      ),
+      GoRoute(
+        path: '/profile/saved-payments',
+        builder: (context, state) => const SavedPaymentsScreen(),
+      ),
+      GoRoute(
+        path: '/profile/help-support',
+        builder: (context, state) => const HelpSupportScreen(),
+      ),
+      GoRoute(
+        path: '/profile/privacy-security',
+        builder: (context, state) => const PrivacySecurityScreen(),
+      ),
+      GoRoute(
+        path: '/profile/rate',
+        builder: (context, state) => const RateParabdiScreen(),
+      ),
+      GoRoute(
+        path: '/profile/about',
+        builder: (context, state) => const AboutParabdiScreen(),
       ),
       GoRoute(
         path: '/subscription/:planId',

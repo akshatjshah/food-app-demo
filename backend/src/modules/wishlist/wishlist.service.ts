@@ -6,7 +6,7 @@ export class WishlistService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(userId: string) {
-    return this.prisma.wishlist.findMany({
+    const items = await this.prisma.wishlist.findMany({
       where: { userId },
       include: {
         foodItem: {
@@ -15,6 +15,22 @@ export class WishlistService {
       },
       orderBy: { createdAt: 'desc' },
     });
+    // Serialize Decimal (price/rating) to plain numbers so the Flutter
+    // client can parse them as num (Prisma Decimals serialize as strings).
+    return items.map((w) => ({
+      ...w,
+      foodItem: w.foodItem
+        ? {
+            ...w.foodItem,
+            price: Number((w.foodItem as any).price),
+            rating:
+              (w.foodItem as any).rating === null ||
+              (w.foodItem as any).rating === undefined
+                ? null
+                : Number((w.foodItem as any).rating),
+          }
+        : w.foodItem,
+    }));
   }
 
   async toggle(userId: string, foodItemId: string) {

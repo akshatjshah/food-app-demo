@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_constants.dart' hide SubscriptionPlan;
 import '../../../core/theme/app_theme.dart';
 import '../data/models/subscription.dart';
 import 'subscription_provider.dart';
 
 class SubscriptionTab extends ConsumerStatefulWidget {
-  const SubscriptionTab({super.key});
+  /// When true (opened from Profile), shows a back button instead of
+  /// hiding navigation. Defaults to false for the bottom-tab usage.
+  final bool showBackButton;
+  const SubscriptionTab({super.key, this.showBackButton = false});
 
   @override
   ConsumerState<SubscriptionTab> createState() => _SubscriptionTabState();
@@ -42,6 +44,13 @@ class _SubscriptionTabState extends ConsumerState<SubscriptionTab> {
       appBar: AppBar(
         title: const Text('Parabdi Subscriptions'),
         automaticallyImplyLeading: false,
+        leading: widget.showBackButton
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                onPressed: () => context.pop(),
+              )
+            : null,
       ),
       body: state.isLoading && state.plans.isEmpty
           ? const Center(child: CircularProgressIndicator())

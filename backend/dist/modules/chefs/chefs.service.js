@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChefsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../config/prisma.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 let ChefsService = class ChefsService {
-    constructor(prisma) {
+    constructor(prisma, notificationsService) {
         this.prisma = prisma;
+        this.notificationsService = notificationsService;
     }
     async findByPin(pin) {
         return this.prisma.user.findFirst({ where: { role: 'chef', phoneNumber: pin } });
@@ -53,22 +55,28 @@ let ChefsService = class ChefsService {
         });
     }
     async acceptOrder(orderId, chefId) {
-        return this.prisma.order.update({
+        const updated = await this.prisma.order.update({
             where: { id: orderId },
             data: { status: 'confirmed', chefId },
         });
+        await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'confirmed');
+        return updated;
     }
     async startPreparing(orderId) {
-        return this.prisma.order.update({
+        const updated = await this.prisma.order.update({
             where: { id: orderId },
             data: { status: 'preparing' },
         });
+        await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'preparing');
+        return updated;
     }
     async markReady(orderId) {
-        return this.prisma.order.update({
+        const updated = await this.prisma.order.update({
             where: { id: orderId },
             data: { status: 'ready' },
         });
+        await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'ready');
+        return updated;
     }
     async toggleFoodStock(foodItemId) {
         const food = await this.prisma.foodItem.findUnique({ where: { id: foodItemId } });
@@ -83,6 +91,7 @@ let ChefsService = class ChefsService {
 exports.ChefsService = ChefsService;
 exports.ChefsService = ChefsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        notifications_service_1.NotificationsService])
 ], ChefsService);
 //# sourceMappingURL=chefs.service.js.map

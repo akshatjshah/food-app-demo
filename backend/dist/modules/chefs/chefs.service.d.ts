@@ -1,7 +1,9 @@
 import { PrismaService } from '../../config/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class ChefsService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private notificationsService;
+    constructor(prisma: PrismaService, notificationsService: NotificationsService);
     findByPin(pin: string): Promise<{
         updatedAt: Date;
         id: string;

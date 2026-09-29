@@ -10,11 +10,13 @@ exports.SubscriptionsModule = void 0;
 const common_1 = require("@nestjs/common");
 const subscriptions_service_1 = require("./subscriptions.service");
 const subscriptions_controller_1 = require("./subscriptions.controller");
+const notifications_module_1 = require("../notifications/notifications.module");
 let SubscriptionsModule = class SubscriptionsModule {
 };
 exports.SubscriptionsModule = SubscriptionsModule;
 exports.SubscriptionsModule = SubscriptionsModule = __decorate([
     (0, common_1.Module)({
+        imports: [notifications_module_1.NotificationsModule],
         providers: [subscriptions_service_1.SubscriptionsService],
         controllers: [subscriptions_controller_1.SubscriptionsController],
         exports: [subscriptions_service_1.SubscriptionsService],

@@ -47,8 +47,11 @@ let AdminController = class AdminController {
             search,
         });
     }
-    async updateOrderStatus(orderId, status) {
-        return this.adminService.updateOrderStatus(orderId, status);
+    async updateOrderStatus(orderId, status, req) {
+        return this.adminService.updateOrderStatus(orderId, status, req.user?.id);
+    }
+    async broadcast(body) {
+        return this.adminService.broadcastAnnouncement(body.title, body.body, body.type || 'ANNOUNCEMENT', body.userIds, body.referenceId);
     }
     async getAuditLogs(skip, take) {
         return this.adminService.getAuditLogs({
@@ -112,10 +115,19 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update order status (admin)' }),
     __param(0, (0, common_1.Param)('orderId')),
     __param(1, (0, common_1.Body)('status')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateOrderStatus", null);
+__decorate([
+    (0, common_1.Post)('notifications/broadcast'),
+    (0, swagger_1.ApiOperation)({ summary: 'Broadcast an announcement/offer to customers (admin)' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "broadcast", null);
 __decorate([
     (0, common_1.Get)('audit-logs'),
     (0, swagger_1.ApiOperation)({ summary: 'Get audit logs (admin)' }),
