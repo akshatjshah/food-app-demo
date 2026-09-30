@@ -22,6 +22,9 @@ let DeliverySlotsService = class DeliverySlotsService {
             orderBy: { displayOrder: 'asc' },
         });
     }
+    async findAllAdmin() {
+        return this.prisma.deliverySlot.findMany({ orderBy: { displayOrder: 'asc' } });
+    }
     async create(data) {
         return this.prisma.deliverySlot.create({ data });
     }

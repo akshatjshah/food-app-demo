@@ -71,7 +71,7 @@ export declare class ChefsController {
         chefId: string | null;
         deliveryBoyId: string | null;
     }>;
-    startPreparing(orderId: string): Promise<{
+    startPreparing(orderId: string, req: any): Promise<{
         deliverySlot: string;
         updatedAt: Date;
         id: string;
@@ -93,7 +93,7 @@ export declare class ChefsController {
         chefId: string | null;
         deliveryBoyId: string | null;
     }>;
-    markReady(orderId: string): Promise<{
+    markReady(orderId: string, req: any): Promise<{
         deliverySlot: string;
         updatedAt: Date;
         id: string;
@@ -121,6 +121,8 @@ export declare class ChefsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -134,6 +136,7 @@ export declare class ChefsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;

@@ -22,6 +22,15 @@ export class DeliverySlotsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.admin)
   @ApiBearerAuth()
+  @Get('admin/all')
+  @ApiOperation({ summary: 'Get all slots incl. inactive (admin)' })
+  async findAllAdmin() {
+    return this.deliverySlotsService.findAllAdmin();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.admin)
+  @ApiBearerAuth()
   @Post()
   @ApiOperation({ summary: 'Create delivery slot (admin)' })
   async create(@Body() dto: any) {

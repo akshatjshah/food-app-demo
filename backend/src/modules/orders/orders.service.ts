@@ -220,7 +220,7 @@ export class OrdersService {
     return orders.map((o) => this.toPlainOrder(o));
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requesterId?: string, isAdmin = false) {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
@@ -235,6 +235,15 @@ export class OrdersService {
       },
     });
     if (!order) throw new NotFoundException('Order not found');
+    // Ownership enforcement: customers may only view their own orders.
+    // Chefs/riders may view orders assigned to them; admins bypass.
+    if (!isAdmin && requesterId) {
+      const allowed =
+        order.userId === requesterId ||
+        (order as any).chefId === requesterId ||
+        (order as any).deliveryBoyId === requesterId;
+      if (!allowed) throw new BadRequestException('Not authorized');
+    }
     const plain = this.toPlainOrder(order);
     if (order.address) {
       plain.deliveryAddress = {
@@ -243,6 +252,9 @@ export class OrdersService {
         longitude: Number(order.address.longitude),
       };
     }
+    // Never expose delivery OTP in read responses; it is returned once at creation
+    // and available to privileged admin/chef flows only.
+    delete (plain as any).otpCode;
     return plain;
   }
 
@@ -276,6 +288,7 @@ export class OrdersService {
       include: { items: true },
     });
     if (!order) throw new NotFoundException('Order not found');
+    if (order.userId !== userId) throw new BadRequestException('Not authorized');
 
     let cart = await this.prisma.cart.findUnique({ where: { userId } });
     if (!cart) cart = await this.prisma.cart.create({ data: { userId } });

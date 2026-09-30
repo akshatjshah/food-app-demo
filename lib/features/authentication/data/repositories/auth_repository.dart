@@ -23,15 +23,15 @@ class AuthRepository {
   }
 
   Future<Map<String, dynamic>> googleAuth(String idToken, {String? fcmToken}) async {
-    final data = <String, dynamic>{'id_token': idToken};
-    if (fcmToken != null) data['fcm_token'] = fcmToken;
+    final data = <String, dynamic>{'idToken': idToken};
+    if (fcmToken != null) data['fcmToken'] = fcmToken;
     final response = await _dio.post(ApiConstants.googleAuth, data: data);
     return response.data['data'];
   }
 
   Future<Map<String, dynamic>> refreshTokens(String refreshToken) async {
     final response = await _dio.post(ApiConstants.refreshToken, data: {
-      'refresh_token': refreshToken,
+      'refreshToken': refreshToken,
     });
     return response.data['data'];
   }
@@ -53,6 +53,9 @@ class AuthRepository {
   }
 
   Future<void> saveFcmToken(String token) async {
-    await _dio.post(ApiConstants.fcmToken, data: {'fcm_token': token});
+    await _dio.post(ApiConstants.fcmToken, data: {
+      'token': token,
+      'platform': 'android',
+    });
   }
 }

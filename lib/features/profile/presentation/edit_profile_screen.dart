@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../authentication/presentation/auth_provider.dart';
+import '../../home/presentation/avatar_image.dart';
 import '../../home/presentation/avatar_provider.dart';
 import '../../home/presentation/avatar_selection_page.dart';
 
@@ -99,15 +99,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     onTap: _pickAvatar,
                     child: Stack(
                       children: [
-                        ClipOval(
-                          child: SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: SvgPicture.asset(
-                               AvatarSelectionPage.assetForStatic(avatarId),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                        // Ratio-aware portrait (same asset, full body, no
+                        // circular crop) matching Home/Profile.
+                        AvatarPortrait(
+                          avatarId: avatarId,
+                          width: 110,
+                          borderRadius: 22,
                         ),
                         Positioned(
                           bottom: 0,

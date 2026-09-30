@@ -33,11 +33,11 @@ let ChefsController = class ChefsController {
     async acceptOrder(orderId, req) {
         return this.chefsService.acceptOrder(orderId, req.user.id);
     }
-    async startPreparing(orderId) {
-        return this.chefsService.startPreparing(orderId);
+    async startPreparing(orderId, req) {
+        return this.chefsService.startPreparing(orderId, req.user.id);
     }
-    async markReady(orderId) {
-        return this.chefsService.markReady(orderId);
+    async markReady(orderId, req) {
+        return this.chefsService.markReady(orderId, req.user.id);
     }
     async toggleStock(foodItemId) {
         return this.chefsService.toggleFoodStock(foodItemId);
@@ -86,8 +86,9 @@ __decorate([
     (0, common_1.Post)('orders/:orderId/start'),
     (0, swagger_1.ApiOperation)({ summary: 'Start preparing order' }),
     __param(0, (0, common_1.Param)('orderId')),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ChefsController.prototype, "startPreparing", null);
 __decorate([
@@ -97,8 +98,9 @@ __decorate([
     (0, common_1.Post)('orders/:orderId/ready'),
     (0, swagger_1.ApiOperation)({ summary: 'Mark order as ready' }),
     __param(0, (0, common_1.Param)('orderId')),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ChefsController.prototype, "markReady", null);
 __decorate([

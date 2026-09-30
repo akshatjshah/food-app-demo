@@ -1,36 +1,38 @@
 import 'package:flutter/material.dart';
+import 'avatar_provider.dart';
 import 'avatar_selection_page.dart';
 
 /// Backward-compatible wrapper that delegates to [AvatarSelectionPage].
 ///
-/// Existing callers will continue to work without changes.
-/// All avatar selection now opens the full-screen [AvatarSelectionPage].
+/// Existing callers continue to work without changes. Avatar selection opens
+/// the full-screen [AvatarSelectionPage] with the 8 new PNG avatars; old SVG
+/// ids remain resolvable via [assetFor] for stored fallbacks.
 class AvatarSelectorSheet {
-  static const String fallbackAvatar = 'male_cricket_champ';
+  static const String fallbackAvatar = kDefaultAvatarId;
 
   static const List<String> maleAvatars = [
-    'male_cricket_champ',
-    'male_football_pro',
-    'male_fit_fierce',
-    'male_urban_explorer',
+    'cricket_champ',
+    'fit_fierce',
+    'genz',
+    'urban_man',
   ];
 
   static const List<String> femaleAvatars = [
-    'female_cricket_queen',
-    'female_fit_fabulous',
-    'female_trendy_vibes',
-    'female_urban_chic',
+    'fit_fabulous',
+    'trendy',
+    'women',
+    'princess',
   ];
 
   static const List<String> allAvatars = [
-    'male_cricket_champ',
-    'male_football_pro',
-    'male_fit_fierce',
-    'male_urban_explorer',
-    'female_cricket_queen',
-    'female_fit_fabulous',
-    'female_trendy_vibes',
-    'female_urban_chic',
+    'cricket_champ',
+    'fit_fierce',
+    'genz',
+    'urban_man',
+    'fit_fabulous',
+    'trendy',
+    'women',
+    'princess',
   ];
 
   static Future<String?> show(BuildContext context, {String? selected}) {
@@ -40,11 +42,8 @@ class AvatarSelectorSheet {
   static bool isValidAvatarId(String id) =>
       AvatarSelectionPage.isValidAvatarIdStatic(id);
 
-  static String assetFor(String id) {
-    // Legacy mappings for backward compatibility.
-    if (id == 'male') return 'assets/images/avatars/male_cricket_champ.svg';
-    if (id == 'female') return 'assets/images/avatars/female_cricket_queen.svg';
-    if (allAvatars.contains(id)) return 'assets/images/avatars/$id.svg';
-    return 'assets/images/avatars/$fallbackAvatar.svg';
-  }
+  static String assetFor(String id) => assetForAvatar(id);
 }
+
+/// Top-level alias kept for callers importing only the sheet.
+String assetForAvatar(String id) => assetFor(id);

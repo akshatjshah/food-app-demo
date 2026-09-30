@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './config/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -27,6 +27,8 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { GooglePlacesModule } from './modules/google-places/google-places.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { MediaModule } from './modules/media/media.module';
+import { AdminAuditInterceptor } from './common/audit/admin-audit.interceptor';
 
 @Module({
   imports: [
@@ -57,11 +59,16 @@ import { GatewayModule } from './gateway/gateway.module';
     LoyaltyModule,
     GooglePlacesModule,
     GatewayModule,
+    MediaModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AdminAuditInterceptor,
     },
   ],
 })

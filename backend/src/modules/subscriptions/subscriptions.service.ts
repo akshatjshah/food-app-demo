@@ -10,7 +10,77 @@ export class SubscriptionsService {
   ) {}
 
   async findAll() {
-    return this.prisma.subscription.findMany({ where: { isActive: true } });
+    return this.prisma.subscription.findMany({
+      where: { isActive: true },
+      orderBy: [{ displayOrder: 'asc' }, { price: 'asc' }],
+    });
+  }
+
+  // ── Admin plan management. Existing user subscriptions reference the plan
+  // by id and snapshot nothing, so edits apply to new subscriptions only in
+  // effect; historical user_subscriptions keep their own dates/meals/status.
+  // Deactivation (not delete) is the safe path when subscribers exist. ──
+  async findAllAdmin() {
+    return this.prisma.subscription.findMany({ orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }] });
+  }
+
+  async createPlan(data: {
+    name: string; description?: string; price: number; durationDays: number;
+    mealsCount: number; mealType: string; benefits?: string[]; isActive?: boolean;
+    displayOrder?: number; imageUrl?: string;
+  }) {
+    const existing = await this.prisma.subscription.findUnique({ where: { name: data.name } });
+    if (existing) throw new BadRequestException('A plan with this name already exists');
+    return this.prisma.subscription.create({
+      data: {
+        name: data.name,
+        description: data.description || null,
+        price: data.price,
+        durationDays: data.durationDays,
+        mealsCount: data.mealsCount,
+        mealType: data.mealType,
+        benefits: data.benefits || [],
+        isActive: data.isActive !== false,
+        displayOrder: data.displayOrder ?? 0,
+        imageUrl: data.imageUrl || null,
+      },
+    });
+  }
+
+  async updatePlan(id: string, data: Partial<{
+    name: string; description: string; price: number; durationDays: number;
+    mealsCount: number; mealType: string; benefits: string[]; isActive: boolean;
+    displayOrder: number; imageUrl: string;
+  }>) {
+    const plan = await this.prisma.subscription.findUnique({ where: { id } });
+    if (!plan) throw new BadRequestException('Subscription plan not found');
+    return this.prisma.subscription.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.description !== undefined ? { description: data.description || null } : {}),
+        ...(data.price !== undefined ? { price: data.price } : {}),
+        ...(data.durationDays !== undefined ? { durationDays: data.durationDays } : {}),
+        ...(data.mealsCount !== undefined ? { mealsCount: data.mealsCount } : {}),
+        ...(data.mealType !== undefined ? { mealType: data.mealType } : {}),
+        ...(data.benefits !== undefined ? { benefits: data.benefits } : {}),
+        ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+        ...(data.displayOrder !== undefined ? { displayOrder: data.displayOrder } : {}),
+        ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl || null } : {}),
+      },
+    });
+  }
+
+  async removePlan(id: string) {
+    const activeSubs = await this.prisma.userSubscription.count({
+      where: { subscriptionId: id, status: 'active' },
+    });
+    if (activeSubs > 0) {
+      throw new BadRequestException(
+        'Plan has active subscribers. Deactivate it instead of deleting.',
+      );
+    }
+    return this.prisma.subscription.delete({ where: { id } });
   }
 
   async getMy(userId: string) {

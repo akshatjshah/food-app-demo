@@ -1,16 +1,21 @@
-import 'api_env.dart';
-
 class ApiConstants {
   ApiConstants._();
 
   /// Central API base URL for the entire app.
-  /// Override at run/build time with:
-  ///   flutter run --dart-define=API_BASE_URL=http://<host>:3000/api/v1
-  /// Otherwise uses ApiEnv.host (auto-updated by START_PARABDI_DEV.ps1).
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://${ApiEnv.host}:3000/api/v1',
-  );
+  ///
+  /// Local Android development is permanent and IP-independent via
+  /// `adb reverse tcp:3000 tcp:3000`, so the DEBUG default is loopback:
+  ///   http://127.0.0.1:3000/api/v1
+  /// No manual IP, no --dart-define, no router changes required.
+  /// Optional override (CI/prod) at run/build time with:
+  ///   `flutter run --dart-define=API_BASE_URL=http://HOST:3000/api/v1`
+  static const String _defaultBaseUrl = 'http://127.0.0.1:3000/api/v1';
+
+  static String get baseUrl {
+    const override = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+    if (override.isNotEmpty) return override;
+    return _defaultBaseUrl;
+  }
   static const String sendOtp = '/auth/send-otp';
   static const String verifyOtp = '/auth/verify-otp';
   static const String googleAuth = '/auth/google';

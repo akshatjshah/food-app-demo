@@ -3,4 +3,5 @@ export declare class UpdateCustomizationGroupDto {
     minSelections?: number;
     maxSelections?: number;
     displayOrder?: number;
+    isActive?: boolean;
 }

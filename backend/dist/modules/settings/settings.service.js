@@ -16,12 +16,21 @@ let SettingsService = class SettingsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    isSecretKey(key) {
+        return key.startsWith('otp:') || key.startsWith('otp_rate:');
+    }
     async get(key) {
+        if (this.isSecretKey(key)) {
+            return null;
+        }
         const setting = await this.prisma.setting.findUnique({ where: { key } });
         return setting ? { key: setting.key, value: setting.value, valueType: setting.valueType } : null;
     }
     async getAll() {
-        return this.prisma.setting.findMany();
+        const all = await this.prisma.setting.findMany();
+        return all
+            .filter((s) => !this.isSecretKey(s.key))
+            .map((s) => ({ key: s.key, value: s.value, valueType: s.valueType, description: s.description, updatedAt: s.updatedAt }));
     }
     async set(key, value, valueType, description) {
         return this.prisma.setting.upsert({

@@ -36,6 +36,8 @@ const wallet_module_1 = require("./modules/wallet/wallet.module");
 const loyalty_module_1 = require("./modules/loyalty/loyalty.module");
 const google_places_module_1 = require("./modules/google-places/google-places.module");
 const gateway_module_1 = require("./gateway/gateway.module");
+const media_module_1 = require("./modules/media/media.module");
+const admin_audit_interceptor_1 = require("./common/audit/admin-audit.interceptor");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -69,11 +71,16 @@ exports.AppModule = AppModule = __decorate([
             loyalty_module_1.LoyaltyModule,
             google_places_module_1.GooglePlacesModule,
             gateway_module_1.GatewayModule,
+            media_module_1.MediaModule,
         ],
         providers: [
             {
                 provide: core_1.APP_GUARD,
                 useClass: throttler_1.ThrottlerGuard,
+            },
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: admin_audit_interceptor_1.AdminAuditInterceptor,
             },
         ],
     })

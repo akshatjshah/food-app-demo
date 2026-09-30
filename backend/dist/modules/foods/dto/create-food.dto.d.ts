@@ -13,4 +13,8 @@ export declare class CreateFoodDto {
     isFastingFriendly?: boolean;
     isBestseller?: boolean;
     isHealthyPick?: boolean;
+    stock?: number;
+    displayOrder?: number;
+    tags?: string[];
+    isActive?: boolean;
 }

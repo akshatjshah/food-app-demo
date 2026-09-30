@@ -5,13 +5,25 @@ import { PrismaService } from '../../config/prisma.service';
 export class SettingsService {
   constructor(private prisma: PrismaService) {}
 
+  private isSecretKey(key: string) {
+    return key.startsWith('otp:') || key.startsWith('otp_rate:');
+  }
+
   async get(key: string) {
+    if (this.isSecretKey(key)) {
+      // OTP hashes must never be readable via settings API.
+      return null;
+    }
     const setting = await this.prisma.setting.findUnique({ where: { key } });
     return setting ? { key: setting.key, value: setting.value, valueType: setting.valueType } : null;
   }
 
   async getAll() {
-    return this.prisma.setting.findMany();
+    const all = await this.prisma.setting.findMany();
+    // Strip OTP/rate-limit secrets; never expose hashes.
+    return all
+      .filter((s) => !this.isSecretKey(s.key))
+      .map((s) => ({ key: s.key, value: s.value, valueType: s.valueType, description: s.description, updatedAt: s.updatedAt }));
   }
 
   async set(key: string, value: string, valueType?: string, description?: string) {

@@ -2,6 +2,7 @@ import { PrismaService } from '../../config/prisma.service';
 export declare class SettingsService {
     private prisma;
     constructor(prisma: PrismaService);
+    private isSecretKey;
     get(key: string): Promise<{
         key: string;
         value: string;

@@ -35,8 +35,10 @@ export class OrdersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get order by ID' })
-  async findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(id);
+  async findOne(@Param('id') id: string, @Request() req) {
+    const role = req.user?.role;
+    const isAdmin = role === 'admin';
+    return this.ordersService.findOne(id, req.user.id, isAdmin);
   }
 
   @Post(':id/cancel')

@@ -65,11 +65,12 @@ export class FoodsService {
       include: {
         category: { select: { id: true, name: true, icon: true } },
         customizationGroups: {
+          where: includeInactive ? undefined : { isActive: true },
           include: { items: { where: { isActive: true } } },
           orderBy: { displayOrder: 'asc' },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
     });
 
     return foods.map((f) => ({
@@ -94,6 +95,7 @@ export class FoodsService {
       include: {
         category: { select: { id: true, name: true, icon: true } },
         customizationGroups: {
+          where: { isActive: true },
           include: { items: { where: { isActive: true } } },
           orderBy: { displayOrder: 'asc' },
         },
@@ -214,6 +216,7 @@ export class FoodsService {
     minSelections?: number;
     maxSelections?: number;
     displayOrder?: number;
+    isActive?: boolean;
   }) {
     const food = await this.prisma.foodItem.findUnique({ where: { id: foodItemId, deletedAt: null } });
     if (!food) throw new NotFoundException('Food item not found');
@@ -230,6 +233,7 @@ export class FoodsService {
         minSelections: data.minSelections ?? 0,
         maxSelections: data.maxSelections ?? 1,
         displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? 0) + 1,
+        isActive: data.isActive !== false,
       },
     });
   }
@@ -239,6 +243,7 @@ export class FoodsService {
     minSelections?: number;
     maxSelections?: number;
     displayOrder?: number;
+    isActive?: boolean;
   }) {
     const group = await this.prisma.customizationGroup.findUnique({ where: { id: groupId } });
     if (!group) throw new NotFoundException('Customization group not found');

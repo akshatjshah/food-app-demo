@@ -12,6 +12,10 @@ export class DeliverySlotsService {
     });
   }
 
+  async findAllAdmin() {
+    return this.prisma.deliverySlot.findMany({ orderBy: { displayOrder: 'asc' } });
+  }
+
   async create(data: any) {
     return this.prisma.deliverySlot.create({ data });
   }

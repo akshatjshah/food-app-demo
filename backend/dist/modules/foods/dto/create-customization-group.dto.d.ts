@@ -8,4 +8,5 @@ export declare class CreateCustomizationGroupDto {
     minSelections?: number;
     maxSelections?: number;
     displayOrder?: number;
+    isActive?: boolean;
 }

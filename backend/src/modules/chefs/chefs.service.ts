@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -33,7 +33,12 @@ export class ChefsService {
   }
 
   async getOrders(chefId: string, status?: string) {
-    const where: any = {};
+    const where: any = {
+      OR: [
+        { chefId },
+        { chefId: null, status: { in: ['placed', 'confirmed'] } },
+      ],
+    };
     if (status) where.status = status;
 
     return this.prisma.order.findMany({
@@ -51,6 +56,14 @@ export class ChefsService {
   }
 
   async acceptOrder(orderId: string, chefId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.chefId && order.chefId !== chefId) {
+      throw new ForbiddenException('Order already assigned to another chef');
+    }
+    if (!['placed', 'confirmed'].includes(order.status)) {
+      throw new BadRequestException(`Cannot accept order in status ${order.status}`);
+    }
     const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: { status: 'confirmed', chefId },
@@ -59,16 +72,32 @@ export class ChefsService {
     return updated;
   }
 
-  async startPreparing(orderId: string) {
+  async startPreparing(orderId: string, chefId?: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (chefId && order.chefId && order.chefId !== chefId) {
+      throw new ForbiddenException('Order assigned to another chef');
+    }
+    if (!['confirmed', 'placed'].includes(order.status)) {
+      throw new BadRequestException(`Cannot start preparing from status ${order.status}`);
+    }
     const updated = await this.prisma.order.update({
       where: { id: orderId },
-      data: { status: 'preparing' },
+      data: { status: 'preparing', ...(chefId ? { chefId } : {}) },
     });
     await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'preparing');
     return updated;
   }
 
-  async markReady(orderId: string) {
+  async markReady(orderId: string, chefId?: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (chefId && order.chefId && order.chefId !== chefId) {
+      throw new ForbiddenException('Order assigned to another chef');
+    }
+    if (order.status !== 'preparing') {
+      throw new BadRequestException(`Cannot mark ready from status ${order.status}`);
+    }
     const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: { status: 'ready' },

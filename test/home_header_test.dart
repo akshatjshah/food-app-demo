@@ -96,6 +96,14 @@ String? _headerAvatarAsset(WidgetTester tester) {
       return assetName;
     }
   }
+  // New PNG avatars render via Image.asset.
+  final images = tester.widgetList<Image>(find.byType(Image));
+  for (final image in images) {
+    final provider = image.image;
+    if (provider is AssetImage && provider.assetName.contains('avatars/')) {
+      return provider.assetName;
+    }
+  }
   return null;
 }
 
@@ -139,7 +147,7 @@ void main() {
       }),
       findsNothing,
     );
-    expect(_headerAvatarAsset(tester), 'assets/images/avatars/male_cricket_champ.svg');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/cricket_champ.png');
   });
 
   testWidgets(
@@ -151,68 +159,82 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Choose Your Avatar'), findsOneWidget);
-    expect(find.text('MEN'), findsOneWidget);
-    expect(find.text('WOMEN'), findsOneWidget);
+    expect(find.text('Male'), findsOneWidget);
+    expect(find.text('Female'), findsOneWidget);
     for (final id in AvatarSelectorSheet.allAvatars) {
       expect(find.byKey(Key('avatar_$id')), findsOneWidget);
     }
     expect(find.byKey(const Key('save_avatar_button')), findsOneWidget);
   });
 
-  testWidgets('selecting female_cricket_queen and saving updates header',
+  testWidgets('selecting fit_fabulous and saving updates header',
       (tester) async {
     await pumpHome(tester);
 
     await tester.tap(find.byTooltip('Choose your avatar'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('avatar_female_cricket_queen')));
+    final card = find.byKey(const Key('avatar_fit_fabulous'));
+    await tester.ensureVisible(card);
+    await tester.pumpAndSettle();
+    await tester.tap(card, warnIfMissed: false);
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('save_avatar_button')));
     await tester.pumpAndSettle();
 
     expect(find.text('Choose Your Avatar'), findsNothing);
-    expect(_headerAvatarAsset(tester), 'assets/images/avatars/female_cricket_queen.svg');
-    expect(LocalStorage.getAvatarForUser('guest'), 'female_cricket_queen');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/fit_&_fabulous.png');
+    expect(LocalStorage.getAvatarForUser('guest'), 'fit_fabulous');
   });
 
   testWidgets('avatar preference is restored from storage on rebuild',
       (tester) async {
-    await LocalStorage.setAvatarForUser('guest', 'female_cricket_queen');
+    await LocalStorage.setAvatarForUser('guest', 'fit_fabulous');
 
     await pumpHome(tester);
 
-    expect(_headerAvatarAsset(tester), 'assets/images/avatars/female_cricket_queen.svg');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/fit_&_fabulous.png');
   });
 
-  testWidgets('legacy female style preference maps to cricket queen',
+  testWidgets('legacy female style preference maps to fit fabulous',
       (tester) async {
     await LocalStorage.setAvatarStyle('female');
 
     await pumpHome(tester);
 
-    expect(_headerAvatarAsset(tester), 'assets/images/avatars/female_cricket_queen.svg');
+    expect(_headerAvatarAsset(tester), 'assets/images/avatars/fit_&_fabulous.png');
+  });
+
+  testWidgets('legacy SVG avatar ids still resolve (fallback)', (tester) async {
+    expect(
+      AvatarSelectorSheet.assetFor('male_cricket_champ'),
+      'assets/images/avatars/male_cricket_champ.svg',
+    );
+    expect(
+      AvatarSelectorSheet.assetFor('female_cricket_queen'),
+      'assets/images/avatars/female_cricket_queen.svg',
+    );
   });
 
   testWidgets('sheet exposes AvatarSelectorSheet.assetFor mapping',
       (tester) async {
     expect(
       AvatarSelectorSheet.assetFor('male'),
-      'assets/images/avatars/male_cricket_champ.svg',
+      'assets/images/avatars/cricket_champ.png',
     );
     expect(
       AvatarSelectorSheet.assetFor('female'),
-      'assets/images/avatars/female_cricket_queen.svg',
+      'assets/images/avatars/fit_&_fabulous.png',
     );
-    expect(AvatarSelectorSheet.assetFor('other'), 'assets/images/avatars/male_cricket_champ.svg');
+    expect(AvatarSelectorSheet.assetFor('other'), 'assets/images/avatars/cricket_champ.png');
     expect(
-      AvatarSelectorSheet.assetFor('female_cricket_queen'),
-      'assets/images/avatars/female_cricket_queen.svg',
+      AvatarSelectorSheet.assetFor('fit_fabulous'),
+      'assets/images/avatars/fit_&_fabulous.png',
     );
     expect(
-      AvatarSelectorSheet.assetFor('male_urban_explorer'),
-      'assets/images/avatars/male_urban_explorer.svg',
+      AvatarSelectorSheet.assetFor('urban_man'),
+      'assets/images/avatars/urban_man.png',
     );
   });
 }

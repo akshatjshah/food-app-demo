@@ -78,4 +78,28 @@ export class CreateFoodDto {
   @IsBoolean()
   @IsOptional()
   isHealthyPick?: boolean;
+
+  @ApiPropertyOptional({ description: 'Stock count. Null/omitted = unlimited.' })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  stock?: number;
+
+  @ApiPropertyOptional({ example: 1 })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  displayOrder?: number;
+
+  @ApiPropertyOptional({ type: [String], example: ['spicy', 'lunch'] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
+
+  @ApiPropertyOptional({ default: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }

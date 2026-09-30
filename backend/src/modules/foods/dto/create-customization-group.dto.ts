@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min, Validate, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsOptional, Min, Validate, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -43,4 +43,9 @@ export class CreateCustomizationGroupDto {
   @IsNumber()
   @IsOptional()
   displayOrder?: number;
+
+  @ApiPropertyOptional({ default: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }

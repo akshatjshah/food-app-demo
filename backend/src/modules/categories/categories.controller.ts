@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -81,5 +81,14 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Reorder categories (admin)' })
   async reorder(@Body() dto: ReorderCategoriesDto) {
     return this.categoriesService.reorder(dto.items);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.admin)
+  @ApiBearerAuth()
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete category when safe (admin)' })
+  async remove(@Param('id') id: string) {
+    return this.categoriesService.remove(id);
   }
 }

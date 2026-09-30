@@ -53,10 +53,13 @@ export class AuthService {
 
     console.log(`[OTP] ${phoneNumber}: ${otp} (expires: ${expiresAt.toISOString()})`);
 
+    const isDev = this.configService.get<string>('NODE_ENV') !== 'production';
     return {
       message: 'OTP sent successfully',
       expiresIn: OTP_EXPIRY_MS / 1000,
-      otp,
+      // Only expose the code in non-production (dev SMS bypass). Production
+      // delivers via SMS provider and must never leak the code in API output.
+      ...(isDev ? { otp } : {}),
     };
   }
 

@@ -17,13 +17,28 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const subscriptions_service_1 = require("./subscriptions.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const roles_guard_1 = require("../auth/guards/roles.guard");
+const roles_decorator_1 = require("../../guards/roles.decorator");
 const public_decorator_1 = require("../../guards/public.decorator");
+const client_1 = require("@prisma/client");
 let SubscriptionsController = class SubscriptionsController {
     constructor(subscriptionsService) {
         this.subscriptionsService = subscriptionsService;
     }
     async findAll() {
         return this.subscriptionsService.findAll();
+    }
+    async findAllAdmin() {
+        return this.subscriptionsService.findAllAdmin();
+    }
+    async createPlan(dto) {
+        return this.subscriptionsService.createPlan(dto);
+    }
+    async updatePlan(id, dto) {
+        return this.subscriptionsService.updatePlan(id, dto);
+    }
+    async removePlan(id) {
+        return this.subscriptionsService.removePlan(id);
     }
     async getMy(req) {
         return this.subscriptionsService.getMy(req.user.id);
@@ -50,6 +65,50 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SubscriptionsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.UserRole.admin),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/all'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all plans incl. inactive (admin)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SubscriptionsController.prototype, "findAllAdmin", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.UserRole.admin),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create plan (admin)' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SubscriptionsController.prototype, "createPlan", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.UserRole.admin),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)('admin/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update plan (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SubscriptionsController.prototype, "updatePlan", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.UserRole.admin),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Delete)('admin/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete plan (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SubscriptionsController.prototype, "removePlan", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),

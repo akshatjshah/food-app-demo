@@ -20,14 +20,13 @@ const create_coupon_dto_1 = require("./dto/create-coupon.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../../guards/roles.decorator");
-const public_decorator_1 = require("../../guards/public.decorator");
 const client_1 = require("@prisma/client");
 let CouponsController = class CouponsController {
     constructor(couponsService) {
         this.couponsService = couponsService;
     }
-    async validate(body) {
-        return this.couponsService.validate(body.code, body.userId, body.orderValue);
+    async validate(body, req) {
+        return this.couponsService.validate(body.code, req.user.id, body.orderValue);
     }
     async findAll() {
         return this.couponsService.findAll();
@@ -44,12 +43,14 @@ let CouponsController = class CouponsController {
 };
 exports.CouponsController = CouponsController;
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Post)('validate'),
     (0, swagger_1.ApiOperation)({ summary: 'Validate coupon code' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], CouponsController.prototype, "validate", null);
 __decorate([

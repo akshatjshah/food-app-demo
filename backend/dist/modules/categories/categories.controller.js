@@ -52,6 +52,9 @@ let CategoriesController = class CategoriesController {
     async reorder(dto) {
         return this.categoriesService.reorder(dto.items);
     }
+    async remove(id) {
+        return this.categoriesService.remove(id);
+    }
 };
 exports.CategoriesController = CategoriesController;
 __decorate([
@@ -137,6 +140,17 @@ __decorate([
     __metadata("design:paramtypes", [reorder_categories_dto_1.ReorderCategoriesDto]),
     __metadata("design:returntype", Promise)
 ], CategoriesController.prototype, "reorder", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.UserRole.admin),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete category when safe (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CategoriesController.prototype, "remove", null);
 exports.CategoriesController = CategoriesController = __decorate([
     (0, swagger_1.ApiTags)('Categories'),
     (0, common_1.Controller)('categories'),

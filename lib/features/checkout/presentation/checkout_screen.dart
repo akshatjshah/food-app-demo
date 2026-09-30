@@ -9,6 +9,7 @@ import '../../address/presentation/address_provider.dart';
 import '../../cart/data/models/cart.dart';
 import '../../cart/presentation/cart_provider.dart';
 import '../../payments/presentation/payment_provider.dart';
+import '../data/models/delivery_slot.dart';
 import '../data/repositories/checkout_repository.dart';
 
 final checkoutRepositoryProvider = Provider<CheckoutRepository>((ref) {
@@ -24,6 +25,10 @@ class CheckoutState {
   final List<Map<String, dynamic>> addresses;
   Map<String, dynamic>? selectedAddress;
   String selectedSlot;
+  String? selectedSlotId;
+  List<DeliverySlot> deliverySlots;
+  bool isLoadingSlots;
+  String? slotsError;
   String selectedPaymentMethod;
   String? specialInstructions;
   String? couponCode;
@@ -36,7 +41,11 @@ class CheckoutState {
     this.validationResult,
     this.addresses = const [],
     this.selectedAddress,
-    this.selectedSlot = 'Immediate (25-30 mins)',
+    this.selectedSlot = '',
+    this.selectedSlotId,
+    this.deliverySlots = const [],
+    this.isLoadingSlots = false,
+    this.slotsError,
     this.selectedPaymentMethod = 'upi',
     this.specialInstructions,
     this.couponCode,
@@ -51,11 +60,16 @@ class CheckoutState {
     List<Map<String, dynamic>>? addresses,
     Map<String, dynamic>? selectedAddress,
     String? selectedSlot,
+    String? selectedSlotId,
+    List<DeliverySlot>? deliverySlots,
+    bool? isLoadingSlots,
+    String? slotsError,
     String? selectedPaymentMethod,
     String? specialInstructions,
     String? couponCode,
     bool clearError = false,
     bool clearSelectedAddress = false,
+    bool clearSlotsError = false,
   }) {
     return CheckoutState(
       isLoading: isLoading ?? this.isLoading,
@@ -67,6 +81,10 @@ class CheckoutState {
       selectedAddress:
           clearSelectedAddress ? null : (selectedAddress ?? this.selectedAddress),
       selectedSlot: selectedSlot ?? this.selectedSlot,
+      selectedSlotId: selectedSlotId ?? this.selectedSlotId,
+      deliverySlots: deliverySlots ?? this.deliverySlots,
+      isLoadingSlots: isLoadingSlots ?? this.isLoadingSlots,
+      slotsError: clearSlotsError ? null : (slotsError ?? this.slotsError),
       selectedPaymentMethod: selectedPaymentMethod ?? this.selectedPaymentMethod,
       specialInstructions: specialInstructions ?? this.specialInstructions,
       couponCode: couponCode ?? this.couponCode,
@@ -116,8 +134,44 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     return def ?? (addresses.isNotEmpty ? addresses.first : null);
   }
 
+  String _slotErrorMessage(DioException e) {
+    final data = e.response?.data;
+    if (data is Map<String, dynamic>) {
+      final err = data['error'];
+      if (err is Map<String, dynamic> && err['message'] is String) {
+        return err['message'] as String;
+      }
+      if (data['message'] is String) return data['message'] as String;
+    }
+    return 'Failed to load delivery slots';
+  }
+
+  void _applySlots(List<DeliverySlot> slots) {
+    String selectedSlot = state.selectedSlot;
+    String? selectedSlotId = state.selectedSlotId;
+    if (!slots.any((s) => s.value == selectedSlot)) {
+      selectedSlot = slots.isNotEmpty ? slots.first.value : '';
+      selectedSlotId = slots.isNotEmpty ? slots.first.id : null;
+    } else {
+      selectedSlotId =
+          slots.where((s) => s.value == selectedSlot).firstOrNull?.id;
+    }
+    state = state.copyWith(
+      isLoadingSlots: false,
+      deliverySlots: slots,
+      selectedSlot: selectedSlot,
+      selectedSlotId: selectedSlotId,
+      clearSlotsError: true,
+    );
+  }
+
   Future<void> loadCheckout() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      isLoadingSlots: true,
+      clearError: true,
+      clearSlotsError: true,
+    );
     try {
       final addressFuture = _addressActions.loadAddresses();
       final results = await Future.wait([
@@ -140,10 +194,43 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
         selectedAddress: selected,
         clearSelectedAddress: selected == null,
       );
+
+      // Slots load independently so a slot failure never blocks checkout.
+      try {
+        final slots = await _repo.getDeliverySlots();
+        _applySlots(slots);
+      } on DioException catch (e) {
+        state = state.copyWith(
+          isLoadingSlots: false,
+          slotsError: _slotErrorMessage(e),
+        );
+      }
     } on DioException catch (e) {
+      final data = e.response?.data;
+      final message = data is Map<String, dynamic> &&
+              data['error'] is Map<String, dynamic> &&
+              (data['error'] as Map<String, dynamic>)['message'] is String
+          ? (data['error'] as Map<String, dynamic>)['message'] as String
+          : 'Failed to load checkout';
       state = state.copyWith(
         isLoading: false,
-        error: e.response?.data['error']?['message'] ?? 'Failed to load checkout',
+        isLoadingSlots: false,
+        error: message,
+      );
+    }
+  }
+
+  /// Retry only the delivery-slot fetch (used by the slot section's
+  /// loading/error/empty states). Preserves the rest of the checkout UI.
+  Future<void> retryLoadSlots() async {
+    state = state.copyWith(isLoadingSlots: true, clearSlotsError: true);
+    try {
+      final slots = await _repo.getDeliverySlots();
+      _applySlots(slots);
+    } on DioException catch (e) {
+      state = state.copyWith(
+        isLoadingSlots: false,
+        slotsError: _slotErrorMessage(e),
       );
     }
   }
@@ -180,7 +267,12 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
   }
 
   void selectSlot(String slot) {
-    state = state.copyWith(selectedSlot: slot);
+    final match =
+        state.deliverySlots.where((s) => s.value == slot).firstOrNull;
+    state = state.copyWith(
+      selectedSlot: slot,
+      selectedSlotId: match?.id ?? state.selectedSlotId,
+    );
   }
 
   void selectPaymentMethod(String method) {
@@ -196,6 +288,10 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
       state = state.copyWith(error: 'Please select a delivery address');
       return null;
     }
+    if (state.selectedSlot.isEmpty) {
+      state = state.copyWith(error: 'Please select a delivery slot');
+      return null;
+    }
 
     state = state.copyWith(isPlacing: true, clearError: true);
     try {
@@ -209,9 +305,15 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
       state = state.copyWith(isPlacing: false);
       return result['id'] as String;
     } on DioException catch (e) {
+      final data = e.response?.data;
+      final message = data is Map<String, dynamic> &&
+              data['error'] is Map<String, dynamic> &&
+              (data['error'] as Map<String, dynamic>)['message'] is String
+          ? (data['error'] as Map<String, dynamic>)['message'] as String
+          : 'Failed to place order';
       state = state.copyWith(
         isPlacing: false,
-        error: e.response?.data['error']?['message'] ?? 'Failed to place order',
+        error: message,
       );
       return null;
     }
@@ -445,13 +547,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildDeliverySlotSection(BuildContext context, CheckoutState state) {
-    final slots = [
-      'Immediate (25-30 mins)',
-      'Lunch Slot (12:00 PM - 1:00 PM)',
-      'Lunch Slot (1:00 PM - 2:00 PM)',
-      'Dinner Slot (7:30 PM - 8:30 PM)',
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -464,26 +559,101 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             borderRadius: BorderRadius.circular(AppRadius.r12),
             border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: state.selectedSlot,
-              isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              items: slots.map((slot) {
-                return DropdownMenuItem<String>(
-                  value: slot,
-                  child: Text(slot, style: const TextStyle(fontSize: 14)),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  ref.read(checkoutProvider.notifier).selectSlot(val);
-                }
-              },
-            ),
-          ),
+          child: _buildDeliverySlotBody(context, state),
         ),
       ],
+    );
+  }
+
+  Widget _buildDeliverySlotBody(BuildContext context, CheckoutState state) {
+    // Loading state — same container, spinner row.
+    if (state.isLoadingSlots) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 12),
+            Text('Loading delivery slots...', style: TextStyle(fontSize: 14, color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+
+    // API error state — message + retry, checkout stays usable.
+    if (state.slotsError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline_rounded,
+                size: 20, color: Theme.of(context).colorScheme.error),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                state.slotsError!,
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () =>
+                  ref.read(checkoutProvider.notifier).retryLoadSlots(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Empty state — backend returned no active slots.
+    if (state.deliverySlots.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            const Icon(Icons.schedule_outlined, size: 20, color: Colors.grey),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'No delivery slots available right now.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () =>
+                  ref.read(checkoutProvider.notifier).retryLoadSlots(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final selectedStillValid =
+        state.deliverySlots.any((s) => s.value == state.selectedSlot);
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: selectedStillValid ? state.selectedSlot : null,
+        hint: const Text('Select a delivery slot',
+            style: TextStyle(fontSize: 14, color: Colors.grey)),
+        isExpanded: true,
+        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+        items: state.deliverySlots.map((slot) {
+          return DropdownMenuItem<String>(
+            value: slot.value,
+            child: Text(slot.label, style: const TextStyle(fontSize: 14)),
+          );
+        }).toList(),
+        onChanged: (val) {
+          if (val != null) {
+            ref.read(checkoutProvider.notifier).selectSlot(val);
+          }
+        },
+      ),
     );
   }
 

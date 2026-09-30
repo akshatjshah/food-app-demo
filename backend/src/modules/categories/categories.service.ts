@@ -25,7 +25,7 @@ export class CategoriesService {
     return category;
   }
 
-  async create(data: { name: string; icon?: string; displayOrder?: number }) {
+  async create(data: { name: string; icon?: string; displayOrder?: number; imageUrl?: string; description?: string; isFeatured?: boolean }) {
     const existing = await this.prisma.category.findFirst({ where: { name: data.name } });
     if (existing) throw new ConflictException('Category with this name already exists');
 
@@ -35,11 +35,14 @@ export class CategoriesService {
         name: data.name,
         icon: data.icon ?? '',
         displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? 0) + 1,
+        imageUrl: data.imageUrl || null,
+        description: data.description || null,
+        isFeatured: data.isFeatured === true,
       },
     });
   }
 
-  async update(id: string, data: { name?: string; icon?: string; displayOrder?: number; isActive?: boolean }) {
+  async update(id: string, data: { name?: string; icon?: string; displayOrder?: number; isActive?: boolean; imageUrl?: string; description?: string; isFeatured?: boolean }) {
     await this.findOne(id);
 
     if (data.name) {
@@ -90,5 +93,24 @@ export class CategoriesService {
       where: { id },
       data: { isActive: true },
     });
+  }
+
+  /** Safe delete: only when no foods (even inactive/soft-deleted visible) reference it. */
+  async remove(id: string) {
+    await this.findOne(id);
+    const foodCount = await this.prisma.foodItem.count({ where: { categoryId: id } });
+    if (foodCount > 0) {
+      throw new BadRequestException(
+        `Cannot delete category: ${foodCount} food item(s) still belong to it. Reassign them first.`,
+      );
+    }
+    const shortCount = await this.prisma.short.count({ where: { categoryId: id } });
+    if (shortCount > 0) {
+      throw new BadRequestException(
+        `Cannot delete category: ${shortCount} short(s) still link to it.`,
+      );
+    }
+    await this.prisma.category.delete({ where: { id } });
+    return { message: 'Category deleted' };
   }
 }

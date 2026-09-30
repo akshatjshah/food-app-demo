@@ -44,6 +44,9 @@ let CategoriesService = class CategoriesService {
                 name: data.name,
                 icon: data.icon ?? '',
                 displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? 0) + 1,
+                imageUrl: data.imageUrl || null,
+                description: data.description || null,
+                isFeatured: data.isFeatured === true,
             },
         });
     }
@@ -89,6 +92,19 @@ let CategoriesService = class CategoriesService {
             where: { id },
             data: { isActive: true },
         });
+    }
+    async remove(id) {
+        await this.findOne(id);
+        const foodCount = await this.prisma.foodItem.count({ where: { categoryId: id } });
+        if (foodCount > 0) {
+            throw new common_1.BadRequestException(`Cannot delete category: ${foodCount} food item(s) still belong to it. Reassign them first.`);
+        }
+        const shortCount = await this.prisma.short.count({ where: { categoryId: id } });
+        if (shortCount > 0) {
+            throw new common_1.BadRequestException(`Cannot delete category: ${shortCount} short(s) still link to it.`);
+        }
+        await this.prisma.category.delete({ where: { id } });
+        return { message: 'Category deleted' };
     }
 };
 exports.CategoriesService = CategoriesService;

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
@@ -13,11 +13,12 @@ import { UserRole } from '@prisma/client';
 export class CouponsController {
   constructor(private couponsService: CouponsService) {}
 
-  @Public()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post('validate')
   @ApiOperation({ summary: 'Validate coupon code' })
-  async validate(@Body() body: { code: string; userId: string; orderValue: number }) {
-    return this.couponsService.validate(body.code, body.userId, body.orderValue);
+  async validate(@Body() body: { code: string; orderValue: number }, @Request() req) {
+    return this.couponsService.validate(body.code, req.user.id, body.orderValue);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

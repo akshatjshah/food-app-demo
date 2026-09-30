@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:parabdi/features/cart/data/models/cart.dart';
+import '../models/delivery_slot.dart';
 
 class CheckoutRepository {
   final Dio _dio;
@@ -21,6 +22,21 @@ class CheckoutRepository {
     final data = response.data['data'];
     if (data is List) return List<Map<String, dynamic>>.from(data);
     return [];
+  }
+
+  Future<List<DeliverySlot>> getDeliverySlots() async {
+    final response = await _dio.get('/delivery-slots');
+    final body = response.data;
+    final dynamic raw = body is Map<String, dynamic> && body.containsKey('data')
+        ? body['data']
+        : body;
+    if (raw is! List) return [];
+    return raw
+        .whereType<Map<String, dynamic>>()
+        .map(DeliverySlot.fromJson)
+        // Backend already filters isActive, but guard client-side too.
+        .where((slot) => slot.isActive && slot.id.isNotEmpty)
+        .toList();
   }
 
   Future<Map<String, dynamic>> createOrder({

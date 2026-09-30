@@ -8,12 +8,70 @@ export declare class SubscriptionsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        imageUrl: string | null;
+        displayOrder: number;
         price: import("@prisma/client/runtime/library").Decimal;
         durationDays: number;
         mealsCount: number;
         mealType: string;
         benefits: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
+    findAllAdmin(): Promise<{
+        description: string | null;
+        name: string;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        imageUrl: string | null;
+        displayOrder: number;
+        price: import("@prisma/client/runtime/library").Decimal;
+        durationDays: number;
+        mealsCount: number;
+        mealType: string;
+        benefits: import("@prisma/client/runtime/library").JsonValue;
+    }[]>;
+    createPlan(dto: any): Promise<{
+        description: string | null;
+        name: string;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        imageUrl: string | null;
+        displayOrder: number;
+        price: import("@prisma/client/runtime/library").Decimal;
+        durationDays: number;
+        mealsCount: number;
+        mealType: string;
+        benefits: import("@prisma/client/runtime/library").JsonValue;
+    }>;
+    updatePlan(id: string, dto: any): Promise<{
+        description: string | null;
+        name: string;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        imageUrl: string | null;
+        displayOrder: number;
+        price: import("@prisma/client/runtime/library").Decimal;
+        durationDays: number;
+        mealsCount: number;
+        mealType: string;
+        benefits: import("@prisma/client/runtime/library").JsonValue;
+    }>;
+    removePlan(id: string): Promise<{
+        description: string | null;
+        name: string;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        imageUrl: string | null;
+        displayOrder: number;
+        price: import("@prisma/client/runtime/library").Decimal;
+        durationDays: number;
+        mealsCount: number;
+        mealType: string;
+        benefits: import("@prisma/client/runtime/library").JsonValue;
+    }>;
     getMy(req: any): Promise<({
         subscription: {
             description: string | null;
@@ -21,6 +79,8 @@ export declare class SubscriptionsController {
             id: string;
             createdAt: Date;
             isActive: boolean;
+            imageUrl: string | null;
+            displayOrder: number;
             price: import("@prisma/client/runtime/library").Decimal;
             durationDays: number;
             mealsCount: number;
@@ -46,6 +106,8 @@ export declare class SubscriptionsController {
             id: string;
             createdAt: Date;
             isActive: boolean;
+            imageUrl: string | null;
+            displayOrder: number;
             price: import("@prisma/client/runtime/library").Decimal;
             durationDays: number;
             mealsCount: number;

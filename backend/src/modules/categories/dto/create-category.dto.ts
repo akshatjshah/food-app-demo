@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -7,7 +7,7 @@ export class CreateCategoryDto {
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({ example: '🍛' })
+  @ApiPropertyOptional({ example: 'dY?>' })
   @IsString()
   @IsOptional()
   icon?: string;
@@ -17,4 +17,19 @@ export class CreateCategoryDto {
   @IsNumber()
   @IsOptional()
   displayOrder?: number;
+
+  @ApiPropertyOptional({ description: 'Category image URL (admin-managed, shown in customer app)' })
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  isFeatured?: boolean;
 }

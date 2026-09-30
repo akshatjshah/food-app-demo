@@ -44,8 +44,8 @@ export class ChefsController {
   @ApiBearerAuth()
   @Post('orders/:orderId/start')
   @ApiOperation({ summary: 'Start preparing order' })
-  async startPreparing(@Param('orderId') orderId: string) {
-    return this.chefsService.startPreparing(orderId);
+  async startPreparing(@Param('orderId') orderId: string, @Request() req) {
+    return this.chefsService.startPreparing(orderId, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -53,8 +53,8 @@ export class ChefsController {
   @ApiBearerAuth()
   @Post('orders/:orderId/ready')
   @ApiOperation({ summary: 'Mark order as ready' })
-  async markReady(@Param('orderId') orderId: string) {
-    return this.chefsService.markReady(orderId);
+  async markReady(@Param('orderId') orderId: string, @Request() req) {
+    return this.chefsService.markReady(orderId, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

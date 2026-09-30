@@ -7,9 +7,9 @@ export declare class AuthService {
     private configService;
     constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService);
     sendOtp(phoneNumber: string): Promise<{
+        otp?: string | undefined;
         message: string;
         expiresIn: number;
-        otp: string;
     }>;
     verifyOtp(phoneNumber: string, otp: string): Promise<{
         accessToken: string;

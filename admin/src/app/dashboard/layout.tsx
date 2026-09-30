@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-provider";
@@ -8,37 +8,80 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   ShoppingCart,
-  UtensilsCrossed,
-  FolderTree,
   Users,
   ChefHat,
+  Bike,
+  UtensilsCrossed,
+  FolderTree,
+  SlidersHorizontal,
+  Image,
+  Clapperboard,
   CalendarDays,
+  Clock,
   Ticket,
   Star,
-  Image,
   Bell,
+  MapPin,
+  Wallet,
+  FileText,
   Settings,
+  ShieldCheck,
+  BarChart3,
+  ScrollText,
   LogOut,
   Menu,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/dashboard/foods", label: "Foods", icon: UtensilsCrossed },
-  { href: "/dashboard/categories", label: "Categories", icon: FolderTree },
-  { href: "/dashboard/customers", label: "Customers", icon: Users },
-  { href: "/dashboard/chefs", label: "Chefs", icon: ChefHat },
-  { href: "/dashboard/subscriptions", label: "Subscriptions", icon: CalendarDays },
-  { href: "/dashboard/coupons", label: "Coupons", icon: Ticket },
-  { href: "/dashboard/reviews", label: "Reviews", icon: Star },
-  { href: "/dashboard/banners", label: "Banners", icon: Image },
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+const navSections = [
+  {
+    title: "Overview",
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/dashboard/analytics", label: "Analytics / Reports", icon: BarChart3 },
+      { href: "/dashboard/audit-logs", label: "Audit Logs", icon: ScrollText },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
+      { href: "/dashboard/customers", label: "Customers", icon: Users },
+      { href: "/dashboard/chefs", label: "Chefs", icon: ChefHat },
+      { href: "/dashboard/riders", label: "Delivery / Riders", icon: Bike },
+      { href: "/dashboard/reviews", label: "Reviews", icon: Star },
+    ],
+  },
+  {
+    title: "Catalog",
+    items: [
+      { href: "/dashboard/foods", label: "Foods", icon: UtensilsCrossed },
+      { href: "/dashboard/categories", label: "Categories", icon: FolderTree },
+      { href: "/dashboard/customizations", label: "Customizations", icon: SlidersHorizontal },
+      { href: "/dashboard/banners", label: "Banners", icon: Image },
+      { href: "/dashboard/shorts", label: "Shorts", icon: Clapperboard },
+      { href: "/dashboard/subscriptions", label: "Subscriptions", icon: CalendarDays },
+      { href: "/dashboard/delivery-slots", label: "Delivery Slots", icon: Clock },
+      { href: "/dashboard/coupons", label: "Coupons", icon: Ticket },
+    ],
+  },
+  {
+    title: "Engagement",
+    items: [
+      { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
+      { href: "/dashboard/addresses", label: "Addresses / Places", icon: MapPin },
+      { href: "/dashboard/wallet", label: "Wallet / Loyalty", icon: Wallet },
+      { href: "/dashboard/app-content", label: "App Content", icon: FileText },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      { href: "/dashboard/settings", label: "App Settings", icon: Settings },
+      { href: "/dashboard/roles", label: "Roles & Permissions", icon: ShieldCheck },
+    ],
+  },
 ];
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -49,34 +92,43 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-2 border-b border-white/10 px-6 py-5">
         <UtensilsCrossed className="h-6 w-6 text-sidebar-accent" />
-        <span className="text-lg font-bold">Parabdi</span>
+        <span className="text-lg font-bold">Parabdi Admin</span>
       </div>
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => {
-          const isActive =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-white"
-                  : "text-sidebar-foreground/70 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-4">
+        {navSections.map((section) => (
+          <div key={section.title}>
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+              {section.title}
+            </p>
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const isActive =
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-sidebar-accent text-white"
+                        : "text-sidebar-foreground/70 hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
       <div className="border-t border-white/10 p-4">
-        <div className="mb-3 text-xs text-sidebar-foreground/50">
+        <div className="mb-3 truncate text-xs text-sidebar-foreground/50">
           Signed in as <span className="font-medium text-sidebar-foreground/80">{user?.email}</span>
         </div>
         <Button
@@ -93,7 +145,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -115,12 +167,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen">
-      {/* Desktop sidebar */}
-      <aside className="hidden w-64 lg:block">
-        <SidebarContent />
+      <aside className="hidden w-64 shrink-0 lg:block">
+        <div className="sticky top-0 h-screen">
+          <SidebarContent />
+        </div>
       </aside>
 
-      {/* Mobile sidebar */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild className="fixed left-4 top-4 z-50 lg:hidden">
           <Button variant="outline" size="icon">
@@ -132,14 +184,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SheetContent>
       </Sheet>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      <main className="min-w-0 flex-1 overflow-auto">
         <div className="border-b bg-background px-6 py-3 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="pl-12 lg:pl-0">
               <h1 className="text-lg font-semibold">Welcome, {user?.name || "Admin"}</h1>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => useAuth().logout()}>
+            <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>

@@ -5,9 +5,8 @@ export declare class CouponsController {
     constructor(couponsService: CouponsService);
     validate(body: {
         code: string;
-        userId: string;
         orderValue: number;
-    }): Promise<{
+    }, req: any): Promise<{
         valid: boolean;
         message: string;
         discount?: undefined;

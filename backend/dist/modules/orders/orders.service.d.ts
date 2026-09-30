@@ -28,7 +28,7 @@ export declare class OrdersService {
         take?: number;
         status?: string;
     }): Promise<any[]>;
-    findOne(id: string): Promise<any>;
+    findOne(id: string, requesterId?: string, isAdmin?: boolean): Promise<any>;
     cancel(id: string, userId: string): Promise<{
         deliverySlot: string;
         updatedAt: Date;

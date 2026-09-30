@@ -19,7 +19,61 @@ let SubscriptionsService = class SubscriptionsService {
         this.notificationsService = notificationsService;
     }
     async findAll() {
-        return this.prisma.subscription.findMany({ where: { isActive: true } });
+        return this.prisma.subscription.findMany({
+            where: { isActive: true },
+            orderBy: [{ displayOrder: 'asc' }, { price: 'asc' }],
+        });
+    }
+    async findAllAdmin() {
+        return this.prisma.subscription.findMany({ orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }] });
+    }
+    async createPlan(data) {
+        const existing = await this.prisma.subscription.findUnique({ where: { name: data.name } });
+        if (existing)
+            throw new common_1.BadRequestException('A plan with this name already exists');
+        return this.prisma.subscription.create({
+            data: {
+                name: data.name,
+                description: data.description || null,
+                price: data.price,
+                durationDays: data.durationDays,
+                mealsCount: data.mealsCount,
+                mealType: data.mealType,
+                benefits: data.benefits || [],
+                isActive: data.isActive !== false,
+                displayOrder: data.displayOrder ?? 0,
+                imageUrl: data.imageUrl || null,
+            },
+        });
+    }
+    async updatePlan(id, data) {
+        const plan = await this.prisma.subscription.findUnique({ where: { id } });
+        if (!plan)
+            throw new common_1.BadRequestException('Subscription plan not found');
+        return this.prisma.subscription.update({
+            where: { id },
+            data: {
+                ...(data.name !== undefined ? { name: data.name } : {}),
+                ...(data.description !== undefined ? { description: data.description || null } : {}),
+                ...(data.price !== undefined ? { price: data.price } : {}),
+                ...(data.durationDays !== undefined ? { durationDays: data.durationDays } : {}),
+                ...(data.mealsCount !== undefined ? { mealsCount: data.mealsCount } : {}),
+                ...(data.mealType !== undefined ? { mealType: data.mealType } : {}),
+                ...(data.benefits !== undefined ? { benefits: data.benefits } : {}),
+                ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+                ...(data.displayOrder !== undefined ? { displayOrder: data.displayOrder } : {}),
+                ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl || null } : {}),
+            },
+        });
+    }
+    async removePlan(id) {
+        const activeSubs = await this.prisma.userSubscription.count({
+            where: { subscriptionId: id, status: 'active' },
+        });
+        if (activeSubs > 0) {
+            throw new common_1.BadRequestException('Plan has active subscribers. Deactivate it instead of deleting.');
+        }
+        return this.prisma.subscription.delete({ where: { id } });
     }
     async getMy(userId) {
         return this.prisma.userSubscription.findMany({

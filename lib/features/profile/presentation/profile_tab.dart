@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../authentication/presentation/auth_provider.dart';
+import '../../home/presentation/avatar_image.dart';
 import '../../home/presentation/avatar_provider.dart';
-import '../../home/presentation/avatar_selection_page.dart';
 import '../../subscription/data/models/subscription.dart';
 import '../../subscription/presentation/subscription_provider.dart';
 
@@ -84,15 +83,11 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
         padding: const EdgeInsets.all(AppSpacing.s20),
         child: Row(
           children: [
-            ClipOval(
-              child: SizedBox(
-                width: 72,
-                height: 72,
-                child: SvgPicture.asset(
-                  AvatarSelectionPage.assetForStatic(avatarId),
-                  fit: BoxFit.cover,
-                ),
-              ),
+            // Same portrait treatment as Home: ratio-aware, never cropped.
+            AvatarPortrait(
+              avatarId: avatarId,
+              width: 64,
+              borderRadius: 18,
             ),
             const SizedBox(width: AppSpacing.s16),
             Expanded(

@@ -39,13 +39,17 @@ let AdminController = class AdminController {
     async getRecentOrders(limit) {
         return this.adminService.getRecentOrders(limit ? parseInt(limit) : 5);
     }
-    async getOrders(skip, take, status, search) {
+    async getOrders(skip, take, status, paymentStatus, search) {
         return this.adminService.getOrders({
             skip: skip ? parseInt(skip) : 0,
-            take: take ? parseInt(take) : 20,
+            take: Math.min(take ? parseInt(take) : 20, 100),
             status,
+            paymentStatus,
             search,
         });
+    }
+    async getOrderDetail(orderId) {
+        return this.adminService.getOrderDetail(orderId);
     }
     async updateOrderStatus(orderId, status, req) {
         return this.adminService.updateOrderStatus(orderId, status, req.user?.id);
@@ -53,11 +57,57 @@ let AdminController = class AdminController {
     async broadcast(body) {
         return this.adminService.broadcastAnnouncement(body.title, body.body, body.type || 'ANNOUNCEMENT', body.userIds, body.referenceId);
     }
-    async getAuditLogs(skip, take) {
+    async getAuditLogs(skip, take, entity, action, search) {
         return this.adminService.getAuditLogs({
             skip: skip ? parseInt(skip) : 0,
             take: take ? parseInt(take) : 20,
+            entity,
+            action,
+            search,
         });
+    }
+    async getCustomers(search, skip, take) {
+        return this.adminService.getCustomers({
+            search,
+            skip: skip ? parseInt(skip) : 0,
+            take: take ? parseInt(take) : 20,
+        });
+    }
+    async getCustomerDetail(id) {
+        return this.adminService.getCustomerDetail(id);
+    }
+    async setCustomerBlocked(id, isBlocked, req) {
+        return this.adminService.setCustomerBlocked(id, isBlocked === true, req.user?.id);
+    }
+    async getStaff(role, search) {
+        const r = role === 'delivery' ? 'delivery' : 'chef';
+        return this.adminService.getStaff(r, search);
+    }
+    async createStaff(body, req) {
+        return this.adminService.createStaff(body, req.user?.id);
+    }
+    async updateStaff(id, body, req) {
+        return this.adminService.updateStaff(id, body, req.user?.id);
+    }
+    async getWalletTransactions(skip, take, search) {
+        return this.adminService.getWalletTransactions({
+            skip: skip ? parseInt(skip) : 0,
+            take: take ? parseInt(take) : 20,
+            search,
+        });
+    }
+    async getReports(days) {
+        return this.adminService.getReports(days ? parseInt(days) : 30);
+    }
+    async getLoyaltyTransactions(skip, take, search) {
+        return this.adminService.getLoyaltyTransactions({
+            skip: skip ? parseInt(skip) : 0,
+            take: take ? parseInt(take) : 20,
+            search,
+        });
+    }
+    async getRecentNotifications(take) {
+        return this.adminService.getRecentNotifications(take ? parseInt(take) : 50);
     }
 };
 exports.AdminController = AdminController;
@@ -105,11 +155,20 @@ __decorate([
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('status')),
-    __param(3, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('paymentStatus')),
+    __param(4, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getOrders", null);
+__decorate([
+    (0, common_1.Get)('orders/:orderId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get order detail (admin)' }),
+    __param(0, (0, common_1.Param)('orderId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getOrderDetail", null);
 __decorate([
     (0, common_1.Patch)('orders/:orderId/status'),
     (0, swagger_1.ApiOperation)({ summary: 'Update order status (admin)' }),
@@ -133,10 +192,105 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get audit logs (admin)' }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('entity')),
+    __param(3, (0, common_1.Query)('action')),
+    __param(4, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getAuditLogs", null);
+__decorate([
+    (0, common_1.Get)('customers'),
+    (0, swagger_1.ApiOperation)({ summary: 'List customers (admin)' }),
+    __param(0, (0, common_1.Query)('search')),
+    __param(1, (0, common_1.Query)('skip')),
+    __param(2, (0, common_1.Query)('take')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCustomers", null);
+__decorate([
+    (0, common_1.Get)('customers/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get customer detail (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCustomerDetail", null);
+__decorate([
+    (0, common_1.Patch)('customers/:id/block'),
+    (0, swagger_1.ApiOperation)({ summary: 'Block/unblock customer (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('isBlocked')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "setCustomerBlocked", null);
+__decorate([
+    (0, common_1.Get)('staff'),
+    (0, swagger_1.ApiOperation)({ summary: 'List chefs/riders (admin)' }),
+    __param(0, (0, common_1.Query)('role')),
+    __param(1, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], AdminController.prototype, "getAuditLogs", null);
+], AdminController.prototype, "getStaff", null);
+__decorate([
+    (0, common_1.Post)('staff'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create chef/rider (admin)' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "createStaff", null);
+__decorate([
+    (0, common_1.Patch)('staff/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update chef/rider (admin)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateStaff", null);
+__decorate([
+    (0, common_1.Get)('wallet/transactions'),
+    (0, swagger_1.ApiOperation)({ summary: 'List wallet transactions (admin)' }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getWalletTransactions", null);
+__decorate([
+    (0, common_1.Get)('reports/summary'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get analytics summary (admin)' }),
+    __param(0, (0, common_1.Query)('days')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getReports", null);
+__decorate([
+    (0, common_1.Get)('loyalty/transactions'),
+    (0, swagger_1.ApiOperation)({ summary: 'List loyalty transactions (admin)' }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getLoyaltyTransactions", null);
+__decorate([
+    (0, common_1.Get)('notifications/recent'),
+    (0, swagger_1.ApiOperation)({ summary: 'Recent notifications sent (admin)' }),
+    __param(0, (0, common_1.Query)('take')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getRecentNotifications", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin'),
     (0, common_1.Controller)('admin'),

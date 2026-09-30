@@ -107,9 +107,9 @@ if ($FixSystem) {
     exit 0
 }
 
-# ---------------------------------------------------------------------------
-# 1. Detect current PC LAN IPv4 (internet-facing adapter, not WSL/VPN)
-# ---------------------------------------------------------------------------
+# Local Android uses `adb reverse tcp:3000 tcp:3000`, so the Flutter
+# DEBUG default is permanent loopback (IP-independent). This sync keeps
+# api_env.dart pinned to 127.0.0.1 and never writes a LAN IP.
 Write-Step "Detecting PC LAN IP"
 $lanIp = $null
 try {
@@ -131,28 +131,30 @@ if (-not $lanIp) {
         })
     if ($candidates.Count -gt 0) { $lanIp = $candidates[0].IPAddress }
 }
-if (-not $lanIp) { $lanIp = '192.168.1.7' }
-Write-Ok "LAN IP: $lanIp"
+if (-not $lanIp) { $lanIp = '127.0.0.1' }
+Write-Ok "LAN IP: $lanIp (Flutter uses 127.0.0.1 via adb reverse - IP-independent)"
 
 # ---------------------------------------------------------------------------
-# 2. Sync single Flutter API base URL (api_env.dart)
+# 2. Pin Flutter API host to loopback (adb reverse makes it IP-independent)
 # ---------------------------------------------------------------------------
 Write-Step "Syncing Flutter API configuration"
 $desiredApiEnv = @"
-// AUTO-GENERATED/UPDATED by START_PARABDI_DEV.ps1 - do not edit manually.
-// Single source of truth for the PC LAN host used by the physical Android device.
+// Fixed loopback host for local Android development.
+// The phone reaches the PC backend via `adb reverse tcp:3000 tcp:3000`,
+// so the app always uses http://127.0.0.1:3000/api/v1 (see ApiConstants).
+// No LAN IP, no per-machine generated value. Kept for compatibility.
 class ApiEnv {
   ApiEnv._();
 
-  static const String host = String.fromEnvironment('API_HOST', defaultValue: '$lanIp');
+  static const String host = String.fromEnvironment('API_HOST', defaultValue: '127.0.0.1');
 }
 "@
 $currentApiEnv = if (Test-Path $ApiEnvFile) { Get-Content $ApiEnvFile -Raw } else { '' }
 if ($currentApiEnv -ne $desiredApiEnv) {
     Set-Content -Path $ApiEnvFile -Value $desiredApiEnv -NoNewline -Encoding utf8
-    Write-Ok "api_env.dart updated -> host = $lanIp"
+    Write-Ok "api_env.dart pinned -> host = 127.0.0.1 (adb reverse)"
 } else {
-    Write-Ok "api_env.dart already correct ($lanIp)"
+    Write-Ok "api_env.dart already correct (127.0.0.1)"
 }
 
 # ---------------------------------------------------------------------------
@@ -378,9 +380,9 @@ Write-Host ""
 Write-Host "==================== PARABDI DEV STACK READY ====================" -ForegroundColor Green
 Write-Host " PostgreSQL (Docker) : healthy, volume food-app-demo_pgdata preserved"
 Write-Host " Backend health      : $HealthUrl"
-Write-Host " Android API URL     : http://${lanIp}:3000/api/v1"
-Write-Host " Flutter base URL    : lib/core/constants/api_env.dart (host=$lanIp)"
-Write-Host " Override (optional) : flutter run --dart-define=API_BASE_URL=http://${lanIp}:3000/api/v1"
+Write-Host " Android API URL     : http://127.0.0.1:3000/api/v1 (via adb reverse tcp:3000 tcp:3000)"
+Write-Host " Flutter base URL    : lib/core/constants/api_constants.dart (default 127.0.0.1, IP-independent)"
+Write-Host " Override (optional) : flutter run --dart-define=API_BASE_URL=http://127.0.0.1:3000/api/v1"
 Write-Host " Backend log         : backend\logs\backend.log"
 Write-Host "================================================================"
 if ($allOk) {

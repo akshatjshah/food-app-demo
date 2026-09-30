@@ -56,10 +56,11 @@ let AuthService = class AuthService {
             },
         });
         console.log(`[OTP] ${phoneNumber}: ${otp} (expires: ${expiresAt.toISOString()})`);
+        const isDev = this.configService.get('NODE_ENV') !== 'production';
         return {
             message: 'OTP sent successfully',
             expiresIn: OTP_EXPIRY_MS / 1000,
-            otp,
+            ...(isDev ? { otp } : {}),
         };
     }
     async verifyOtp(phoneNumber, otp) {

@@ -194,7 +194,7 @@ let OrdersService = class OrdersService {
         });
         return orders.map((o) => this.toPlainOrder(o));
     }
-    async findOne(id) {
+    async findOne(id, requesterId, isAdmin = false) {
         const order = await this.prisma.order.findUnique({
             where: { id },
             include: {
@@ -210,6 +210,13 @@ let OrdersService = class OrdersService {
         });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
+        if (!isAdmin && requesterId) {
+            const allowed = order.userId === requesterId ||
+                order.chefId === requesterId ||
+                order.deliveryBoyId === requesterId;
+            if (!allowed)
+                throw new common_1.BadRequestException('Not authorized');
+        }
         const plain = this.toPlainOrder(order);
         if (order.address) {
             plain.deliveryAddress = {
@@ -218,6 +225,7 @@ let OrdersService = class OrdersService {
                 longitude: Number(order.address.longitude),
             };
         }
+        delete plain.otpCode;
         return plain;
     }
     async cancel(id, userId) {
@@ -249,6 +257,8 @@ let OrdersService = class OrdersService {
         });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
+        if (order.userId !== userId)
+            throw new common_1.BadRequestException('Not authorized');
         let cart = await this.prisma.cart.findUnique({ where: { userId } });
         if (!cart)
             cart = await this.prisma.cart.create({ data: { userId } });

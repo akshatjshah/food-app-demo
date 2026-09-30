@@ -26,7 +26,7 @@ let ShortsService = class ShortsService {
                 foodItem: { select: { id: true, name: true, price: true, imageUrls: true } },
                 category: { select: { id: true, name: true } },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
             skip: params?.skip || 0,
             take: params?.take || 20,
         });
@@ -46,6 +46,52 @@ let ShortsService = class ShortsService {
     }
     async incrementViews(shortId) {
         await this.prisma.short.update({ where: { id: shortId }, data: { viewsCount: { increment: 1 } } });
+    }
+    async findAllAdmin() {
+        return this.prisma.short.findMany({
+            include: {
+                foodItem: { select: { id: true, name: true } },
+                category: { select: { id: true, name: true } },
+            },
+            orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
+            take: 100,
+        });
+    }
+    async create(data) {
+        if (!data.videoUrl || !data.thumbnailUrl) {
+            throw new common_1.BadRequestException('videoUrl and thumbnailUrl are required');
+        }
+        return this.prisma.short.create({
+            data: {
+                videoUrl: data.videoUrl,
+                thumbnailUrl: data.thumbnailUrl,
+                caption: data.caption || null,
+                foodItemId: data.foodItemId || null,
+                categoryId: data.categoryId || null,
+                isActive: data.isActive !== false,
+                displayOrder: data.displayOrder ?? 0,
+            },
+        });
+    }
+    async update(id, data) {
+        const existing = await this.prisma.short.findUnique({ where: { id } });
+        if (!existing)
+            throw new common_1.BadRequestException('Short not found');
+        return this.prisma.short.update({
+            where: { id },
+            data: {
+                ...(data.videoUrl !== undefined ? { videoUrl: data.videoUrl } : {}),
+                ...(data.thumbnailUrl !== undefined ? { thumbnailUrl: data.thumbnailUrl } : {}),
+                ...(data.caption !== undefined ? { caption: data.caption || null } : {}),
+                ...(data.foodItemId !== undefined ? { foodItemId: data.foodItemId || null } : {}),
+                ...(data.categoryId !== undefined ? { categoryId: data.categoryId || null } : {}),
+                ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+                ...(data.displayOrder !== undefined ? { displayOrder: data.displayOrder } : {}),
+            },
+        });
+    }
+    async remove(id) {
+        return this.prisma.short.delete({ where: { id } });
     }
 };
 exports.ShortsService = ShortsService;

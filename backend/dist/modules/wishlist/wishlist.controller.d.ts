@@ -6,15 +6,15 @@ export declare class WishlistController {
         foodItem: {
             price: number;
             rating: number | null;
-            id: string;
             name: string;
-            imageUrls: import("@prisma/client/runtime/library").JsonValue;
+            id: string;
             isVeg: boolean;
+            imageUrls: import("@prisma/client/runtime/library").JsonValue;
         };
         id: string;
+        createdAt: Date;
         userId: string;
         foodItemId: string;
-        createdAt: Date;
     }[]>;
     toggle(req: any, foodItemId: string): Promise<{
         added: boolean;

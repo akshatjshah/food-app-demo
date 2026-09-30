@@ -24,6 +24,7 @@ export declare class FoodsController {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -39,6 +40,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -50,6 +53,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }[]>;
     findSpecials(): Promise<{
@@ -68,6 +72,7 @@ export declare class FoodsController {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -83,6 +88,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -94,6 +101,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }[]>;
     findOne(id: string): Promise<{
@@ -112,6 +120,7 @@ export declare class FoodsController {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -127,6 +136,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -138,6 +149,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }>;
     findAllAdmin(categoryId?: string, search?: string): Promise<{
@@ -156,6 +168,7 @@ export declare class FoodsController {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -171,6 +184,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -182,6 +197,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }[]>;
     create(dto: CreateFoodDto): Promise<{
@@ -190,6 +206,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -203,6 +221,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -212,6 +231,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -225,6 +246,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -234,6 +256,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -247,6 +271,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -256,6 +281,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -269,6 +296,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -278,6 +306,8 @@ export declare class FoodsController {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -291,6 +321,7 @@ export declare class FoodsController {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -307,6 +338,7 @@ export declare class FoodsController {
         name: string;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         displayOrder: number;
         foodItemId: string;
         minSelections: number;
@@ -316,6 +348,7 @@ export declare class FoodsController {
         name: string;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         displayOrder: number;
         foodItemId: string;
         minSelections: number;
@@ -325,6 +358,7 @@ export declare class FoodsController {
         name: string;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         displayOrder: number;
         foodItemId: string;
         minSelections: number;

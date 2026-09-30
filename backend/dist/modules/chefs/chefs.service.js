@@ -38,7 +38,12 @@ let ChefsService = class ChefsService {
         return { totalOrders, preparingOrders, readyOrders };
     }
     async getOrders(chefId, status) {
-        const where = {};
+        const where = {
+            OR: [
+                { chefId },
+                { chefId: null, status: { in: ['placed', 'confirmed'] } },
+            ],
+        };
         if (status)
             where.status = status;
         return this.prisma.order.findMany({
@@ -55,6 +60,15 @@ let ChefsService = class ChefsService {
         });
     }
     async acceptOrder(orderId, chefId) {
+        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        if (!order)
+            throw new common_1.NotFoundException('Order not found');
+        if (order.chefId && order.chefId !== chefId) {
+            throw new common_1.ForbiddenException('Order already assigned to another chef');
+        }
+        if (!['placed', 'confirmed'].includes(order.status)) {
+            throw new common_1.BadRequestException(`Cannot accept order in status ${order.status}`);
+        }
         const updated = await this.prisma.order.update({
             where: { id: orderId },
             data: { status: 'confirmed', chefId },
@@ -62,15 +76,33 @@ let ChefsService = class ChefsService {
         await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'confirmed');
         return updated;
     }
-    async startPreparing(orderId) {
+    async startPreparing(orderId, chefId) {
+        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        if (!order)
+            throw new common_1.NotFoundException('Order not found');
+        if (chefId && order.chefId && order.chefId !== chefId) {
+            throw new common_1.ForbiddenException('Order assigned to another chef');
+        }
+        if (!['confirmed', 'placed'].includes(order.status)) {
+            throw new common_1.BadRequestException(`Cannot start preparing from status ${order.status}`);
+        }
         const updated = await this.prisma.order.update({
             where: { id: orderId },
-            data: { status: 'preparing' },
+            data: { status: 'preparing', ...(chefId ? { chefId } : {}) },
         });
         await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'preparing');
         return updated;
     }
-    async markReady(orderId) {
+    async markReady(orderId, chefId) {
+        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        if (!order)
+            throw new common_1.NotFoundException('Order not found');
+        if (chefId && order.chefId && order.chefId !== chefId) {
+            throw new common_1.ForbiddenException('Order assigned to another chef');
+        }
+        if (order.status !== 'preparing') {
+            throw new common_1.BadRequestException(`Cannot mark ready from status ${order.status}`);
+        }
         const updated = await this.prisma.order.update({
             where: { id: orderId },
             data: { status: 'ready' },

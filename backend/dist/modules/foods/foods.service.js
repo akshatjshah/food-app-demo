@@ -50,11 +50,12 @@ let FoodsService = class FoodsService {
             include: {
                 category: { select: { id: true, name: true, icon: true } },
                 customizationGroups: {
+                    where: includeInactive ? undefined : { isActive: true },
                     include: { items: { where: { isActive: true } } },
                     orderBy: { displayOrder: 'asc' },
                 },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
         });
         return foods.map((f) => ({
             ...f,
@@ -76,6 +77,7 @@ let FoodsService = class FoodsService {
             include: {
                 category: { select: { id: true, name: true, icon: true } },
                 customizationGroups: {
+                    where: { isActive: true },
                     include: { items: { where: { isActive: true } } },
                     orderBy: { displayOrder: 'asc' },
                 },
@@ -194,6 +196,7 @@ let FoodsService = class FoodsService {
                 minSelections: data.minSelections ?? 0,
                 maxSelections: data.maxSelections ?? 1,
                 displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? 0) + 1,
+                isActive: data.isActive !== false,
             },
         });
     }

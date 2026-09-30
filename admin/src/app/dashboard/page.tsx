@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { StatusBadge } from "@/components/admin/status-badge";
 import {
   BarChart,
   Bar,
@@ -18,95 +19,77 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { ShoppingCart, DollarSign, CalendarDays, Clock } from "lucide-react";
+import {
+  ShoppingCart,
+  DollarSign,
+  CalendarDays,
+  Clock,
+  BadgeCheck,
+  Ban,
+  Users,
+  UtensilsCrossed,
+  ChefHat,
+  Bike,
+  AlertTriangle,
+} from "lucide-react";
 
-const PIE_COLORS = ["#f97316", "#22c55e", "#3b82f6", "#ef4444", "#a855f7"];
+const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#22c55e", "#ef4444", "#14b8a6", "#a855f7"];
 
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  preparing: "bg-purple-100 text-purple-800",
-  out_for_delivery: "bg-orange-100 text-orange-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-};
+function unwrap<T>(res: any): T {
+  return res.data?.data ?? res.data;
+}
+
+function Kpi({ title, value, icon: Icon, color, bg }: any) {
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${bg}`}>
+          <Icon className={`h-5 w-5 ${color}`} />
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">{title}</p>
+          <p className="text-xl font-bold">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
-    queryFn: async () => {
-      const res = await apiClient.get("/admin/dashboard");
-      return res.data.data;
-    },
+    queryFn: async () => unwrap<any>(await apiClient.get("/admin/dashboard")),
   });
 
   const { data: revenueData } = useQuery({
     queryKey: ["revenue-chart"],
-    queryFn: async () => {
-      const res = await apiClient.get("/admin/dashboard/revenue?days=7");
-      return res.data.data;
-    },
+    queryFn: async () => unwrap<any[]>(await apiClient.get("/admin/dashboard/revenue?days=14")),
   });
 
   const { data: ordersByStatus } = useQuery({
     queryKey: ["orders-by-status"],
-    queryFn: async () => {
-      const res = await apiClient.get("/admin/dashboard/orders-by-status");
-      return res.data.data;
-    },
+    queryFn: async () => unwrap<any[]>(await apiClient.get("/admin/dashboard/orders-by-status")),
   });
 
   const { data: topDishes } = useQuery({
     queryKey: ["top-dishes"],
-    queryFn: async () => {
-      const res = await apiClient.get("/admin/dashboard/top-dishes?limit=10");
-      return res.data.data;
-    },
+    queryFn: async () => unwrap<any[]>(await apiClient.get("/admin/dashboard/top-dishes?limit=8")),
   });
 
   const { data: recentOrders } = useQuery({
     queryKey: ["recent-orders"],
-    queryFn: async () => {
-      const res = await apiClient.get("/admin/dashboard/recent-orders?limit=5");
-      return res.data.data;
-    },
+    queryFn: async () => unwrap<any[]>(await apiClient.get("/admin/dashboard/recent-orders?limit=8")),
   });
 
-  const kpis = [
-    {
-      title: "Total Orders",
-      value: stats?.totalOrders ?? 0,
-      icon: ShoppingCart,
-      color: "text-blue-600",
-      bg: "bg-blue-100",
-    },
-    {
-      title: "Revenue Today",
-      value: formatCurrency(stats?.revenueToday ?? 0),
-      icon: DollarSign,
-      color: "text-green-600",
-      bg: "bg-green-100",
-    },
-    {
-      title: "Active Subscriptions",
-      value: stats?.activeSubscriptions ?? 0,
-      icon: CalendarDays,
-      color: "text-purple-600",
-      bg: "bg-purple-100",
-    },
-    {
-      title: "Pending Orders",
-      value: stats?.pendingOrders ?? 0,
-      icon: Clock,
-      color: "text-orange-600",
-      bg: "bg-orange-100",
-    },
-  ];
+  const { data: customers } = useQuery({
+    queryKey: ["recent-customers"],
+    queryFn: async () => unwrap<any>(await apiClient.get("/admin/customers?take=5")),
+  });
 
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-6">
               <div className="h-4 w-24 rounded bg-muted" />
@@ -120,78 +103,76 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => (
-          <Card key={kpi.title}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${kpi.bg}`}>
-                <kpi.icon className={`h-6 w-6 ${kpi.color}`} />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{kpi.title}</p>
-                <p className="text-2xl font-bold">{kpi.value}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <Kpi title="Today's Orders" value={stats?.todayOrders ?? 0} icon={ShoppingCart} color="text-blue-600" bg="bg-blue-100" />
+        <Kpi title="Today's Revenue" value={formatCurrency(stats?.revenueToday ?? 0)} icon={DollarSign} color="text-green-600" bg="bg-green-100" />
+        <Kpi title="Pending Orders" value={stats?.pendingOrders ?? 0} icon={Clock} color="text-orange-600" bg="bg-orange-100" />
+        <Kpi title="Completed Orders" value={stats?.completedOrders ?? 0} icon={BadgeCheck} color="text-emerald-600" bg="bg-emerald-100" />
+        <Kpi title="Total Orders" value={stats?.totalOrders ?? 0} icon={ShoppingCart} color="text-indigo-600" bg="bg-indigo-100" />
+        <Kpi title="Total Revenue" value={formatCurrency(stats?.totalRevenue ?? 0)} icon={DollarSign} color="text-teal-600" bg="bg-teal-100" />
+        <Kpi title="Cancelled Orders" value={stats?.cancelledOrders ?? 0} icon={Ban} color="text-red-600" bg="bg-red-100" />
+        <Kpi title="Active Subscriptions" value={stats?.activeSubscriptions ?? 0} icon={CalendarDays} color="text-purple-600" bg="bg-purple-100" />
+        <Kpi title="Active Customers" value={stats?.activeCustomers ?? 0} icon={Users} color="text-sky-600" bg="bg-sky-100" />
+        <Kpi title="Active Foods" value={stats?.activeFoods ?? 0} icon={UtensilsCrossed} color="text-amber-600" bg="bg-amber-100" />
+        <Kpi title="Low-Stock Foods" value={stats?.lowStockFoods ?? 0} icon={AlertTriangle} color="text-rose-600" bg="bg-rose-100" />
+        <Kpi title="Chefs / Riders" value={`${stats?.activeChefs ?? 0} / ${stats?.activeRiders ?? 0}`} icon={ChefHat} color="text-slate-600" bg="bg-slate-100" />
       </div>
 
-      {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Revenue Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Revenue (Last 7 Days)</CardTitle>
+            <CardTitle>Revenue & Orders (Last 14 Days)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={revenueData || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="date" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                <Bar dataKey="revenue" fill="#f97316" radius={[4, 4, 0, 0]} />
+                <XAxis dataKey="date" className="text-xs" tick={{ fontSize: 10 }} interval={3} />
+                <YAxis className="text-xs" tick={{ fontSize: 10 }} />
+                <Tooltip formatter={(value: any, name: any) => (name === "revenue" ? formatCurrency(Number(value)) : value)} />
+                <Bar dataKey="revenue" fill="#16a34a" radius={[4, 4, 0, 0]} name="revenue" />
+                <Bar dataKey="orders" fill="#3b82f6" radius={[4, 4, 0, 0]} name="orders" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Orders by Status */}
         <Card>
           <CardHeader>
             <CardTitle>Orders by Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={ordersByStatus || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  dataKey="count"
-                  nameKey="status"
-                  label={({ status, count }) => `${status}: ${count}`}
-                >
-                  {(ordersByStatus || []).map((_: any, index: number) => (
-                    <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {(ordersByStatus?.length ?? 0) > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={ordersByStatus || []}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    dataKey="count"
+                    nameKey="status"
+                    label={({ status, count }: any) => `${String(status).replace(/_/g, " ")}: ${count}`}
+                  >
+                    {(ordersByStatus || []).map((_: any, index: number) => (
+                      <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="py-16 text-center text-sm text-muted-foreground">No orders yet</p>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Bottom Row */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Top Dishes */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Top 10 Dishes</CardTitle>
+            <CardTitle>Top Dishes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -213,17 +194,20 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Orders */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Orders</CardTitle>
+              <Link href="/dashboard/orders" className="text-xs font-medium text-primary hover:underline">
+                View all
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Order #</TableHead>
-                  <TableHead>Customer</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -231,25 +215,55 @@ export default function DashboardPage() {
               <TableBody>
                 {recentOrders?.map((order: any) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-mono text-xs">{order.orderNumber}</TableCell>
-                    <TableCell>{order.customerName || "Guest"}</TableCell>
+                    <TableCell>
+                      <div className="font-mono text-xs">{order.orderNumber}</div>
+                      <div className="text-xs text-muted-foreground">{order.customerName || "Guest"}</div>
+                    </TableCell>
                     <TableCell>{formatCurrency(order.total)}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className={statusColors[order.status]}>
-                        {order.status}
-                      </Badge>
+                      <StatusBadge status={order.status} />
                     </TableCell>
                   </TableRow>
                 ))}
                 {(!recentOrders || recentOrders.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
                       No recent orders
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Customers</CardTitle>
+              <Link href="/dashboard/customers" className="text-xs font-medium text-primary hover:underline">
+                View all
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {(customers?.data || []).map((c: any) => (
+                <div key={c.id} className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">{c.fullName || "Unnamed"}</p>
+                    <p className="text-xs text-muted-foreground">{c.phoneNumber}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{c.orderCount} orders</span>
+                </div>
+              ))}
+              {(!customers?.data || customers.data.length === 0) && (
+                <p className="text-sm text-muted-foreground">No customers yet</p>
+              )}
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+              <Bike className="h-3 w-3" /> Riders active: {stats?.activeRiders ?? 0}
+            </div>
           </CardContent>
         </Card>
       </div>

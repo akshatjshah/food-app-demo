@@ -32,8 +32,10 @@ let OrdersController = class OrdersController {
             status,
         });
     }
-    async findOne(id) {
-        return this.ordersService.findOne(id);
+    async findOne(id, req) {
+        const role = req.user?.role;
+        const isAdmin = role === 'admin';
+        return this.ordersService.findOne(id, req.user.id, isAdmin);
     }
     async cancel(id, req) {
         return this.ordersService.cancel(id, req.user.id);
@@ -68,8 +70,9 @@ __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get order by ID' }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findOne", null);
 __decorate([

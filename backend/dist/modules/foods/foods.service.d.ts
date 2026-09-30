@@ -31,6 +31,7 @@ export declare class FoodsService {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -46,6 +47,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -57,6 +60,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }[]>;
     findSpecials(): Promise<{
@@ -75,6 +79,7 @@ export declare class FoodsService {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -90,6 +95,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -101,6 +108,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }[]>;
     findOne(id: string): Promise<{
@@ -119,6 +127,7 @@ export declare class FoodsService {
             name: string;
             id: string;
             createdAt: Date;
+            isActive: boolean;
             displayOrder: number;
             foodItemId: string;
             minSelections: number;
@@ -134,6 +143,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -145,6 +156,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         reviewsCount: number;
     }>;
     create(data: any): Promise<{
@@ -153,6 +165,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -166,6 +180,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -175,6 +190,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -188,6 +205,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -197,6 +215,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -210,6 +230,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -219,6 +240,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -232,6 +255,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -241,6 +265,8 @@ export declare class FoodsService {
         id: string;
         createdAt: Date;
         isActive: boolean;
+        tags: import("@prisma/client/runtime/library").JsonValue;
+        displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
         isVeg: boolean;
@@ -254,6 +280,7 @@ export declare class FoodsService {
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        stock: number | null;
         rating: import("@prisma/client/runtime/library").Decimal;
         reviewsCount: number;
     }>;
@@ -270,6 +297,7 @@ export declare class FoodsService {
         name: string;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         displayOrder: number;
         foodItemId: string;
         minSelections: number;
@@ -280,10 +308,12 @@ export declare class FoodsService {
         minSelections?: number;
         maxSelections?: number;
         displayOrder?: number;
+        isActive?: boolean;
     }): Promise<{
         name: string;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         displayOrder: number;
         foodItemId: string;
         minSelections: number;
@@ -294,10 +324,12 @@ export declare class FoodsService {
         minSelections?: number;
         maxSelections?: number;
         displayOrder?: number;
+        isActive?: boolean;
     }): Promise<{
         name: string;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         displayOrder: number;
         foodItemId: string;
         minSelections: number;

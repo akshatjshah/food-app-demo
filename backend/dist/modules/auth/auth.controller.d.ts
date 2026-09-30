@@ -10,9 +10,9 @@ export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
     sendOtp(dto: SendOtpDto): Promise<{
+        otp?: string | undefined;
         message: string;
         expiresIn: number;
-        otp: string;
     }>;
     verifyOtp(dto: VerifyOtpDto): Promise<{
         accessToken: string;

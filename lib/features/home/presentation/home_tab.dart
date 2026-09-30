@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -11,6 +10,7 @@ import '../../cart/presentation/cart_provider.dart';
 import '../../notifications/presentation/notifications_provider.dart';
 import '../../subscription/presentation/subscription_provider.dart';
 import '../../wishlist/presentation/wishlist_screen.dart';
+import 'avatar_image.dart';
 import 'avatar_provider.dart';
 import 'avatar_selection_page.dart';
 import 'home_provider.dart';
@@ -115,21 +115,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   behavior: HitTestBehavior.opaque,
                   child: Tooltip(
                     message: 'Choose your avatar',
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
-                        child: SvgPicture.asset(
-                          AvatarSelectionPage.assetForStatic(avatarId),
-                          fit: BoxFit.cover,
-                        ),
+                    // Small circular header avatar showing the selected
+                    // avatar's face (same saved asset, face-focused crop).
+                    // Header layout is otherwise unchanged.
+                    child: HomeAvatarFace(
+                      avatarId: avatarId,
+                      size: 48,
                     ),
                   ),
                 ),
@@ -404,7 +395,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () => context.push('/search'),
                 child: Text('View All', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
               ),
             ],

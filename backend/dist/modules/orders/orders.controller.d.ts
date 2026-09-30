@@ -16,7 +16,7 @@ export declare class OrdersController {
         createdAt: Date;
     }>;
     findAll(req: any, skip?: string, take?: string, status?: string): Promise<any[]>;
-    findOne(id: string): Promise<any>;
+    findOne(id: string, req: any): Promise<any>;
     cancel(id: string, req: any): Promise<{
         deliverySlot: string;
         updatedAt: Date;

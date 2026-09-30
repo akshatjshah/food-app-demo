@@ -80,3 +80,11 @@ flutter:
   assets:
     - assets/images/
     - assets/lottie/
+    - "assets/images/avatars/cricket_champ.png"
+    - "assets/images/avatars/fit_&_fabulous.png"
+    - "assets/images/avatars/fit_&_fierce.png"
+    - "assets/images/avatars/genz.png"
+    - "assets/images/avatars/princess.png"
+    - "assets/images/avatars/trendy.png"
+    - "assets/images/avatars/urban_man.png"
+    - "assets/images/avatars/women.png"
