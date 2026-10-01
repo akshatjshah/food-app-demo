@@ -25,11 +25,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("admin_token");
-    const storedUser = localStorage.getItem("admin_user");
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedToken = localStorage.getItem("admin_token");
+      const storedUser = localStorage.getItem("admin_user");
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      }
+    } catch {
+      // Corrupt storage must never brick the app — start logged out.
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("admin_user");
     }
     setIsLoading(false);
   }, []);

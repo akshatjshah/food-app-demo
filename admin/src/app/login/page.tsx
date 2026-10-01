@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-provider";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,8 +13,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [redirecting, setRedirecting] = useState(false);
+  const { login, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Compile/dashboard chunks while the user types, so post-login
+  // navigation is instant even when the dev server compiles on demand.
+  useEffect(() => {
+    router.prefetch("/dashboard");
+  }, [router]);
+
+  // If already authenticated (e.g. token restored from storage),
+  // don't sit on the login form — go to the dashboard.
+  useEffect(() => {
+    if (!authLoading && user) {
+      setRedirecting(true);
+      router.replace("/dashboard");
+    }
+  }, [authLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +38,13 @@ export default function LoginPage() {
     try {
       await login(email, password);
       toast.success("Logged in successfully");
-      router.push("/dashboard");
+      // Keep the form disabled until navigation completes; otherwise the
+      // login button re-enables while the dashboard route is still loading
+      // and it looks like the login went nowhere.
+      setRedirecting(true);
+      router.replace("/dashboard");
     } catch (err: any) {
       toast.error(err?.response?.data?.error?.message || "Invalid credentials");
-    } finally {
       setLoading(false);
     }
   };
@@ -62,8 +81,8 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+            <Button type="submit" className="w-full" disabled={loading || redirecting}>
+              {redirecting ? "Redirecting to dashboard..." : loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </CardContent>

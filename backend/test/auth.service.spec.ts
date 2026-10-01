@@ -21,6 +21,9 @@ describe('AuthService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      refreshToken: {
+        create: jest.fn().mockResolvedValue({}),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
