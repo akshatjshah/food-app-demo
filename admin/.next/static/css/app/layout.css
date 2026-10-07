@@ -1096,10 +1096,6 @@ video {
 .bg-card {
   background-color: hsl(var(--card));
 }
-.bg-cyan-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(207 250 254 / var(--tw-bg-opacity, 1));
-}
 .bg-destructive {
   background-color: hsl(var(--destructive));
 }
@@ -1365,10 +1361,6 @@ video {
 .text-card-foreground {
   color: hsl(var(--card-foreground));
 }
-.text-cyan-800 {
-  --tw-text-opacity: 1;
-  color: rgb(21 94 117 / var(--tw-text-opacity, 1));
-}
 .text-destructive {
   color: hsl(var(--destructive));
 }
@@ -1393,10 +1385,6 @@ video {
 .text-indigo-600 {
   --tw-text-opacity: 1;
   color: rgb(79 70 229 / var(--tw-text-opacity, 1));
-}
-.text-indigo-800 {
-  --tw-text-opacity: 1;
-  color: rgb(55 48 163 / var(--tw-text-opacity, 1));
 }
 .text-muted-foreground {
   color: hsl(var(--muted-foreground));

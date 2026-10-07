@@ -32,7 +32,7 @@ let ChefsService = class ChefsService {
                 where: { chefId, status: 'preparing' },
             }),
             this.prisma.order.count({
-                where: { chefId, status: 'ready' },
+                where: { chefId, status: { in: ['ready', 'out_for_delivery'] } },
             }),
         ]);
         return { totalOrders, preparingOrders, readyOrders };
@@ -100,14 +100,14 @@ let ChefsService = class ChefsService {
         if (chefId && order.chefId && order.chefId !== chefId) {
             throw new common_1.ForbiddenException('Order assigned to another chef');
         }
-        if (order.status !== 'preparing') {
+        if (order.status !== 'preparing' && order.status !== 'ready') {
             throw new common_1.BadRequestException(`Cannot mark ready from status ${order.status}`);
         }
         const updated = await this.prisma.order.update({
             where: { id: orderId },
-            data: { status: 'ready' },
+            data: { status: 'out_for_delivery' },
         });
-        await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'ready');
+        await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'out_for_delivery');
         return updated;
     }
     async toggleFoodStock(foodItemId) {

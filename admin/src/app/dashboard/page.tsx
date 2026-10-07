@@ -6,7 +6,7 @@ import apiClient from "@/lib/api-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
-import { StatusBadge } from "@/components/admin/status-badge";
+import { StatusBadge, displayOrderStatus } from "@/components/admin/status-badge";
 import {
   BarChart,
   Bar,
@@ -153,7 +153,7 @@ export default function DashboardPage() {
                     outerRadius={100}
                     dataKey="count"
                     nameKey="status"
-                    label={({ status, count }: any) => `${String(status).replace(/_/g, " ")}: ${count}`}
+                    label={({ status, count }: any) => `${String(displayOrderStatus(String(status))).replace(/_/g, " ")}: ${count}`}
                   >
                     {(ordersByStatus || []).map((_: any, index: number) => (
                       <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />

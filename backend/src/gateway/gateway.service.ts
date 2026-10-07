@@ -119,34 +119,81 @@ export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
     status: string,
     data: Record<string, unknown> = {},
   ): void {
-    const room = `order_${orderId}`;
-    this.server.to(room).emit('order_status_update', {
-      orderId,
-      status,
-      timestamp: new Date().toISOString(),
-      ...data,
-    });
+    try {
+      const payload = {
+        orderId,
+        newStatus: status,
+        status,
+        timestamp: new Date().toISOString(),
+        ...data,
+      };
+      // Order room (tracking screen joins this), owner user room
+      // (My Orders list), and admins room (Admin list/detail) — all live.
+      const room = `order_${orderId}`;
+      this.server.to(room).emit('order_status_update', payload);
+      const userId = (data as any)?.userId;
+      if (typeof userId === 'string' && userId.length > 0) {
+        this.server.to(`user_${userId}`).emit('order_status_update', payload);
+      }
+      this.server.to('admins').emit('order_status_update', payload);
 
-    this.logger.log(`Emitted order_status_update to room ${room}: ${status}`);
+      this.logger.log(`Emitted order_status_update to room ${room}: ${status}`);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to emit order_status_update for ${orderId}: ${(error as Error).message}`,
+      );
+    }
   }
 
   emitNewOrderAlert(chefId: string, order: Record<string, unknown>): void {
-    const room = `chef_${chefId}`;
-    this.server.to(room).emit('new_order', {
-      order,
-      timestamp: new Date().toISOString(),
-    });
+    try {
+      const room = `chef_${chefId}`;
+      this.server.to(room).emit('new_order', {
+        order,
+        timestamp: new Date().toISOString(),
+      });
 
-    this.logger.log(`Emitted new_order alert to chef ${chefId}`);
+      this.logger.log(`Emitted new_order alert to chef ${chefId}`);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to emit new_order alert: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * New customer order → Admin Orders list must prepend it live.
+   * Broadcasts the full order payload when available; Admin falls back
+   * to refetching the list when only an orderId is present.
+   */
+  emitNewOrder(order: Record<string, unknown>): void {
+    try {
+      this.server.to('admins').emit('new_order', {
+        order,
+        orderId: (order as any)?.id,
+        timestamp: new Date().toISOString(),
+      });
+      this.logger.log('Emitted new_order to admins');
+    } catch (error) {
+      this.logger.warn(
+        `Failed to emit new_order: ${(error as Error).message}`,
+      );
+    }
   }
 
   broadcastToAdmins(event: string, data: Record<string, unknown>): void {
-    this.server.to('admins').emit(event, {
-      ...data,
-      timestamp: new Date().toISOString(),
-    });
+    try {
+      this.server.to('admins').emit(event, {
+        ...data,
+        timestamp: new Date().toISOString(),
+      });
 
-    this.logger.log(`Broadcast ${event} to admins`);
+      this.logger.log(`Broadcast ${event} to admins`);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to broadcast ${event}: ${(error as Error).message}`,
+      );
+    }
   }
 
   /**

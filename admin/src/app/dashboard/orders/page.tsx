@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
+import { useAdminOrdersRealtime } from "@/lib/order-socket";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -13,18 +14,24 @@ import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
 import { Pagination } from "@/components/admin/pagination";
-import { StatusBadge, ORDER_STATUSES } from "@/components/admin/status-badge";
+import { StatusBadge, ORDER_STATUSES, displayOrderStatus } from "@/components/admin/status-badge";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { toast } from "sonner";
 import { Search, Eye } from "lucide-react";
 
+// Final Parabdi workflow (mirrors backend ORDER_TRANSITIONS):
+// PLACED → CONFIRMED → PREPARING → OUT_FOR_DELIVERY → DELIVERED.
+// Exactly ONE visible Cancelled action per state (backend "rejected"
+// displays as "Cancelled"). No READY FOR PICKUP anywhere.
+// Legacy drains (ready/rider_assigned/picked_up → out_for_delivery) let
+// historically-stranded orders advance but are never forward targets.
 const NEXT_STATUS: Record<string, string[]> = {
   pending_payment: ["placed", "cancelled"],
-  placed: ["confirmed", "cancelled", "rejected"],
-  confirmed: ["preparing", "cancelled", "rejected"],
-  preparing: ["ready", "cancelled", "rejected"],
-  ready: ["rider_assigned", "cancelled", "rejected"],
-  rider_assigned: ["picked_up", "cancelled"],
+  placed: ["confirmed", "rejected"],
+  confirmed: ["preparing", "rejected"],
+  preparing: ["out_for_delivery", "rejected"],
+  ready: ["out_for_delivery", "rejected"],
+  rider_assigned: ["out_for_delivery"],
   picked_up: ["out_for_delivery"],
   out_for_delivery: ["delivered", "cancelled"],
   delivered: [],
@@ -42,6 +49,10 @@ export default function OrdersPage() {
   const [newStatus, setNewStatus] = useState("");
   const pageSize = 15;
   const qc = useQueryClient();
+
+  // Genuine realtime: new orders + status changes stream over Socket.IO.
+  // No refresh, no polling — list/detail invalidate on socket events.
+  useAdminOrdersRealtime(true);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-orders", status, paymentStatus, appliedSearch, page],
@@ -71,7 +82,7 @@ export default function OrdersPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
       qc.invalidateQueries({ queryKey: ["admin-order-detail", detailId] });
-      toast.success(`Order moved to ${newStatus.replace(/_/g, " ")}`);
+      toast.success(`Order moved to ${displayOrderStatus(newStatus).replace(/_/g, " ")}`);
       setNewStatus("");
     },
     onError: (e: any) => toast.error(e?.response?.data?.error?.message || "Status update failed"),
@@ -108,7 +119,7 @@ export default function OrdersPage() {
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
                 {ORDER_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                  <SelectItem key={s} value={s}>{displayOrderStatus(s).replace(/_/g, " ")}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -258,7 +269,7 @@ export default function OrdersPage() {
                   )}
                   {detail.statusHistory?.map((h: any) => (
                     <p key={h.id} className="text-xs text-muted-foreground">
-                      {h.fromStatus || "—"} → <span className="font-medium text-foreground">{h.toStatus}</span> · {formatDateTime(h.createdAt)}
+                      {displayOrderStatus(h.fromStatus || "—") || "—"} → <span className="font-medium text-foreground">{displayOrderStatus(h.toStatus)}</span> · {formatDateTime(h.createdAt)}
                     </p>
                   ))}
                 </div>
@@ -273,7 +284,7 @@ export default function OrdersPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {allowed.map((s) => (
-                        <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                        <SelectItem key={s} value={s}>{displayOrderStatus(s).replace(/_/g, " ")}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

@@ -10,17 +10,19 @@ void main() {
       expect(OrderStatusUi.isHistory('rejected'), isTrue);
     });
 
-    test('rejected label is exactly "Rejected"', () {
-      expect(OrderStatusUi.label('rejected'), 'Rejected');
+    test('rejected display label is "Cancelled" (backend stays rejected)', () {
+      expect(OrderStatusUi.label('rejected'), 'Cancelled');
+      expect(OrderStatusUi.label('cancelled'), 'Cancelled');
     });
 
     test('rejected badge color is red', () {
       expect(OrderStatusUi.color('rejected'), AppColors.error);
     });
 
-    test('placed is blue, confirmed is green', () {
+    test('placed is blue, confirmed is yellow, delivered is green', () {
       expect(OrderStatusUi.color('placed'), Colors.blue);
-      expect(OrderStatusUi.color('confirmed'), AppColors.success);
+      expect(OrderStatusUi.color('confirmed'), const Color(0xFFCA8A04));
+      expect(OrderStatusUi.color('delivered'), AppColors.success);
       expect(OrderStatusUi.label('placed'), 'Placed');
       expect(OrderStatusUi.label('confirmed'), 'Confirmed');
     });
@@ -53,6 +55,13 @@ void main() {
       for (final s in ['delivered', 'cancelled', 'rejected']) {
         expect(OrderStatusUi.isHistory(s), isTrue, reason: s);
       }
+    });
+
+    test('legacy ready states display as Out for Delivery', () {
+      expect(OrderStatusUi.label('ready'), 'Out for Delivery');
+      expect(OrderStatusUi.label('rider_assigned'), 'Out for Delivery');
+      expect(OrderStatusUi.label('picked_up'), 'Out for Delivery');
+      expect(OrderStatusUi.label('out_for_delivery'), 'Out for Delivery');
     });
   });
 }

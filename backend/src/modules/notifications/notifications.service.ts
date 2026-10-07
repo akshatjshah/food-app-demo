@@ -229,7 +229,9 @@ export class NotificationsService implements OnModuleInit {
       case 'preparing':
         return { title: 'Order Being Prepared', body: `Your order #${short} is being prepared fresh for you.`, type: 'ORDER_PREPARING' };
       case 'ready':
-        return { title: 'Order Ready', body: `Your order #${short} is ready and will be picked up shortly.`, type: 'ORDER_READY' };
+        // Legacy internal status only (no Ready-for-Pickup step exists in
+        // the Parabdi workflow). Surfaced as out-for-delivery copy.
+        return { title: 'Out for Delivery', body: `Your order #${short} is on its way to you!`, type: 'ORDER_ON_WAY' };
       case 'rider_assigned':
         return { title: 'Delivery Partner Assigned', body: `A delivery partner has been assigned to your order #${short}.`, type: 'DELIVERY_UPDATE' };
       case 'picked_up':
@@ -259,6 +261,27 @@ export class NotificationsService implements OnModuleInit {
       type: message.type,
       referenceId: orderId,
     });
+
+    // Genuine realtime: push order_status_update to the order room, the
+    // owner's user room, and the admins room so My Orders, Tracking, and
+    // Admin update live with no refresh/polling.
+    try {
+      this.gateway?.emitOrderStatusUpdate(orderId, status, { userId });
+    } catch {
+      // socket emit is best-effort only
+    }
+  }
+
+  /**
+   * New order placed → Admin Orders list must prepend it live.
+   * Emitted alongside the 'placed' status update above.
+   */
+  emitNewOrderToAdmins(order: Record<string, unknown>): void {
+    try {
+      this.gateway?.emitNewOrder(order);
+    } catch {
+      // best-effort only
+    }
   }
 
   async sendPaymentUpdate(

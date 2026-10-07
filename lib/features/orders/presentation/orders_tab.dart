@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/realtime/order_socket.dart';
 import '../../../core/widgets/app_refresh.dart';
 import '../../authentication/presentation/auth_provider.dart';
 import '../data/models/order.dart';
@@ -19,13 +22,30 @@ class OrdersTab extends ConsumerStatefulWidget {
 
 class _OrdersTabState extends ConsumerState<OrdersTab> {
   int _activeCategory = 0; // 0: Ongoing, 1: History
+  StreamSubscription<OrderStatusEvent>? _socketSub;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(ordersProvider.notifier).loadOrders();
+      // Genuine realtime: backend order_status_update patches the SAME
+      // order card live — no refresh, no polling, no duplicates.
+      OrderSocket.instance.connect();
+      _socketSub?.cancel();
+      _socketSub = OrderSocket.instance.statusStream.listen((event) {
+        if (!mounted) return;
+        ref
+            .read(ordersProvider.notifier)
+            .applyRealtimeUpdate(event.orderId, event.status);
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _socketSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -317,8 +337,8 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
   }
 
   Widget _buildOrderCard(BuildContext context, Order order) {
-    // Rejected stays visible with a RED "Rejected" badge — never removed,
-    // never relabeled. Same card style (ID, date, items, total) as others.
+    // Rejected (backend status) stays visible with a RED "Cancelled" badge —
+    // never removed, never hidden. Same card style (ID, date, items, total).
     // Cancel/Track are invalid after rejection, so rejected cards always use
     // history-style actions even when shown in the Ongoing tab.
     final isRejected = order.status == 'rejected';

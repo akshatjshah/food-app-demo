@@ -186,7 +186,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             case 'preparing':
                 return { title: 'Order Being Prepared', body: `Your order #${short} is being prepared fresh for you.`, type: 'ORDER_PREPARING' };
             case 'ready':
-                return { title: 'Order Ready', body: `Your order #${short} is ready and will be picked up shortly.`, type: 'ORDER_READY' };
+                return { title: 'Out for Delivery', body: `Your order #${short} is on its way to you!`, type: 'ORDER_ON_WAY' };
             case 'rider_assigned':
                 return { title: 'Delivery Partner Assigned', body: `A delivery partner has been assigned to your order #${short}.`, type: 'DELIVERY_UPDATE' };
             case 'picked_up':
@@ -210,6 +210,18 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             type: message.type,
             referenceId: orderId,
         });
+        try {
+            this.gateway?.emitOrderStatusUpdate(orderId, status, { userId });
+        }
+        catch {
+        }
+    }
+    emitNewOrderToAdmins(order) {
+        try {
+            this.gateway?.emitNewOrder(order);
+        }
+        catch {
+        }
     }
     async sendPaymentUpdate(userId, orderId, outcome, amount) {
         const amountText = amount !== undefined ? ` of ₹${amount}` : '';

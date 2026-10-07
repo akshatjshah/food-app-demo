@@ -24,8 +24,10 @@ export class ChefsService {
       this.prisma.order.count({
         where: { chefId, status: 'preparing' },
       }),
+      // "Ready" tray now means ready-to-deliver: legacy 'ready' orders
+      // plus the normal 'out_for_delivery' state (no Ready-for-Pickup step).
       this.prisma.order.count({
-        where: { chefId, status: 'ready' },
+        where: { chefId, status: { in: ['ready', 'out_for_delivery'] } },
       }),
     ]);
 
@@ -89,20 +91,26 @@ export class ChefsService {
     return updated;
   }
 
+  /**
+   * Legacy endpoint name kept (POST /chefs/orders/:id/ready) so existing
+   * chef clients keep working, but the Parabdi workflow has no pickup
+   * step: preparing now advances directly to OUT FOR DELIVERY.
+   */
   async markReady(orderId: string, chefId?: string) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('Order not found');
     if (chefId && order.chefId && order.chefId !== chefId) {
       throw new ForbiddenException('Order assigned to another chef');
     }
-    if (order.status !== 'preparing') {
+    // Allow legacy 'ready' orders to be re-marked (idempotent drain).
+    if (order.status !== 'preparing' && order.status !== 'ready') {
       throw new BadRequestException(`Cannot mark ready from status ${order.status}`);
     }
     const updated = await this.prisma.order.update({
       where: { id: orderId },
-      data: { status: 'ready' },
+      data: { status: 'out_for_delivery' },
     });
-    await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'ready');
+    await this.notificationsService.sendOrderStatusUpdate(updated.userId, orderId, 'out_for_delivery');
     return updated;
   }
 

@@ -9,6 +9,11 @@ import '../../../core/theme/app_theme.dart';
 /// customer returns to Orders) and History. Backend and repository layers
 /// must not filter/exclude any status; this split is display-only.
 class OrderStatusUi {
+  // Normal Parabdi flow: placed → confirmed → preparing →
+  // out_for_delivery → delivered. Legacy internal states
+  // (ready/rider_assigned/picked_up) never appear as distinct labels —
+  // they are displayed as "Out for Delivery". Kept in this set only so
+  // historically-stranded orders stay visible in Ongoing, never hidden.
   static const ongoingStatuses = <String>{
     'pending_payment',
     'placed',
@@ -52,12 +57,11 @@ class OrderStatusUi {
         return 'Confirmed';
       case 'preparing':
         return 'Preparing';
+      // No pickup step exists. Legacy internal states surface
+      // as Out for Delivery (matches the 5-step tracking timeline).
       case 'ready':
-        return 'Ready';
       case 'rider_assigned':
-        return 'Rider Assigned';
       case 'picked_up':
-        return 'Picked Up';
       case 'out_for_delivery':
         return 'Out for Delivery';
       case 'delivered':
@@ -65,24 +69,30 @@ class OrderStatusUi {
       case 'cancelled':
         return 'Cancelled';
       case 'rejected':
-        return 'Rejected';
+        // Display-only: backend/internal status stays "rejected",
+        // but users/admins always see "Cancelled".
+        return 'Cancelled';
       default:
         return status;
     }
   }
 
-  /// Placed=blue, Confirmed/Delivered=green, Rejected/Cancelled=red.
+  /// Placed=blue, Confirmed=yellow, Delivered=green, Rejected/Cancelled=red
+  /// (displayed as "Cancelled").
   static Color color(String status) {
     switch (status) {
       case 'placed':
         return Colors.blue;
       case 'confirmed':
+        // Must be YELLOW (not green): Placed=blue, Confirmed=yellow,
+        // Delivered=green, Cancelled(red, incl. backend "rejected")=red.
+        return const Color(0xFFCA8A04);
       case 'delivered':
         return AppColors.success;
       case 'preparing':
         return Colors.orange;
+      // Legacy ready/rider/picked_up share the delivery color.
       case 'ready':
-        return Colors.teal;
       case 'rider_assigned':
       case 'picked_up':
       case 'out_for_delivery':

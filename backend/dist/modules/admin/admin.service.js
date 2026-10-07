@@ -28,11 +28,11 @@ const VALID_ORDER_STATUSES = [
 ];
 const ORDER_TRANSITIONS = {
     pending_payment: ['placed', 'cancelled'],
-    placed: ['confirmed', 'cancelled', 'rejected'],
-    confirmed: ['preparing', 'cancelled', 'rejected'],
-    preparing: ['ready', 'cancelled', 'rejected'],
-    ready: ['rider_assigned', 'cancelled', 'rejected'],
-    rider_assigned: ['picked_up', 'cancelled'],
+    placed: ['confirmed', 'rejected'],
+    confirmed: ['preparing', 'rejected'],
+    preparing: ['out_for_delivery', 'rejected'],
+    ready: ['out_for_delivery', 'rejected'],
+    rider_assigned: ['out_for_delivery'],
     picked_up: ['out_for_delivery'],
     out_for_delivery: ['delivered', 'cancelled'],
     delivered: [],
@@ -157,8 +157,14 @@ let AdminService = class AdminService {
     }
     async getOrders(params) {
         const where = {};
-        if (params.status)
-            where.status = params.status;
+        if (params.status) {
+            if (params.status === 'cancelled') {
+                where.status = { in: ['cancelled', 'rejected'] };
+            }
+            else {
+                where.status = params.status;
+            }
+        }
         if (params.paymentStatus)
             where.paymentStatus = params.paymentStatus;
         if (params.search) {

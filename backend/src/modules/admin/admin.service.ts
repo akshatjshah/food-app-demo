@@ -16,15 +16,25 @@ const VALID_ORDER_STATUSES = [
   'rejected',
 ];
 
-// Allowed forward transitions. Terminal states (delivered/cancelled/rejected)
-// cannot move anywhere.
+// Final Parabdi order workflow (single source of truth):
+//   PLACED → CONFIRMED → PREPARING → OUT_FOR_DELIVERY → DELIVERED
+// Rejection is a separate terminal path: backend status stays "rejected",
+// displayed everywhere as "Cancelled" (red). There is exactly ONE visible
+// Cancelled action per state (rejected for early states, cancelled for
+// out_for_delivery/customer cancels) so the Admin dropdown never shows
+// duplicate "cancelled / cancelled" rows.
+// Legacy delivery states (ready/rider_assigned/picked_up) are NOT targets
+// in the normal flow — they only drain forward to out_for_delivery so
+// historically-stranded orders can still advance. The preparing → ready
+// handoff was removed: preparing now advances to out_for_delivery.
 const ORDER_TRANSITIONS: Record<string, string[]> = {
   pending_payment: ['placed', 'cancelled'],
-  placed: ['confirmed', 'cancelled', 'rejected'],
-  confirmed: ['preparing', 'cancelled', 'rejected'],
-  preparing: ['ready', 'cancelled', 'rejected'],
-  ready: ['rider_assigned', 'cancelled', 'rejected'],
-  rider_assigned: ['picked_up', 'cancelled'],
+  placed: ['confirmed', 'rejected'],
+  confirmed: ['preparing', 'rejected'],
+  preparing: ['out_for_delivery', 'rejected'],
+  // Legacy drains (never offered as forward targets from normal states).
+  ready: ['out_for_delivery', 'rejected'],
+  rider_assigned: ['out_for_delivery'],
   picked_up: ['out_for_delivery'],
   out_for_delivery: ['delivered', 'cancelled'],
   delivered: [],
@@ -181,7 +191,15 @@ export class AdminService {
 
   async getOrders(params: { skip?: number; take?: number; status?: string; paymentStatus?: string; search?: string }) {
     const where: any = {};
-    if (params.status) where.status = params.status;
+    // Single visible "Cancelled" filter covers both internal statuses:
+    // customer cancels (cancelled) and admin/chef rejections (rejected).
+    if (params.status) {
+      if (params.status === 'cancelled') {
+        where.status = { in: ['cancelled', 'rejected'] };
+      } else {
+        where.status = params.status;
+      }
+    }
     if (params.paymentStatus) where.paymentStatus = params.paymentStatus;
     if (params.search) {
       where.OR = [

@@ -154,7 +154,9 @@ final chefOrdersProvider = FutureProvider.autoDispose
   final statusMap = {
     OrderTab.incoming: 'placed',
     OrderTab.preparing: 'preparing',
-    OrderTab.ready: 'ready',
+    // No pickup step: the "Ready" tray lists out-for-delivery orders
+    // (markReady advances preparing → out_for_delivery).
+    OrderTab.ready: 'out_for_delivery',
   };
   try {
     final data = await repo.getOrders(status: statusMap[tab]);

@@ -84,29 +84,64 @@ let OrderGateway = OrderGateway_1 = class OrderGateway {
         };
     }
     emitOrderStatusUpdate(orderId, status, data = {}) {
-        const room = `order_${orderId}`;
-        this.server.to(room).emit('order_status_update', {
-            orderId,
-            status,
-            timestamp: new Date().toISOString(),
-            ...data,
-        });
-        this.logger.log(`Emitted order_status_update to room ${room}: ${status}`);
+        try {
+            const payload = {
+                orderId,
+                newStatus: status,
+                status,
+                timestamp: new Date().toISOString(),
+                ...data,
+            };
+            const room = `order_${orderId}`;
+            this.server.to(room).emit('order_status_update', payload);
+            const userId = data?.userId;
+            if (typeof userId === 'string' && userId.length > 0) {
+                this.server.to(`user_${userId}`).emit('order_status_update', payload);
+            }
+            this.server.to('admins').emit('order_status_update', payload);
+            this.logger.log(`Emitted order_status_update to room ${room}: ${status}`);
+        }
+        catch (error) {
+            this.logger.warn(`Failed to emit order_status_update for ${orderId}: ${error.message}`);
+        }
     }
     emitNewOrderAlert(chefId, order) {
-        const room = `chef_${chefId}`;
-        this.server.to(room).emit('new_order', {
-            order,
-            timestamp: new Date().toISOString(),
-        });
-        this.logger.log(`Emitted new_order alert to chef ${chefId}`);
+        try {
+            const room = `chef_${chefId}`;
+            this.server.to(room).emit('new_order', {
+                order,
+                timestamp: new Date().toISOString(),
+            });
+            this.logger.log(`Emitted new_order alert to chef ${chefId}`);
+        }
+        catch (error) {
+            this.logger.warn(`Failed to emit new_order alert: ${error.message}`);
+        }
+    }
+    emitNewOrder(order) {
+        try {
+            this.server.to('admins').emit('new_order', {
+                order,
+                orderId: order?.id,
+                timestamp: new Date().toISOString(),
+            });
+            this.logger.log('Emitted new_order to admins');
+        }
+        catch (error) {
+            this.logger.warn(`Failed to emit new_order: ${error.message}`);
+        }
     }
     broadcastToAdmins(event, data) {
-        this.server.to('admins').emit(event, {
-            ...data,
-            timestamp: new Date().toISOString(),
-        });
-        this.logger.log(`Broadcast ${event} to admins`);
+        try {
+            this.server.to('admins').emit(event, {
+                ...data,
+                timestamp: new Date().toISOString(),
+            });
+            this.logger.log(`Broadcast ${event} to admins`);
+        }
+        catch (error) {
+            this.logger.warn(`Failed to broadcast ${event}: ${error.message}`);
+        }
     }
     emitNotificationToUser(userId, notification) {
         try {

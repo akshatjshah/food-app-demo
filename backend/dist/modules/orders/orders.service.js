@@ -141,6 +141,17 @@ let OrdersService = class OrdersService {
             return newOrder;
         });
         await this.notificationsService.sendOrderStatusUpdate(userId, order.id, 'placed');
+        try {
+            this.notificationsService.emitNewOrderToAdmins({
+                id: order.id,
+                userId,
+                status: order.status,
+                grandTotal: Number(order.grandTotal),
+                createdAt: order.createdAt,
+            });
+        }
+        catch {
+        }
         return {
             id: order.id,
             status: order.status,

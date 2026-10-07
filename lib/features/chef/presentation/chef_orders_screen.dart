@@ -112,7 +112,7 @@ class _OrderList extends ConsumerWidget {
                         ? 'No incoming orders'
                         : tab == OrderTab.preparing
                             ? 'Nothing cooking right now'
-                            : 'No orders ready for pickup',
+                            : 'No orders ready for delivery',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -400,7 +400,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                       Icon(Icons.check_circle_rounded, size: 16, color: AppColors.success),
                       SizedBox(width: AppSpacing.s4),
                       Text(
-                        'Ready for pickup',
+                        'Out for delivery',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

@@ -1,35 +1,45 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/realtime/order_socket.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_refresh.dart';
 import '../data/models/order.dart';
 import '../data/repositories/order_repository.dart';
+import 'providers/orders_provider.dart';
 
-class OrderTrackingScreen extends StatefulWidget {
+class OrderTrackingScreen extends ConsumerStatefulWidget {
   final String orderId;
   const OrderTrackingScreen({super.key, required this.orderId});
 
   @override
-  State<OrderTrackingScreen> createState() => _OrderTrackingScreenState();
+  ConsumerState<OrderTrackingScreen> createState() =>
+      _OrderTrackingScreenState();
 }
 
-class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
+class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
   late final OrderRepository _repo;
   Order? _order;
   bool _isLoading = true;
   String? _error;
+  StreamSubscription<OrderStatusEvent>? _socketSub;
 
+  // Final 5-step Parabdi timeline (no pickup step).
+  // Legacy internal states (ready/rider_assigned/picked_up) resolve to
+  // the Out for Delivery step so stranded orders still render sensibly.
   static const _statusSteps = <String, int>{
     'placed': 0,
     'confirmed': 1,
     'preparing': 2,
     'ready': 3,
     'rider_assigned': 3,
-    'picked_up': 4,
-    'out_for_delivery': 4,
-    'delivered': 5,
+    'picked_up': 3,
+    'out_for_delivery': 3,
+    'delivered': 4,
     'cancelled': -1,
     'rejected': -2,
   };
@@ -38,7 +48,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     ('Order Placed', 'Your order has been received'),
     ('Order Confirmed', 'Kitchen accepted your order'),
     ('Preparing Meal', 'Chef is preparing your meal'),
-    ('Ready for Pickup', 'Meal is ready for rider'),
     ('Out for Delivery', 'Rider is on the way'),
     ('Delivered', 'Enjoy your meal!'),
   ];
@@ -48,6 +57,42 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     super.initState();
     _repo = OrderRepository(ApiClient.instance);
     _fetchOrder();
+    // Genuine realtime: join this order's room and advance the timeline
+    // live when the backend broadcasts order_status_update. Event-driven
+    // single refetch per status change — no polling, no timers.
+    OrderSocket.instance.connect();
+    OrderSocket.instance.joinOrder(widget.orderId);
+    _socketSub?.cancel();
+    _socketSub = OrderSocket.instance.statusStream.listen((event) {
+      if (!mounted || event.orderId != widget.orderId) return;
+      _onSocketStatus(event.status);
+    });
+  }
+
+  @override
+  void dispose() {
+    _socketSub?.cancel();
+    OrderSocket.instance.leaveOrder(widget.orderId);
+    super.dispose();
+  }
+
+  /// Socket event → patch provider (My Orders card) + refetch this order
+  /// so the stepper animates to the new stage automatically.
+  Future<void> _onSocketStatus(String status) async {
+    try {
+      ref.read(ordersProvider.notifier).applyRealtimeUpdate(widget.orderId, status);
+    } catch (_) {}
+    try {
+      final order = await _repo.getOrder(widget.orderId);
+      if (!mounted) return;
+      setState(() {
+        _order = order;
+        _error = null;
+        _isLoading = false;
+      });
+    } catch (_) {
+      // Keep the last known state; header/pull refresh can retry.
+    }
   }
 
   Future<void> _fetchOrder() async {
@@ -321,7 +366,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   }
 
   Widget _buildOtpBadge(BuildContext context, Order order) {
-    if (order.status != 'out_for_delivery' && order.status != 'delivered' && order.status != 'ready') {
+    if (order.status != 'out_for_delivery' && order.status != 'delivered') {
       return const SizedBox.shrink();
     }
 
@@ -354,12 +399,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Order Rejected',
+                  'Order Cancelled',
                   style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error, fontSize: 15),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'This order was rejected. It remains in your history.',
+                  'This order has been cancelled. It remains in your history.',
                   style: TextStyle(color: Colors.grey, fontSize: 13),
                 ),
               ],
@@ -414,7 +459,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           children: [
             Column(
               children: [
-                Container(
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 450),
+                  curve: Curves.easeInOut,
                   width: 20,
                   height: 20,
                   decoration: BoxDecoration(
@@ -434,7 +481,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                       : null,
                 ),
                 if (index < _stepLabels.length - 1)
-                  Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeInOut,
                     width: 2,
                     height: 32,
                     color: isDone

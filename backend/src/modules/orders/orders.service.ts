@@ -163,6 +163,19 @@ export class OrdersService {
     // In-app notification for order placed (best-effort, never breaks checkout).
     await this.notificationsService.sendOrderStatusUpdate(userId, order.id, 'placed');
 
+    // Live Admin Orders list: broadcast the new order (best-effort).
+    try {
+      this.notificationsService.emitNewOrderToAdmins({
+        id: order.id,
+        userId,
+        status: order.status,
+        grandTotal: Number(order.grandTotal),
+        createdAt: order.createdAt,
+      });
+    } catch {
+      // best-effort only
+    }
+
     return {
       id: order.id,
       status: order.status,

@@ -86,6 +86,51 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
     await loadOrders();
   }
 
+  /// Live socket path: updates the SAME order card in place when the
+  /// backend broadcasts `order_status_update`. No reload, no duplicates,
+  /// no card recreation — the affected record is patched and re-split
+  /// across ongoing/history (rejected stays visible in both).
+  void applyRealtimeUpdate(String orderId, String newStatus) {
+    final inOngoing = state.ongoingOrders.any((o) => o.id == orderId);
+    final inHistory = state.historyOrders.any((o) => o.id == orderId);
+    if (!inOngoing && !inHistory) {
+      // Unknown order (e.g. just placed on another device) — refetch once.
+      loadOrders();
+      return;
+    }
+    final updatedOngoing = state.ongoingOrders
+        .map((o) => o.id == orderId ? o.copyWith(status: newStatus) : o)
+        .toList();
+    final updatedHistory = state.historyOrders
+        .map((o) => o.id == orderId ? o.copyWith(status: newStatus) : o)
+        .toList();
+    // Re-split so terminal states land in History while rejected stays
+    // visible in Ongoing too (display-only split, nothing filtered out).
+    final all = <String, Order>{};
+    for (final o in [...updatedOngoing, ...updatedHistory]) {
+      all[o.id] = o;
+    }
+    final ongoing =
+        all.values.where((o) => OrderStatusUi.isOngoing(o.status)).toList();
+    final history =
+        all.values.where((o) => OrderStatusUi.isHistory(o.status)).toList();
+    state = state.copyWith(
+      ongoingOrders: ongoing,
+      historyOrders: history,
+      clearError: true,
+    );
+  }
+
+  /// Tracking screen + pull paths: refetch a single order then patch state.
+  Future<void> refreshOrder(String orderId) async {
+    try {
+      final fresh = await _repo.getOrder(orderId);
+      applyRealtimeUpdate(fresh.id, fresh.status);
+    } catch (_) {
+      await loadOrders();
+    }
+  }
+
   Future<void> reorder(String orderId) async {
     await _repo.reorder(orderId);
   }

@@ -31,6 +31,7 @@ export declare class OrderGateway implements OnGatewayConnection, OnGatewayDisco
     };
     emitOrderStatusUpdate(orderId: string, status: string, data?: Record<string, unknown>): void;
     emitNewOrderAlert(chefId: string, order: Record<string, unknown>): void;
+    emitNewOrder(order: Record<string, unknown>): void;
     broadcastToAdmins(event: string, data: Record<string, unknown>): void;
     emitNotificationToUser(userId: string, notification: Record<string, unknown>): void;
     emitNotificationBroadcast(userIds: string[], notification: Record<string, unknown>): void;
