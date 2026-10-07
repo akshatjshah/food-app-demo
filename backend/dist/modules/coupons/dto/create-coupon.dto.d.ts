@@ -8,5 +8,6 @@ export declare class CreateCouponDto {
     maxUses?: number;
     maxUsesPerUser?: number;
     isFirstOrderOnly?: boolean;
+    isActive?: boolean;
     expiresAt: string;
 }

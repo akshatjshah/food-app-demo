@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../data/models/short_item.dart';
 import '../data/repositories/shorts_repository.dart';
 
@@ -44,6 +45,24 @@ class _ShortsScreenState extends ConsumerState<ShortsScreen> {
     final repo = ref.read(shortsRepositoryProvider);
     await repo.likeShort(item.id);
     ref.invalidate(shortsFutureProvider);
+  }
+
+  /// Re-fetches shorts from the backend via the existing provider.
+  /// PageView cannot host pull-to-refresh, so the header button is the
+  /// refresh affordance here. Good data stays until the new fetch lands;
+  /// failures surface a snackbar with Retry.
+  Future<void> _refreshShorts() async {
+    ref.invalidate(shortsFutureProvider);
+    try {
+      await ref.read(shortsFutureProvider.future);
+    } catch (_) {
+      if (!mounted) return;
+      showRefreshError(
+        context,
+        message: 'Could not refresh shorts. Showing saved data.',
+        onRetry: _refreshShorts,
+      );
+    }
   }
 
   @override
@@ -175,6 +194,27 @@ class _ShortsScreenState extends ConsumerState<ShortsScreen> {
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
                       onPressed: () => context.pop(),
+                    ),
+                  ),
+                  // Header refresh: vertical PageView cannot host
+                  // pull-to-refresh, so this button re-fetches shorts.
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 8,
+                    right: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: AppRefreshIconButton(
+                        tooltip: 'Refresh shorts',
+                        color: Colors.white,
+                        size: 20,
+                        errorMessage: 'Could not refresh shorts. Showing saved data.',
+                        onRefresh: _refreshShorts,
+                        hasError: () =>
+                            ref.read(shortsFutureProvider).hasError,
+                      ),
                     ),
                   ),
                 ],

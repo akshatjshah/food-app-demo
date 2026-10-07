@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../../address/data/models/address.dart';
 import '../../address/presentation/address_provider.dart';
 import '../../cart/data/models/cart.dart';
@@ -364,6 +365,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          // Re-fetches cart + addresses + delivery slots via the existing
+          // checkout loader. Covers states where pull is unavailable.
+          AppRefreshIconButton(
+            tooltip: 'Refresh checkout',
+            errorMessage:
+                'Could not refresh checkout. Showing saved data.',
+            onRefresh: () =>
+                ref.read(checkoutProvider.notifier).loadCheckout(),
+            hasError: () => ref.read(checkoutProvider).error != null,
+          ),
+        ],
       ),
       body: checkoutState.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -439,21 +452,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
 
         Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(AppSpacing.s16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAddressSection(context, state),
-                const Divider(height: 40),
-                _buildDeliverySlotSection(context, state),
-                const Divider(height: 40),
-                _buildPaymentSection(context, state),
-                const Divider(height: 40),
-                _buildOrderSummarySection(context, state),
-                const SizedBox(height: 100),
-              ],
+          child: AppPullToRefresh(
+            onRefresh: () =>
+                ref.read(checkoutProvider.notifier).loadCheckout(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.s16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAddressSection(context, state),
+                  const Divider(height: 40),
+                  _buildDeliverySlotSection(context, state),
+                  const Divider(height: 40),
+                  _buildPaymentSection(context, state),
+                  const Divider(height: 40),
+                  _buildOrderSummarySection(context, state),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
         ),

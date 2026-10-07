@@ -108,7 +108,7 @@ export declare class AdminController {
     broadcast(body: {
         title: string;
         body: string;
-        type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT';
+        type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT' | 'BROADCAST';
         userIds?: string[];
         referenceId?: string;
     }): Promise<{

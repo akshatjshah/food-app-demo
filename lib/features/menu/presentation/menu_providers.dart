@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
+import '../../home/presentation/home_provider.dart';
 import '../data/models/menu_food.dart';
 import '../data/models/menu_category.dart';
 import '../data/repositories/menu_repository.dart';
@@ -10,10 +11,28 @@ final menuRepositoryProvider = Provider<MenuRepository>((ref) {
 });
 
 // --- Categories ---
+//
+// Single source of truth: customer categories come from the backend
+// `GET /categories` records via the existing Home categories repository
+// ([homeRepositoryProvider], also watched by Home through `homeProvider`).
+// Menu chips and the search browse list must NOT keep a second category
+// fetch/filter logic — they read the same active, admin-ordered list so a
+// rename / image change / disable / reorder (or a removed "Breads") is
+// reflected in Home and Menu together after refresh.
+//
+// Kept as a [FutureProvider] alias for backward compatibility; new UI code
+// should watch `homeProvider` categories directly.
 
 final categoriesProvider = FutureProvider<List<MenuCategory>>((ref) async {
-  final repo = ref.read(menuRepositoryProvider);
-  return repo.getCategories();
+  final repo = ref.read(homeRepositoryProvider);
+  final cats = await repo.getCategories();
+  return cats
+      .map((c) => MenuCategory(
+            id: c.id,
+            name: c.name,
+            icon: c.icon ?? '',
+          ))
+      .toList();
 });
 
 // --- Foods list ---

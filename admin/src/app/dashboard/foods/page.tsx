@@ -55,7 +55,8 @@ function toPayload(form: typeof EMPTY_FORM) {
     videoUrl: form.videoUrl || undefined,
     calories: num(form.calories),
     preparationTimeMinutes: num(form.preparationTimeMinutes) ?? 20,
-    stock: form.stock === "" ? null : Number(form.stock),
+    // Omit stock when blank (unlimited). Explicit null fails strict DTO number validation.
+    stock: form.stock === "" ? undefined : Number(form.stock),
     displayOrder: Number(form.displayOrder) || 0,
     tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
     isVeg: form.isVeg,

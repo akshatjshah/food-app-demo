@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../../wishlist/presentation/wishlist_screen.dart';
 
 /// "My Favorites" — thin customer-facing alias over the existing
@@ -35,6 +36,19 @@ class _MyFavoritesScreenState extends ConsumerState<MyFavoritesScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          // Same shared wishlist source as WishlistScreen; header refresh
+          // covers non-scrollable states. Saved favorites are preserved on
+          // failure with a snackbar instead.
+          AppRefreshIconButton(
+            tooltip: 'Refresh favorites',
+            errorMessage:
+                'Could not refresh favorites. Showing saved data.',
+            onRefresh: () =>
+                ref.read(wishlistProvider.notifier).loadWishlist(),
+            hasError: () => ref.read(wishlistProvider).error != null,
+          ),
+        ],
       ),
       body: _buildBody(state),
     );
@@ -103,10 +117,13 @@ class _MyFavoritesScreenState extends ConsumerState<MyFavoritesScreen> {
         ),
       );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      itemCount: state.items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
+    return AppPullToRefresh(
+      onRefresh: () => ref.read(wishlistProvider.notifier).loadWishlist(),
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        itemCount: state.items.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
       itemBuilder: (context, index) {
         final item = state.items[index];
         final food = item.foodItem;
@@ -179,6 +196,7 @@ class _MyFavoritesScreenState extends ConsumerState<MyFavoritesScreen> {
           ),
         );
       },
+      ),
     );
   }
 }

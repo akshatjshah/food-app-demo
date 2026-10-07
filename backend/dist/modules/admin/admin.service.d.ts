@@ -112,7 +112,7 @@ export declare class AdminService {
         chefId: string | null;
         deliveryBoyId: string | null;
     }>;
-    broadcastAnnouncement(title: string, body: string, type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT', userIds?: string[], referenceId?: string): Promise<{
+    broadcastAnnouncement(title: string, body: string, type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT' | 'BROADCAST', userIds?: string[], referenceId?: string): Promise<{
         sent: number;
         failed: number;
     }>;

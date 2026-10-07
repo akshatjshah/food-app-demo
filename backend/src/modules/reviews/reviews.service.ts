@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
 
 @Injectable()
@@ -14,6 +14,24 @@ export class ReviewsService {
   }
 
   async create(userId: string, dto: { foodItemId: string; orderId: string; rating: number; comment?: string; images?: string[] }) {
+    // Reviews are only allowed on delivered orders owned by the customer.
+    // One review per (order, food item, user) per existing backend rules.
+    const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
+    if (!order || order.userId !== userId) {
+      throw new ForbiddenException('You can only review your own orders');
+    }
+    if (order.status !== 'delivered') {
+      throw new BadRequestException('You can review only after the order is delivered');
+    }
+    const existing = await this.prisma.review.findFirst({
+      where: { userId, orderId: dto.orderId, foodItemId: dto.foodItemId },
+    });
+    if (existing) {
+      throw new BadRequestException('You have already reviewed this item for this order');
+    }
+    if (dto.rating < 1 || dto.rating > 5) {
+      throw new BadRequestException('Rating must be between 1 and 5');
+    }
     return this.prisma.$transaction(async (tx) => {
       const review = await tx.review.create({
         data: { userId, ...dto },

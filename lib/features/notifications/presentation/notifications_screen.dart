@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../data/models/notification_item.dart';
 import 'notifications_provider.dart';
 
@@ -18,7 +19,7 @@ class _CategoryStyle {
 _CategoryStyle _styleFor(NotificationItem notif) {
   final type = (notif.type ?? '').trim().toLowerCase();
 
-  // ORDER — green (placed / confirmed / preparing / ready / delivered / cancelled / update)
+  // ORDER — green (placed / confirmed / preparing / ready / delivered / cancelled / rejected / update)
   const orderTypes = {
     'order',
     'order_update',
@@ -28,6 +29,7 @@ _CategoryStyle _styleFor(NotificationItem notif) {
     'order_ready',
     'order_delivered',
     'order_cancelled',
+    'order_rejected',
   };
   // DELIVERY — blue (rider assigned / on the way / delivery updates)
   const deliveryTypes = {
@@ -221,7 +223,7 @@ class NotificationsScreen extends ConsumerWidget {
               onBack: () => context.pop(),
             ),
             Expanded(
-              child: RefreshIndicator(
+              child: AppPullToRefresh(
                 onRefresh: () async => refreshNotifications(ref),
                 child: notificationsAsync.when(
                   loading: () =>

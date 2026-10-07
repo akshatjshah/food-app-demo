@@ -1,8 +1,9 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit, Inject, Optional, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../config/prisma.service';
 import { initializeApp, cert, App } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
+import { OrderGateway } from '../../gateway/gateway.service';
 
 @Injectable()
 export class NotificationsService implements OnModuleInit {
@@ -12,6 +13,9 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
+    @Optional()
+    @Inject(forwardRef(() => OrderGateway))
+    private gateway?: OrderGateway,
   ) {}
 
   onModuleInit() {
@@ -116,11 +120,23 @@ export class NotificationsService implements OnModuleInit {
       const created = await this.prisma.notification.create({
         data: { userId, ...data },
       });
+      const publicNotif = this.toPublic(created);
+      // Realtime socket push so an open Home shows the bell popup instantly
+      // (FCM + polling are fallbacks, never the only path).
+      try {
+        this.gateway?.emitNotificationToUser(userId, publicNotif);
+      } catch {
+        // socket emit is best-effort only
+      }
+      // FCM data keys must match Flutter's reader (reference_id snake_case).
+      // Include title/body in data so background/terminated taps still carry context.
       await this.sendPushNotification(userId, data.title, data.body, {
         type: data.type,
-        referenceId: data.referenceId || '',
+        reference_id: data.referenceId || '',
+        title: data.title,
+        body: data.body,
       });
-      return this.toPublic(created);
+      return publicNotif;
     } catch (error) {
       this.logger.warn(`Failed to create notification for user ${userId}: ${error.message}`);
       return null;
@@ -224,7 +240,7 @@ export class NotificationsService implements OnModuleInit {
       case 'cancelled':
         return { title: 'Order Cancelled', body: `Your order #${short} has been cancelled.`, type: 'ORDER_CANCELLED' };
       case 'rejected':
-        return { title: 'Order Not Accepted', body: `Your order #${short} could not be accepted. Please try again.`, type: 'ORDER_CANCELLED' };
+        return { title: 'Order Not Accepted', body: `Your order #${short} could not be accepted. Please try again.`, type: 'ORDER_REJECTED' };
       default:
         return { title: 'Order Update', body: `Your order #${short} status: ${status}.`, type: 'ORDER_UPDATE' };
     }
@@ -308,18 +324,33 @@ export class NotificationsService implements OnModuleInit {
     let sent = 0;
     let failed = 0;
 
-    for (const userId of userIds) {
+    // Deduplicate targets so retries/double-clicks don't create duplicate rows.
+    const uniqueIds = [...new Set(userIds)];
+    const createdPublic: ReturnType<NotificationsService['toPublic']>[] = [];
+    for (const userId of uniqueIds) {
       try {
-        await this.prisma.notification.create({ data: { userId, title, body, type, referenceId } });
+        const created = await this.prisma.notification.create({ data: { userId, title, body, type, referenceId } });
+        createdPublic.push(this.toPublic(created));
         sent++;
       } catch {
         failed++;
       }
     }
 
+    // Realtime socket push per targeted customer so open apps update
+    // the bell badge + popup instantly without refresh (FCM is fallback).
+    try {
+      for (let i = 0; i < uniqueIds.length; i++) {
+        const payload = createdPublic[i] ?? { title, body, type, reference_id: referenceId ?? null };
+        this.gateway?.emitNotificationToUser(uniqueIds[i], payload as Record<string, unknown>);
+      }
+    } catch {
+      // best-effort only
+    }
+
     if (this.firebaseApp) {
       const tokens = await this.prisma.fcmToken.findMany({
-        where: { userId: { in: userIds }, isActive: true },
+        where: { userId: { in: uniqueIds }, isActive: true },
         select: { token: true },
       });
 
@@ -330,6 +361,13 @@ export class NotificationsService implements OnModuleInit {
         const response = await messaging.sendEachForMulticast({
           tokens: validTokens,
           notification: { title, body },
+          // Keep data keys identical to single notify() so Flutter tap handling works.
+          data: {
+            type,
+            reference_id: referenceId || '',
+            title,
+            body,
+          },
           android: { priority: 'high' },
           apns: { payload: { aps: { sound: 'default' } } },
         });

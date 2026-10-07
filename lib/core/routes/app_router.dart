@@ -121,7 +121,9 @@ class AppRouter {
         builder: (context, state) {
           final orderId = state.pathParameters['orderId']!;
           final mealName = state.uri.queryParameters['meal'] ?? 'Gujarati Thali';
-          return RatingScreen(orderId: orderId, mealName: mealName);
+          final foodItemId = state.uri.queryParameters['foodItemId'];
+          return RatingScreen(
+              orderId: orderId, mealName: mealName, foodItemId: foodItemId);
         },
       ),
       GoRoute(

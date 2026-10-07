@@ -24,6 +24,22 @@ let ReviewsService = class ReviewsService {
         });
     }
     async create(userId, dto) {
+        const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
+        if (!order || order.userId !== userId) {
+            throw new common_1.ForbiddenException('You can only review your own orders');
+        }
+        if (order.status !== 'delivered') {
+            throw new common_1.BadRequestException('You can review only after the order is delivered');
+        }
+        const existing = await this.prisma.review.findFirst({
+            where: { userId, orderId: dto.orderId, foodItemId: dto.foodItemId },
+        });
+        if (existing) {
+            throw new common_1.BadRequestException('You have already reviewed this item for this order');
+        }
+        if (dto.rating < 1 || dto.rating > 5) {
+            throw new common_1.BadRequestException('Rating must be between 1 and 5');
+        }
         return this.prisma.$transaction(async (tx) => {
             const review = await tx.review.create({
                 data: { userId, ...dto },

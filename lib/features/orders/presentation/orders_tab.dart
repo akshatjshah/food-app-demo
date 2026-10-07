@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../../authentication/presentation/auth_provider.dart';
 import '../data/models/order.dart';
+import 'order_status_ui.dart';
 import 'providers/orders_provider.dart';
 
 class OrdersTab extends ConsumerStatefulWidget {
@@ -46,7 +48,7 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
         children: [
           _buildCategoryToggle(context),
           Expanded(
-            child: RefreshIndicator(
+            child: AppPullToRefresh(
               onRefresh: () => ref.read(ordersProvider.notifier).loadOrders(),
               child: ordersState.isLoading
                   ? _buildLoadingShimmer(context)
@@ -315,9 +317,15 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
   }
 
   Widget _buildOrderCard(BuildContext context, Order order) {
-    final isOngoing = !['delivered', 'cancelled'].contains(order.status);
-    final statusColor = _getStatusColor(order.status);
-    final statusLabel = _getStatusLabel(order.status);
+    // Rejected stays visible with a RED "Rejected" badge — never removed,
+    // never relabeled. Same card style (ID, date, items, total) as others.
+    // Cancel/Track are invalid after rejection, so rejected cards always use
+    // history-style actions even when shown in the Ongoing tab.
+    final isRejected = order.status == 'rejected';
+    final showLiveActions =
+        OrderStatusUi.isOngoing(order.status) && !isRejected;
+    final statusColor = OrderStatusUi.color(order.status);
+    final statusLabel = OrderStatusUi.label(order.status);
     final itemSummary = order.items
         .map((item) =>
             '${item.foodItem.name} x ${item.quantity}')
@@ -327,9 +335,12 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.s16),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.s20),
-        child: Column(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.r12),
+        onTap: () => context.push('/track/${order.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.s20),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -379,11 +390,10 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
                   style:
                       const TextStyle(fontWeight: FontWeight.w800),
                 ),
-                if (isOngoing)
+                if (showLiveActions)
                   Row(
                     children: [
-                      if (order.status == 'placed' ||
-                          order.status == 'confirmed')
+                      if (OrderStatusUi.canCancel(order.status))
                         Padding(
                           padding:
                               const EdgeInsets.only(right: 8),
@@ -409,26 +419,27 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
                                     TextStyle(fontSize: 11)),
                           ),
                         ),
-                      ElevatedButton(
-                        onPressed: () => context
-                            .push('/track/${order.id}'),
-                        style: ElevatedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    AppRadius.r12),
+                      if (OrderStatusUi.canTrack(order.status))
+                        ElevatedButton(
+                          onPressed: () => context
+                              .push('/track/${order.id}'),
+                          style: ElevatedButton.styleFrom(
+                            padding:
+                                const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(
+                                      AppRadius.r12),
+                            ),
                           ),
+                          child: const Text('Track Order',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight:
+                                      FontWeight.bold)),
                         ),
-                        child: const Text('Track Order',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight:
-                                    FontWeight.bold)),
-                      ),
                     ],
                   )
                 else
@@ -477,55 +488,46 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
                             style:
                                 TextStyle(fontSize: 11)),
                       ),
+                      // Review is ONLY available after DELIVERED (server also enforces).
+                      if (order.status == 'delivered') ...[
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            final meal = order.items.isNotEmpty
+                                ? order.items.first.foodItem.name
+                                : 'your order';
+                            final foodId = order.items.isNotEmpty
+                                ? order.items.first.foodItem.id
+                                : null;
+                            var target =
+                                '/rate/${order.id}?meal=${Uri.encodeComponent(meal)}';
+                            if (foodId != null) {
+                              target +=
+                                  '&foodItemId=${Uri.encodeComponent(foodId)}';
+                            }
+                            context.push(target);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppRadius.r12),
+                            ),
+                          ),
+                          child: const Text('Rate & Review',
+                              style: TextStyle(fontSize: 11)),
+                        ),
+                      ],
                     ],
                   ),
               ],
             ),
           ],
         ),
+        ),
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'placed':
-      case 'confirmed':
-        return AppColors.accent;
-      case 'preparing':
-        return Colors.blue;
-      case 'ready':
-        return Colors.purple;
-      case 'out_for_delivery':
-        return AppColors.primary;
-      case 'delivered':
-        return AppColors.success;
-      case 'cancelled':
-        return AppColors.error;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getStatusLabel(String status) {
-    switch (status) {
-      case 'placed':
-        return 'Placed';
-      case 'confirmed':
-        return 'Confirmed';
-      case 'preparing':
-        return 'Preparing';
-      case 'ready':
-        return 'Ready';
-      case 'out_for_delivery':
-        return 'Out for Delivery';
-      case 'delivered':
-        return 'Delivered';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
   }
 
   Future<void> _handleReorder(BuildContext context, Order order) async {

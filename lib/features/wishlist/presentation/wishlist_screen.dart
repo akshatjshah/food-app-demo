@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../data/models/wishlist_item.dart';
 import '../data/repositories/wishlist_repository.dart';
 
@@ -181,6 +182,19 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          // Header refresh for loading/error/empty states where pull is
+          // unavailable. Same backend fetch; saved favorites are preserved
+          // on failure with a snackbar instead.
+          AppRefreshIconButton(
+            tooltip: 'Refresh wishlist',
+            errorMessage:
+                'Could not refresh wishlist. Showing saved data.',
+            onRefresh: () =>
+                ref.read(wishlistProvider.notifier).loadWishlist(),
+            hasError: () => ref.read(wishlistProvider).error != null,
+          ),
+        ],
       ),
       body: _buildBody(state),
     );
@@ -234,19 +248,23 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.75,
+    return AppPullToRefresh(
+      onRefresh: () => ref.read(wishlistProvider.notifier).loadWishlist(),
+      child: GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.75,
+        ),
+        itemCount: state.items.length,
+        itemBuilder: (context, index) {
+          final item = state.items[index];
+          return _buildWishlistCard(item);
+        },
       ),
-      itemCount: state.items.length,
-      itemBuilder: (context, index) {
-        final item = state.items[index];
-        return _buildWishlistCard(item);
-      },
     );
   }
 

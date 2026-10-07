@@ -264,6 +264,21 @@ let AuthService = class AuthService {
     async registerFcmToken(userId, token, platform) {
         return this.upsertFcmToken(userId, token, platform);
     }
+    async deactivateFcmToken(userId, token) {
+        if (token) {
+            await this.prisma.fcmToken.updateMany({
+                where: { userId, token },
+                data: { isActive: false },
+            });
+        }
+        else {
+            await this.prisma.fcmToken.updateMany({
+                where: { userId, isActive: true },
+                data: { isActive: false },
+            });
+        }
+        return { message: 'Device token(s) deactivated' };
+    }
     async adminLogin(email, password) {
         const user = await this.prisma.user.findFirst({
             where: { email, role: client_1.UserRole.admin },

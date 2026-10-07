@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationsModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const gateway_module_1 = require("../../gateway/gateway.module");
 const notifications_service_1 = require("./notifications.service");
 const notifications_controller_1 = require("./notifications.controller");
 let NotificationsModule = class NotificationsModule {
@@ -16,7 +17,7 @@ let NotificationsModule = class NotificationsModule {
 exports.NotificationsModule = NotificationsModule;
 exports.NotificationsModule = NotificationsModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule],
+        imports: [config_1.ConfigModule, (0, common_1.forwardRef)(() => gateway_module_1.GatewayModule)],
         providers: [notifications_service_1.NotificationsService],
         controllers: [notifications_controller_1.NotificationsController],
         exports: [notifications_service_1.NotificationsService],

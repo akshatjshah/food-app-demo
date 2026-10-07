@@ -44,6 +44,11 @@ export class CreateCouponDto {
   @IsOptional()
   isFirstOrderOnly?: boolean;
 
+  @ApiPropertyOptional({ example: true, description: 'Visible/active to customers' })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
+
   @ApiProperty({ example: '2026-12-31' })
   @IsString()
   expiresAt: string;

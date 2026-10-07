@@ -87,4 +87,9 @@ export declare class AuthController {
         platform: string;
         isActive: boolean;
     }>;
+    deactivateFcmToken(req: any, body?: {
+        token?: string;
+    }): Promise<{
+        message: string;
+    }>;
 }

@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
+import '../../home/data/models/home_data.dart';
+import '../../home/presentation/home_provider.dart';
 import '../data/models/menu_food.dart';
-import '../data/models/menu_category.dart';
-import 'menu_providers.dart';
 import 'search_provider.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchProvider);
-    final categoriesAsync = ref.watch(categoriesProvider);
+    // Same single source as Home + Menu chips: active backend categories.
+    final homeState = ref.watch(homeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -83,12 +85,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _buildBody(searchState, categoriesAsync),
+      body: _buildBody(searchState, homeState),
     );
   }
 
-  Widget _buildBody(
-      SearchState searchState, AsyncValue<List<MenuCategory>> categoriesAsync) {
+  Widget _buildBody(SearchState searchState, HomeState homeState) {
     if (searchState.query.isEmpty) {
       if (searchState.error != null && searchState.results.isEmpty) {
         return _buildErrorState(searchState.error!);
@@ -96,7 +97,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (searchState.isLoading && searchState.results.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }
-      return _buildSuggestions(categoriesAsync, searchState);
+      return _buildSuggestions(homeState, searchState);
     }
 
     if (searchState.isLoading) {
@@ -111,12 +112,38 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return _buildResults(searchState.results);
   }
 
-  Widget _buildSuggestions(
-      AsyncValue<List<MenuCategory>> categoriesAsync, SearchState searchState) {
-    final foods = searchState.results;
+  /// Shared refresh for search: re-fetches the single category source and
+  /// re-runs the current query against the backend. Existing results stay
+  /// visible if the refresh fails (notifiers preserve good data).
+  Future<void> _refreshSearch() async {
+    final query = ref.read(searchProvider).query;
+    await ref.read(homeProvider.notifier).refresh();
+    if (!mounted) return;
+    // Re-runs the current query against the backend (fire-and-forget:
+    // the provider streams loading/results/error states itself).
+    ref.read(searchProvider.notifier).submitQuery(query);
+    if (!mounted) return;
+    final searchState = ref.read(searchProvider);
+    final homeState = ref.read(homeProvider);
+    if ((searchState.error != null && searchState.results.isEmpty) ||
+        (homeState.categoriesError && homeState.categories.isEmpty)) {
+      showRefreshError(
+        context,
+        message: 'Could not refresh search. Showing saved data.',
+        onRetry: _refreshSearch,
+      );
+    }
+  }
 
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.s16),
+  Widget _buildSuggestions(HomeState homeState, SearchState searchState) {
+    final foods = searchState.results;
+    final categories = homeState.categories;
+
+    return AppPullToRefresh(
+      onRefresh: _refreshSearch,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.s16),
       children: [
         const Text('Popular Searches',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -141,30 +168,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const Text('Browse Categories',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: AppSpacing.s12),
-        categoriesAsync.when(
-          data: (categories) => Column(
+        // Single source of truth (same list as Home + Menu chips): active
+        // backend categories in admin order. No hardcoded fallback — an
+        // error shows a retry affordance instead of a fake category list.
+        if (homeState.categoriesLoading && categories.isEmpty)
+          const Center(child: CircularProgressIndicator())
+        else if (homeState.categoriesError && categories.isEmpty)
+          Row(
+            children: [
+              const Expanded(
+                child: Text('Categories unavailable',
+                    style: TextStyle(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ref.read(homeProvider.notifier).refresh(),
+                child: const Text('Retry'),
+              ),
+            ],
+          )
+        else
+          Column(
             children: categories
                 .where((c) => c.id != 'all')
                 .map((cat) {
-              return ListTile(
-                leading: cat.icon.isNotEmpty
-                    ? Text(cat.icon, style: const TextStyle(fontSize: 24))
-                    : const Icon(Icons.category, size: 24),
-                title: Text(cat.name),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                onTap: () {
-                  _controller.text = cat.name;
-                  ref
-                      .read(searchProvider.notifier)
-                      .submitQuery(cat.name);
-                },
-              );
+              return _buildCategoryTile(context, cat);
             }).toList(),
           ),
-          loading: () =>
-              const Center(child: CircularProgressIndicator()),
-          error: (_, __) => const SizedBox.shrink(),
-        ),
         const SizedBox(height: AppSpacing.s24),
         const Text('All Meals',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -179,7 +209,39 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           )
         else
           ...foods.map(_buildFoodCard),
-      ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryTile(BuildContext context, HomeCategory cat) {
+    Widget leading;
+    if (cat.icon != null && cat.icon!.isNotEmpty) {
+      leading = Text(cat.icon!, style: const TextStyle(fontSize: 24));
+    } else if (cat.imageUrl != null && cat.imageUrl!.isNotEmpty) {
+      leading = ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: cat.imageUrl!,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          placeholder: (context, url) =>
+              Container(width: 40, height: 40, color: Colors.grey[200]),
+          errorWidget: (context, url, error) =>
+              const Icon(Icons.category, size: 24),
+        ),
+      );
+    } else {
+      leading = const Icon(Icons.category, size: 24);
+    }
+    return ListTile(
+      leading: leading,
+      title: Text(cat.name),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      onTap: () {
+        _controller.text = cat.name;
+        ref.read(searchProvider.notifier).submitQuery(cat.name);
+      },
     );
   }
 
@@ -222,13 +284,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildResults(List<MenuFood> results) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final food = results[index];
-        return _buildFoodCard(food);
-      },
+    return AppPullToRefresh(
+      onRefresh: _refreshSearch,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        itemCount: results.length,
+        itemBuilder: (context, index) {
+          final food = results[index];
+          return _buildFoodCard(food);
+        },
+      ),
     );
   }
 

@@ -76,6 +76,9 @@ export declare class AuthService {
         platform: string;
         isActive: boolean;
     }>;
+    deactivateFcmToken(userId: string, token?: string): Promise<{
+        message: string;
+    }>;
     adminLogin(email: string, password: string): Promise<{
         access_token: string;
         user: {

@@ -67,6 +67,12 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateCouponDto.prototype, "isFirstOrderOnly", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true, description: 'Visible/active to customers' }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateCouponDto.prototype, "isActive", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ example: '2026-12-31' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

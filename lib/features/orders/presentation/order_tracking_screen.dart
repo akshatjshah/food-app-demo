@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../data/models/order.dart';
 import '../data/repositories/order_repository.dart';
 
@@ -25,9 +26,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     'confirmed': 1,
     'preparing': 2,
     'ready': 3,
+    'rider_assigned': 3,
+    'picked_up': 4,
     'out_for_delivery': 4,
     'delivered': 5,
     'cancelled': -1,
+    'rejected': -2,
   };
 
   static const _stepLabels = [
@@ -60,6 +64,28 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         _error = 'Failed to load order details';
         _isLoading = false;
       });
+    }
+  }
+
+  /// Pull/header refresh: re-fetches live order status from the backend.
+  /// Unlike the initial load, a failed refresh never clears the already
+  /// shown order — it surfaces a snackbar with Retry instead.
+  Future<void> _refreshTracking() async {
+    try {
+      final order = await _repo.getOrder(widget.orderId);
+      if (!mounted) return;
+      setState(() {
+        _order = order;
+        _error = null;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      showRefreshError(
+        context,
+        message: 'Could not refresh order status. Showing saved data.',
+        onRetry: _refreshTracking,
+      );
     }
   }
 
@@ -103,6 +129,17 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           icon: const Icon(Icons.close_rounded),
           onPressed: () => context.go('/home'),
         ),
+        actions: [
+          // Header refresh for live status; pull-to-refresh on the content
+          // below performs the same backend fetch.
+          AppRefreshIconButton(
+            tooltip: 'Refresh order status',
+            errorMessage:
+                'Could not refresh order status. Showing saved data.',
+            onRefresh: _refreshTracking,
+            hasError: () => _error != null && _order == null,
+          ),
+        ],
       ),
       body: _buildBody(),
     );
@@ -140,26 +177,55 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
     final order = _order!;
     final isCancelled = order.status == 'cancelled';
+    final isRejected = order.status == 'rejected';
     final canCancel = order.status == 'placed' || order.status == 'confirmed';
 
     return Column(
       children: [
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildMapPlaceholder(context),
-                _buildStatusSection(context, order, isCancelled),
-                if (order.items.isNotEmpty) _buildOrderItems(context, order),
-                if (order.deliveryAddress != null) _buildDeliveryAddress(context, order),
-                _buildOrderSummary(context, order),
-                const SizedBox(height: AppSpacing.s16),
-              ],
+          child: AppPullToRefresh(
+            onRefresh: _refreshTracking,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  _buildMapPlaceholder(context),
+                  _buildStatusSection(context, order, isCancelled, isRejected),
+                  if (order.items.isNotEmpty) _buildOrderItems(context, order),
+                  if (order.deliveryAddress != null) _buildDeliveryAddress(context, order),
+                  _buildOrderSummary(context, order),
+                  const SizedBox(height: AppSpacing.s16),
+                ],
+              ),
             ),
           ),
         ),
         if (canCancel) _buildCancelBar(context),
+        // Rate & Review ONLY after DELIVERED.
+        if (order.status == 'delivered') _buildReviewBar(context, order),
       ],
+    );
+  }
+
+  Widget _buildReviewBar(BuildContext context, Order order) {
+    final meal = order.items.isNotEmpty ? order.items.first.foodItem.name : 'your order';
+    final foodId = order.items.isNotEmpty ? order.items.first.foodItem.id : null;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        child: ElevatedButton.icon(
+          onPressed: () {
+            var target = '/rate/${order.id}?meal=${Uri.encodeComponent(meal)}';
+            if (foodId != null) {
+              target += '&foodItemId=${Uri.encodeComponent(foodId)}';
+            }
+            context.push(target);
+          },
+          icon: const Icon(Icons.star_rate_rounded),
+          label: const Text('Rate & Review',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+      ),
     );
   }
 
@@ -191,7 +257,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     );
   }
 
-  Widget _buildStatusSection(BuildContext context, Order order, bool isCancelled) {
+  Widget _buildStatusSection(
+      BuildContext context, Order order, bool isCancelled,
+      [bool isRejected = false]) {
     final currentStep = _statusSteps[order.status] ?? 0;
     final isDelivered = order.status == 'delivered';
 
@@ -205,9 +273,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildEtaHeader(context, order, isCancelled, isDelivered),
+          _buildEtaHeader(context, order, isCancelled || isRejected, isDelivered),
           const Divider(height: 32),
-          if (isCancelled) _buildCancelledBanner(context) else ...[
+          if (isCancelled)
+            _buildCancelledBanner(context)
+          else if (isRejected)
+            _buildRejectedBanner(context)
+          else ...[
             _buildTimeline(context, currentStep),
           ],
         ],
@@ -262,6 +334,38 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       child: Text(
         'OTP: ${order.otpCode ?? '------'}',
         style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13),
+      ),
+    );
+  }
+
+  Widget _buildRejectedBanner(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s20),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadius.r16),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.block_outlined, color: AppColors.error, size: 24),
+          SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Order Rejected',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error, fontSize: 15),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'This order was rejected. It remains in your history.',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

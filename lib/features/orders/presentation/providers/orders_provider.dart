@@ -5,6 +5,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/local_storage.dart';
 import '../../data/models/order.dart';
 import '../../data/repositories/order_repository.dart';
+import '../order_status_ui.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository(ApiClient.instance);
@@ -44,16 +45,9 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
 
   OrdersNotifier(this._repo) : super(const OrdersState());
 
-  static const _ongoingStatuses = [
-    'placed',
-    'confirmed',
-    'preparing',
-    'ready',
-    'out_for_delivery',
-  ];
-
-  static const _historyStatuses = ['delivered', 'cancelled'];
-
+  // Display-only split. Nothing is ever filtered out: rejected stays in
+  // BOTH lists, unknown statuses fall back to history. Backend + repository
+  // return every status unfiltered.
   Future<void> loadOrders() async {
     final token = LocalStorage.getAccessToken();
     if (token == null || token.isEmpty) {
@@ -69,12 +63,10 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final allOrders = await _repo.getOrders();
-      final ongoing = allOrders
-          .where((o) => _ongoingStatuses.contains(o.status))
-          .toList();
-      final history = allOrders
-          .where((o) => _historyStatuses.contains(o.status))
-          .toList();
+      final ongoing =
+          allOrders.where((o) => OrderStatusUi.isOngoing(o.status)).toList();
+      final history =
+          allOrders.where((o) => OrderStatusUi.isHistory(o.status)).toList();
       state = state.copyWith(
         ongoingOrders: ongoing,
         historyOrders: history,

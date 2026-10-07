@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/notifications/fcm_service.dart';
 import '../../../../core/storage/local_storage.dart';
 import '../../address/presentation/address_provider.dart';
 import '../../wishlist/presentation/wishlist_screen.dart';
@@ -209,6 +210,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         clearSuccess: true,
         resendCooldownSeconds: 0,
       );
+      // Register FCM device token against the new session (best effort).
+      try {
+        await FcmService.registerAfterLogin();
+      } catch (_) {}
       return true;
     } on DioException catch (e) {
       state = state.copyWith(
@@ -254,6 +259,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: user,
         clearDevOtp: true,
       );
+      try {
+        await FcmService.registerAfterLogin();
+      } catch (_) {}
     } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -263,6 +271,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    // Deactivate the device token server-side before clearing the session.
+    try {
+      await FcmService.deactivateOnLogout();
+    } catch (_) {}
     await LocalStorage.clearAuth();
     _ref.read(addressNotifierProvider.notifier).clear();
     try {

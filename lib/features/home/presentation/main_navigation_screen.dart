@@ -72,8 +72,15 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           }
           break;
         case 1: // Menu
-          if (ref.read(categoriesProvider).hasError) {
-            ref.invalidate(categoriesProvider);
+          // Menu chips read the single shared category source (`homeProvider`,
+          // same list as Home → Explore Categories). If that load failed or is
+          // empty, refresh it so a stale chip (e.g. removed "Breads") cannot
+          // linger in cache.
+          final menuHome = ref.read(homeProvider);
+          if (menuHome.categoriesError ||
+              (menuHome.categories.isEmpty &&
+                  !menuHome.categoriesLoading)) {
+            ref.read(homeProvider.notifier).refresh();
           }
           final foods = ref.read(foodListProvider);
           if (!foods.isLoading && foods.error != null) {

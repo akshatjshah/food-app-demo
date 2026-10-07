@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../../cart/presentation/cart_provider.dart';
 import '../../wishlist/presentation/wishlist_screen.dart';
 import '../data/models/menu_food.dart';
@@ -112,9 +113,11 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
         ),
         data: (food) => Stack(
           children: [
-            CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
+            AppPullToRefresh(
+              onRefresh: () => _refreshMeal(),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
                 _buildSliverAppBar(context, food),
                 SliverToBoxAdapter(
                   child: Padding(
@@ -136,13 +139,32 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                     ),
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
             _buildBottomActionBar(context, food),
           ],
         ),
       ),
     );
+  }
+
+  /// Re-fetches this dish from the backend (price, images, availability,
+  /// customizations) via the existing food-detail provider. Failures keep
+  /// the current dish on screen and surface a snackbar with Retry.
+  Future<void> _refreshMeal() async {
+    final provider = foodDetailProvider(widget.mealId);
+    ref.invalidate(provider);
+    try {
+      await ref.read(provider.future);
+    } catch (_) {
+      if (!mounted) return;
+      showRefreshError(
+        context,
+        message: 'Could not refresh dish. Showing saved data.',
+        onRetry: _refreshMeal,
+      );
+    }
   }
 
   Widget _buildSliverAppBar(BuildContext context, MenuFood food) {

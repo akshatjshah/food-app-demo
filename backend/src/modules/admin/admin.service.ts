@@ -22,8 +22,8 @@ const ORDER_TRANSITIONS: Record<string, string[]> = {
   pending_payment: ['placed', 'cancelled'],
   placed: ['confirmed', 'cancelled', 'rejected'],
   confirmed: ['preparing', 'cancelled', 'rejected'],
-  preparing: ['ready', 'cancelled'],
-  ready: ['rider_assigned', 'cancelled'],
+  preparing: ['ready', 'cancelled', 'rejected'],
+  ready: ['rider_assigned', 'cancelled', 'rejected'],
   rider_assigned: ['picked_up', 'cancelled'],
   picked_up: ['out_for_delivery'],
   out_for_delivery: ['delivered', 'cancelled'],
@@ -121,7 +121,9 @@ export class AdminService {
   }
 
   async getOrdersByStatus() {
-    const statuses = ['placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+    // Must include every OrderStatus so rejected (and intermediate) orders
+    // never disappear from admin counts.
+    const statuses = ['pending_payment', 'placed', 'confirmed', 'preparing', 'ready', 'rider_assigned', 'picked_up', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'];
     const results = await Promise.all(
       statuses.map(async (status) => {
         const count = await this.prisma.order.count({ where: { status: status as any } });
@@ -257,7 +259,7 @@ export class AdminService {
   async broadcastAnnouncement(
     title: string,
     body: string,
-    type: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT' = 'ANNOUNCEMENT',
+    type: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT' | 'BROADCAST' = 'ANNOUNCEMENT',
     userIds?: string[],
     referenceId?: string,
   ) {

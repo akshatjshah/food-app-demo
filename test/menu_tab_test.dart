@@ -5,18 +5,50 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:parabdi/features/cart/data/models/cart.dart';
 import 'package:parabdi/features/cart/data/repositories/cart_repository.dart';
 import 'package:parabdi/features/cart/presentation/cart_provider.dart';
-import 'package:parabdi/features/menu/data/models/menu_category.dart';
+import 'package:parabdi/features/home/data/models/home_data.dart';
+import 'package:parabdi/features/home/data/repositories/home_repository.dart';
+import 'package:parabdi/features/home/presentation/home_provider.dart';
 import 'package:parabdi/features/menu/data/models/menu_food.dart';
 import 'package:parabdi/features/menu/data/repositories/menu_repository.dart';
 import 'package:parabdi/features/menu/presentation/menu_providers.dart';
 import 'package:parabdi/features/menu/presentation/menu_tab.dart';
+
+/// Single source of truth for the Menu chips under test: the same
+/// [homeRepositoryProvider] that feeds Home → Explore Categories.
+/// There is intentionally NO separate category fetch for Menu.
+class FakeHomeRepository extends HomeRepository {
+  FakeHomeRepository() : super(Dio());
+
+  List<HomeCategory> categories = [];
+
+  @override
+  Future<List<BannerItem>> getBanners(
+          {int timeoutSeconds = 8, int maxRetries = 1}) async =>
+      [];
+
+  @override
+  Future<List<HomeCategory>> getCategories(
+          {int timeoutSeconds = 8, int maxRetries = 1}) async =>
+      categories;
+
+  @override
+  Future<List<HomeFood>> getFoods({
+    String? categoryId,
+    bool? isBestseller,
+    bool? isVeg,
+    bool? isHealthyPick,
+    int? limit,
+    int timeoutSeconds = 8,
+    int maxRetries = 1,
+  }) async =>
+      [];
+}
 
 class FakeMenuRepository extends MenuRepository {
   FakeMenuRepository() : super(Dio());
 
   final List<Map<String, dynamic?>> calls = [];
   List<MenuFood> foods = [];
-  List<MenuCategory> categories = [];
 
   @override
   Future<List<MenuFood>> getFoods({
@@ -46,9 +78,6 @@ class FakeMenuRepository extends MenuRepository {
     }
     return result;
   }
-
-  @override
-  Future<List<MenuCategory>> getCategories() async => categories;
 }
 
 class FakeCartRepository extends CartRepository {
@@ -150,16 +179,18 @@ Future<void> _settleUntil(WidgetTester tester, bool Function() condition,
 }
 
 void main() {
+  late FakeHomeRepository homeRepo;
   late FakeMenuRepository menuRepo;
   late FakeCartRepository cartRepo;
 
   setUp(() {
-    menuRepo = FakeMenuRepository()
+    homeRepo = FakeHomeRepository()
       ..categories = const [
-        MenuCategory(id: 'c-thali', name: 'Thali'),
-        MenuCategory(id: 'c-rice', name: 'Rice & Biryani'),
-        MenuCategory(id: 'c-breads', name: 'Breads'),
-      ]
+        HomeCategory(id: 'c-thali', name: 'Thali'),
+        HomeCategory(id: 'c-rice', name: 'Rice & Biryani'),
+        HomeCategory(id: 'c-breads', name: 'Breads'),
+      ];
+    menuRepo = FakeMenuRepository()
       ..foods = [
         _food('1', 'Gujarati Thali', categoryId: 'c-thali'),
         _food('2', 'Punjabi Thali', categoryId: 'c-thali'),
@@ -173,6 +204,7 @@ void main() {
   Widget buildApp() {
     return ProviderScope(
       overrides: [
+        homeRepositoryProvider.overrideWithValue(homeRepo),
         menuRepositoryProvider.overrideWithValue(menuRepo),
         cartRepositoryProvider.overrideWithValue(cartRepo),
       ],
@@ -377,5 +409,56 @@ void main() {
 
     expect(cartRepo.stored.first['quantity'], 2);
     expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('chips mirror the shared category source exactly',
+      (tester) async {
+    _usePhoneViewport(tester);
+    await tester.pumpWidget(buildApp());
+    await _settle(tester);
+
+    // Same active categories as the shared source, in the same order.
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Thali'), findsOneWidget);
+    expect(find.text('Rice & Biryani'), findsOneWidget);
+    expect(find.text('Breads'), findsOneWidget);
+  });
+
+  testWidgets('renamed category in the source renames the Menu chip',
+      (tester) async {
+    _usePhoneViewport(tester);
+    homeRepo.categories = const [
+      HomeCategory(id: 'c-thali', name: 'Thali'),
+      HomeCategory(id: 'c-rice', name: 'Rice & Biryani'),
+      HomeCategory(id: 'c-cold', name: 'Cold Drinks'),
+    ];
+    await tester.pumpWidget(buildApp());
+    await _settle(tester);
+
+    expect(find.text('Cold Drinks'), findsOneWidget);
+    expect(find.text('Breads'), findsNothing);
+  });
+
+  testWidgets('removed category disappears from chips after refresh',
+      (tester) async {
+    _usePhoneViewport(tester);
+    await tester.pumpWidget(buildApp());
+    await _settle(tester);
+    expect(find.text('Breads'), findsOneWidget);
+
+    // Admin deletes/disables "Breads": it no longer exists as an active
+    // backend category. After refresh (the same path pull-to-refresh uses)
+    // the stale chip must be gone — no hardcoded fallback may reintroduce it.
+    homeRepo.categories = const [
+      HomeCategory(id: 'c-thali', name: 'Thali'),
+      HomeCategory(id: 'c-rice', name: 'Rice & Biryani'),
+    ];
+    final ctx = tester.element(find.byType(MenuTab));
+    ProviderScope.containerOf(ctx).read(homeProvider.notifier).refresh();
+    await _settle(tester);
+
+    expect(find.text('Breads'), findsNothing);
+    expect(find.text('Thali'), findsOneWidget);
+    expect(find.text('All'), findsOneWidget);
   });
 }

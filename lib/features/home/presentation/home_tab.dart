@@ -1,13 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../core/notifications/fcm_service.dart';
+import '../../../core/notifications/notification_popup.dart';
+import '../../../core/notifications/notification_realtime.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../../address/data/models/address.dart';
 import '../../address/presentation/address_provider.dart';
 import '../../cart/presentation/cart_provider.dart';
+import '../../notifications/data/models/notification_item.dart';
 import '../../notifications/presentation/notifications_provider.dart';
+import '../../settings/presentation/app_content_provider.dart';
 import '../../subscription/presentation/subscription_provider.dart';
 import '../../wishlist/presentation/wishlist_screen.dart';
 import 'avatar_image.dart';
@@ -23,6 +31,12 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
+  StreamSubscription<NotificationItem>? _notifSub;
+  OverlayEntry? _popupEntry;
+  Timer? _popupTimer;
+  // Anchor linking the bell icon to the floating popup below it.
+  final LayerLink _bellLink = LayerLink();
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +56,77 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       try {
         ref.read(subscriptionNotifierProvider.notifier).loadMySubscriptions();
       } catch (_) {}
+      // Realtime notifications: FCM-instant + automatic polling fallback.
+      // New arrivals update the badge and show the bell popup with no
+      // manual refresh needed.
+      NotificationRealtime.instance
+          .attachContainer(ProviderScope.containerOf(context));
+      NotificationRealtime.instance.start();
+      _notifSub ??=
+          NotificationRealtime.instance.stream.listen(_showBellPopup);
     });
+  }
+
+  @override
+  void dispose() {
+    _notifSub?.cancel();
+    _hideBellPopup();
+    super.dispose();
+  }
+
+  /// Floating white rounded popup DIRECTLY BELOW the bell icon showing
+  /// icon + title + message + unread indicator. Auto-dismisses after 6s;
+  /// tapping opens the relevant screen (and marks read first).
+  void _showBellPopup(NotificationItem notif) {
+    if (!mounted) return;
+    _hideBellPopup();
+    _popupEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 92,
+        right: 12,
+        child: CompositedTransformFollower(
+          link: _bellLink,
+          showWhenUnlinked: false,
+          targetAnchor: Alignment.bottomRight,
+          followerAnchor: Alignment.topRight,
+          offset: const Offset(0, 8),
+          child: NotificationBellPopup(
+            notification: notif,
+            onClose: _hideBellPopup,
+            onTap: () => _onPopupTap(notif),
+          ),
+        ),
+      ),
+    );
+    try {
+      Overlay.of(context).insert(_popupEntry!);
+    } catch (_) {
+      _popupEntry = null;
+      return;
+    }
+    _popupTimer?.cancel();
+    _popupTimer = Timer(const Duration(seconds: 6), _hideBellPopup);
+  }
+
+  void _hideBellPopup() {
+    _popupTimer?.cancel();
+    _popupTimer = null;
+    try {
+      _popupEntry?.remove();
+    } catch (_) {}
+    _popupEntry = null;
+  }
+
+  Future<void> _onPopupTap(NotificationItem notif) async {
+    _hideBellPopup();
+    try {
+      await ref
+          .read(notificationsRepositoryProvider)
+          .markAsRead(notif.id);
+    } catch (_) {}
+    refreshNotifications(ref);
+    if (!mounted) return;
+    FcmService.openNotificationTarget(notif.type, notif.referenceId);
   }
 
   String _formatAddress(Address address) {
@@ -64,8 +148,18 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => ref.read(homeProvider.notifier).refresh(),
+        child: AppPullToRefresh(
+          onRefresh: () async {
+            await ref.read(homeProvider.notifier).refresh();
+            // Published App Content + inbox must refresh with the same pull.
+            try {
+              await ref.read(appContentProvider.notifier).load();
+            } catch (_) {}
+            try {
+              await NotificationRealtime.instance.checkNow();
+            } catch (_) {}
+            refreshNotifications(ref);
+          },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 24),
@@ -76,16 +170,16 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 _buildSearchBar(context),
                 _buildOfferCarousel(context, homeState),
                 if (homeState.bannersLoading && homeState.banners.isEmpty) _buildSectionLoading(context),
-                if (homeState.bannersError && homeState.banners.isEmpty) _buildSectionError(context, 'Banners unavailable'),
+                if (homeState.bannersError && homeState.banners.isEmpty) _buildSectionError(context, 'Banners unavailable', showRetry: true),
                 _buildCategories(context, homeState),
                 if (homeState.categoriesLoading && homeState.categories.isEmpty) _buildSectionLoading(context),
-                if (homeState.categoriesError && homeState.categories.isEmpty) _buildSectionError(context, 'Categories unavailable'),
+                if (homeState.categoriesError && homeState.categories.isEmpty) _buildSectionError(context, 'Categories unavailable', showRetry: true),
                 _buildChefSpecials(context, homeState),
                 if (homeState.bestsellersLoading && homeState.bestsellers.isEmpty) _buildSectionLoading(context),
-                if (homeState.bestsellersError && homeState.bestsellers.isEmpty) _buildSectionError(context, 'Chef specials unavailable'),
+                if (homeState.bestsellersError && homeState.bestsellers.isEmpty) _buildSectionError(context, 'Chef specials unavailable', showRetry: true),
                 _buildHealthyPicks(context, homeState),
                 if (homeState.healthyPicksLoading && homeState.healthyPicks.isEmpty) _buildSectionLoading(context),
-                if (homeState.healthyPicksError && homeState.healthyPicks.isEmpty) _buildSectionError(context, 'Healthy picks unavailable'),
+                if (homeState.healthyPicksError && homeState.healthyPicks.isEmpty) _buildSectionError(context, 'Healthy picks unavailable', showRetry: true),
                 _buildSubscriptionBanner(context),
               ],
             ),
@@ -169,16 +263,21 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  IconButton(
-                    onPressed: () => _openNotifications(context),
-                    icon:
-                        const Icon(Icons.notifications_outlined, size: 28),
-                    tooltip: 'Notifications',
+                  CompositedTransformTarget(
+                    link: _bellLink,
+                    child: IconButton(
+                      onPressed: () => _openNotifications(context),
+                      icon:
+                          const Icon(Icons.notifications_outlined, size: 28),
+                      tooltip: 'Notifications',
+                    ),
                   ),
                   Consumer(
                     builder: (context, ref, _) {
+                      // Server unread count = source of truth; updates instantly
+                      // via FCM onMessage invalidate, no manual refresh needed.
                       final unreadAsync =
-                          ref.watch(filteredUnreadCountProvider);
+                          ref.watch(unreadCountProvider);
                       final count =
                           unreadAsync.valueOrNull ?? 0;
                       if (count <= 0) return const SizedBox.shrink();
@@ -783,10 +882,22 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       activeName = null;
     }
     final hasActive = activeName != null && activeName.isNotEmpty;
+    // Dynamic business content from backend Settings (Admin → Publish → here).
+    // No hardcoded marketing copy: server value wins; empty state refetches.
+    final appContent = ref.watch(appContentProvider);
+    final promoText = appContent.values['home_promo_text'];
+    if ((promoText == null || promoText.isEmpty) && !appContent.isLoading) {
+      Future.microtask(
+          () => ref.read(appContentProvider.notifier).loadIfMissing('home_promo_text'));
+    }
     final bannerTitle = hasActive ? activeName : 'Subscribe & Save';
     final bannerSubtitle = hasActive
         ? 'Status: ${activeStatus ?? 'active'} — manage renewals, pauses and skipped meals.'
-        : 'Get organic meals delivered daily at up to 20% discount.';
+        : (promoText != null && promoText.isNotEmpty
+            ? promoText
+            : (appContent.isLoading
+                ? 'Loading today\u2019s offer\u2026'
+                : 'No offer published yet — pull to refresh.'));
 
     return Container(
       margin: const EdgeInsets.all(AppSpacing.s24),
@@ -850,13 +961,30 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  Widget _buildSectionError(BuildContext context, String message) {
+  /// Section error with optional Retry. Retry re-runs the existing home
+  /// fetch ([HomeNotifier.refresh]: banners + categories + foods) — a real
+  /// backend reload that preserves already-loaded sections on failure.
+  Widget _buildSectionError(BuildContext context, String message, {bool showRetry = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24, vertical: AppSpacing.s8),
       child: Center(
-        child: Text(
-          message,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+              ),
+            ),
+            if (showRetry) ...[
+              const SizedBox(width: AppSpacing.s8),
+              TextButton(
+                onPressed: () => ref.read(homeProvider.notifier).refresh(),
+                child: const Text('Retry'),
+              ),
+            ],
+          ],
         ),
       ),
     );

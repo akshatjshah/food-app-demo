@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../data/models/address.dart';
 import '../data/models/recent_location.dart';
 import '../data/repositories/places_repository.dart';
@@ -165,10 +166,27 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: _popOrHome,
         ),
+        actions: [
+          // Re-fetches saved addresses from the backend (same loader used
+          // on init/retry). Saved results are preserved on failure.
+          AppRefreshIconButton(
+            tooltip: 'Refresh addresses',
+            errorMessage:
+                'Could not refresh addresses. Showing saved data.',
+            onRefresh: () =>
+                ref.read(addressNotifierProvider.notifier).loadAddresses(),
+            hasError: () =>
+                ref.read(addressNotifierProvider).errorMessage != null,
+          ),
+        ],
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.s16),
+        child: AppPullToRefresh(
+          onRefresh: () =>
+              ref.read(addressNotifierProvider.notifier).loadAddresses(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.s16),
           children: [
             _buildSearchField(),
             const SizedBox(height: AppSpacing.s16),
@@ -186,6 +204,7 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
             ],
             const SizedBox(height: AppSpacing.s32),
           ],
+          ),
         ),
       ),
     );

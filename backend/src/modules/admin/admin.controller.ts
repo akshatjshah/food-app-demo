@@ -81,7 +81,7 @@ export class AdminController {
   @Post('notifications/broadcast')
   @ApiOperation({ summary: 'Broadcast an announcement/offer to customers (admin)' })
   async broadcast(
-    @Body() body: { title: string; body: string; type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT'; userIds?: string[]; referenceId?: string },
+    @Body() body: { title: string; body: string; type?: 'OFFER' | 'MENU_UPDATE' | 'ANNOUNCEMENT' | 'BROADCAST'; userIds?: string[]; referenceId?: string },
   ) {
     return this.adminService.broadcastAnnouncement(
       body.title,

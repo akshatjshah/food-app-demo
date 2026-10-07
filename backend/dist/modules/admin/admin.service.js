@@ -30,8 +30,8 @@ const ORDER_TRANSITIONS = {
     pending_payment: ['placed', 'cancelled'],
     placed: ['confirmed', 'cancelled', 'rejected'],
     confirmed: ['preparing', 'cancelled', 'rejected'],
-    preparing: ['ready', 'cancelled'],
-    ready: ['rider_assigned', 'cancelled'],
+    preparing: ['ready', 'cancelled', 'rejected'],
+    ready: ['rider_assigned', 'cancelled', 'rejected'],
     rider_assigned: ['picked_up', 'cancelled'],
     picked_up: ['out_for_delivery'],
     out_for_delivery: ['delivered', 'cancelled'],
@@ -106,7 +106,7 @@ let AdminService = class AdminService {
         return [...byDay.entries()].map(([date, v]) => ({ date, revenue: v.revenue, orders: v.orders }));
     }
     async getOrdersByStatus() {
-        const statuses = ['placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+        const statuses = ['pending_payment', 'placed', 'confirmed', 'preparing', 'ready', 'rider_assigned', 'picked_up', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'];
         const results = await Promise.all(statuses.map(async (status) => {
             const count = await this.prisma.order.count({ where: { status: status } });
             return { status, count };

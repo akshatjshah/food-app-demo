@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
+import '../../settings/presentation/app_content_provider.dart';
 import '../data/models/subscription.dart';
 import 'subscription_provider.dart';
 
@@ -34,6 +36,21 @@ class _SubscriptionTabState extends ConsumerState<SubscriptionTab> {
     }
   }
 
+  /// Re-fetches plans + my subscriptions from the backend via the existing
+  /// notifier. Loaded plans stay visible if the refresh fails.
+  Future<void> _refreshSubscriptions() async {
+    final notifier = ref.read(subscriptionNotifierProvider.notifier);
+    await notifier.loadPlans();
+    if (!mounted) return;
+    await notifier.loadMySubscriptions();
+    // Published promo text must refresh with the same pull — otherwise an
+    // Admin publish never appears until restart.
+    try {
+      await ref.read(appContentProvider.notifier).refreshKey(
+          'subscription_promo_text');
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(subscriptionNotifierProvider);
@@ -51,6 +68,18 @@ class _SubscriptionTabState extends ConsumerState<SubscriptionTab> {
                 onPressed: () => context.pop(),
               )
             : null,
+        actions: [
+          // Covers non-scrollable states (loading / error / empty) where
+          // pull-to-refresh is unavailable. Same backend fetch as pull.
+          AppRefreshIconButton(
+            tooltip: 'Refresh subscriptions',
+            errorMessage:
+                'Could not refresh subscriptions. Showing saved data.',
+            onRefresh: _refreshSubscriptions,
+            hasError: () =>
+                ref.read(subscriptionNotifierProvider).errorMessage != null,
+          ),
+        ],
       ),
       body: state.isLoading && state.plans.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -71,33 +100,51 @@ class _SubscriptionTabState extends ConsumerState<SubscriptionTab> {
                     ],
                   ),
                 )
-              : SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(
-                      left: 24, right: 24, bottom: 120),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (activeSub != null) ...[
-                        _buildActivePlanCard(context, activeSub),
-                        const SizedBox(height: AppSpacing.s32),
+              : AppPullToRefresh(
+                  onRefresh: _refreshSubscriptions,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(
+                        left: 24, right: 24, bottom: 120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (activeSub != null) ...[
+                          _buildActivePlanCard(context, activeSub),
+                          const SizedBox(height: AppSpacing.s32),
+                        ],
+                        Text(
+                          'Explore Subscription Plans',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: AppSpacing.s8),
+                        Builder(builder: (context) {
+                          // Dynamic promo from backend Settings (Admin → Publish).
+                          // No hardcoded marketing fallback — server value wins.
+                          final content = ref.watch(appContentProvider);
+                          final promo = content.values['subscription_promo_text'];
+                          if ((promo == null || promo.isEmpty) && !content.isLoading) {
+                            Future.microtask(() => ref
+                                .read(appContentProvider.notifier)
+                                .loadIfMissing('subscription_promo_text'));
+                          }
+                          return Text(
+                            (promo != null && promo.isNotEmpty)
+                                ? promo
+                                : (content.isLoading
+                                    ? 'Loading subscription offer…'
+                                    : 'No subscription offer published yet.'),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          );
+                        }),
+                        const SizedBox(height: AppSpacing.s24),
+                        ...state.plans.map(
+                            (plan) => _buildPlanCard(context, plan)),
                       ],
-                      Text(
-                        'Explore Subscription Plans',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: AppSpacing.s8),
-                      Text(
-                        'Enjoy luxury home-cooked style meals daily with zero hassle and free priority delivery.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.s24),
-                      ...state.plans.map(
-                          (plan) => _buildPlanCard(context, plan)),
-                    ],
+                    ),
                   ),
                 ),
     );

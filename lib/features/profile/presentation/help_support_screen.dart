@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
+import '../../settings/presentation/app_content_provider.dart';
 
 /// Help & Chat Support — real in-app support surface: FAQ answers,
 /// order-help deep links into the existing Orders tab flow, and
-/// contact rows. No backend ticket API exists, so no fake ticket
+/// contact rows (contact info is dynamic from backend Settings).
+/// No backend ticket API exists, so no fake ticket
 /// submission is included.
-class HelpSupportScreen extends StatelessWidget {
+class HelpSupportScreen extends ConsumerStatefulWidget {
   const HelpSupportScreen({super.key});
 
+  @override
+  ConsumerState<HelpSupportScreen> createState() => _HelpSupportScreenState();
+}
+
+class _HelpSupportScreenState extends ConsumerState<HelpSupportScreen> {
   static const _faqs = [
     (
       q: 'How do I track my order?',
@@ -39,7 +48,44 @@ class HelpSupportScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Always fetch the latest published copy on open — an Admin publish
+    // made while the app runs must appear without restart.
+    Future.microtask(
+        () => ref.read(appContentProvider.notifier).load());
+  }
+
+  Future<void> _refresh() async {
+    try {
+      await ref.read(appContentProvider.notifier).load();
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Dynamic contact info from backend Settings (Admin → Publish).
+    // No hardcoded kitchen-hours copy — server value wins.
+    final content = ref.watch(appContentProvider);
+    final contactInfo = content.values['contact_info'];
+    if ((contactInfo == null || contactInfo.isEmpty) &&
+        !content.isLoading) {
+      Future.microtask(() => ref
+          .read(appContentProvider.notifier)
+          .refreshKey('contact_info'));
+    }
+    final contactLine = (contactInfo != null && contactInfo.isNotEmpty)
+        ? contactInfo
+        : (content.isLoading
+            ? 'Loading support info…'
+            : 'Support contact has not been published yet.');
+    final contactEmail = (contactInfo != null &&
+            contactInfo.contains('@'))
+        ? RegExp(r'[\w.+-]+@[\w-]+\.[\w.]+')
+                .firstMatch(contactInfo)
+                ?.group(0) ??
+            'support@parabdi.in'
+        : 'support@parabdi.in';
     return Scaffold(
       appBar: AppBar(
         title: const Text('Help & Chat Support'),
@@ -47,12 +93,24 @@ class HelpSupportScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          AppRefreshIconButton(
+            tooltip: 'Refresh support info',
+            errorMessage:
+                'Could not refresh support info. Showing saved data.',
+            onRefresh: _refresh,
+            hasError: () => false,
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: AppPullToRefresh(
+        onRefresh: _refresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSpacing.s24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.s20),
@@ -71,18 +129,18 @@ class HelpSupportScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary),
                     ),
                     const SizedBox(width: AppSpacing.s16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('We are here to help',
+                          const Text('We are here to help',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 15)),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Pure Veg Gujarati cloud kitchen • 9 AM – 9 PM, all days',
-                            style:
-                                TextStyle(fontSize: 12, color: Colors.grey),
+                            contactLine,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -119,12 +177,12 @@ class HelpSupportScreen extends StatelessWidget {
                     onTap: () => context.push('/notifications'),
                   ),
                   const Divider(height: 1),
-                  const ListTile(
-                    leading: Icon(Icons.email_outlined),
-                    title: Text('support@parabdi.in',
-                        style: TextStyle(
+                  ListTile(
+                    leading: const Icon(Icons.email_outlined),
+                    title: Text(contactEmail,
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 14)),
-                    subtitle: Text('We reply within a few hours',
+                    subtitle: const Text('We reply within a few hours',
                         style: TextStyle(fontSize: 12)),
                   ),
                 ],
@@ -156,7 +214,8 @@ class HelpSupportScreen extends StatelessWidget {
                     ],
                   ),
                 )),
-          ],
+            ],
+          ),
         ),
       ),
     );

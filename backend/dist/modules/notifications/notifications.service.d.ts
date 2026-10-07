@@ -1,12 +1,14 @@
 import { OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../config/prisma.service';
+import { OrderGateway } from '../../gateway/gateway.service';
 export declare class NotificationsService implements OnModuleInit {
     private prisma;
     private config;
+    private gateway?;
     private readonly logger;
     private firebaseApp;
-    constructor(prisma: PrismaService, config: ConfigService);
+    constructor(prisma: PrismaService, config: ConfigService, gateway?: OrderGateway | undefined);
     onModuleInit(): void;
     private initializeFirebase;
     private toPublic;

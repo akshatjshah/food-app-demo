@@ -41,6 +41,13 @@ let OrderGateway = OrderGateway_1 = class OrderGateway {
             const role = payload.role ?? 'user';
             client.data = { userId, role };
             this.connectedClients.set(client.id, { userId, role });
+            try {
+                client.join(`user_${userId}`);
+                if (role === 'admin')
+                    client.join('admins');
+            }
+            catch {
+            }
             this.logger.log(`Client connected: ${client.id} (user: ${userId}, role: ${role})`);
         }
         catch (error) {
@@ -100,6 +107,30 @@ let OrderGateway = OrderGateway_1 = class OrderGateway {
             timestamp: new Date().toISOString(),
         });
         this.logger.log(`Broadcast ${event} to admins`);
+    }
+    emitNotificationToUser(userId, notification) {
+        try {
+            this.server.to(`user_${userId}`).emit('notification', {
+                ...notification,
+                timestamp: new Date().toISOString(),
+            });
+        }
+        catch (error) {
+            this.logger.warn(`Failed to emit notification to user ${userId}: ${error.message}`);
+        }
+    }
+    emitNotificationBroadcast(userIds, notification) {
+        try {
+            for (const userId of userIds) {
+                this.server.to(`user_${userId}`).emit('notification', {
+                    ...notification,
+                    timestamp: new Date().toISOString(),
+                });
+            }
+        }
+        catch (error) {
+            this.logger.warn(`Failed to emit broadcast notification: ${error.message}`);
+        }
     }
     joinChefRoom(client, chefId) {
         const room = `chef_${chefId}`;

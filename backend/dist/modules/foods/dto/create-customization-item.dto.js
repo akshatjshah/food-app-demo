@@ -36,4 +36,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateCustomizationItemDto.prototype, "displayOrder", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateCustomizationItemDto.prototype, "isActive", void 0);
 //# sourceMappingURL=create-customization-item.dto.js.map

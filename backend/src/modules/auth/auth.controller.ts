@@ -95,4 +95,12 @@ export class AuthController {
   async registerFcmToken(@Request() req, @Body() dto: RegisterFcmTokenDto) {
     return this.authService.registerFcmToken(req.user.id, dto.token, dto.platform);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('fcm-token/deactivate')
+  @ApiOperation({ summary: 'Deactivate FCM token on logout' })
+  async deactivateFcmToken(@Request() req, @Body() body?: { token?: string }) {
+    return this.authService.deactivateFcmToken(req.user.id, body?.token);
+  }
 }

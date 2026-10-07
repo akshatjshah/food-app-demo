@@ -5,5 +5,5 @@
 class ApiEnv {
   ApiEnv._();
 
-  static const String host = String.fromEnvironment('API_HOST', defaultValue: '192.168.1.7');
+  static const String host = String.fromEnvironment('API_HOST', defaultValue: '127.0.0.1');
 }

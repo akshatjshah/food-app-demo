@@ -54,6 +54,15 @@ export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data = { userId, role };
       this.connectedClients.set(client.id, { userId, role });
 
+      // Per-user room so server can push notifications/order alerts to a
+      // specific customer without polling. Admins also join the admins room.
+      try {
+        client.join(`user_${userId}`);
+        if (role === 'admin') client.join('admins');
+      } catch {
+        // join failures must never break auth flow
+      }
+
       this.logger.log(`Client connected: ${client.id} (user: ${userId}, role: ${role})`);
     } catch (error) {
       this.logger.warn(`Client ${client.id} failed authentication — disconnecting`);
@@ -138,6 +147,48 @@ export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     this.logger.log(`Broadcast ${event} to admins`);
+  }
+
+  /**
+   * Realtime notification push to a single customer.
+   * Best-effort: FCM + inbox polling remain fallbacks, so emit failures
+   * must never throw.
+   */
+  emitNotificationToUser(
+    userId: string,
+    notification: Record<string, unknown>,
+  ): void {
+    try {
+      this.server.to(`user_${userId}`).emit('notification', {
+        ...notification,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to emit notification to user ${userId}: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * Realtime push of an admin broadcast to every targeted customer room.
+   */
+  emitNotificationBroadcast(
+    userIds: string[],
+    notification: Record<string, unknown>,
+  ): void {
+    try {
+      for (const userId of userIds) {
+        this.server.to(`user_${userId}`).emit('notification', {
+          ...notification,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to emit broadcast notification: ${(error as Error).message}`,
+      );
+    }
   }
 
   joinChefRoom(client: Socket, chefId: string): void {

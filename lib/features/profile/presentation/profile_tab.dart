@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../../authentication/presentation/auth_provider.dart';
 import '../../home/presentation/avatar_image.dart';
 import '../../home/presentation/avatar_provider.dart';
@@ -38,6 +39,21 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     }
   }
 
+  /// Profile refresh: re-fetches the subscription badge data via the
+  /// existing subscription loader (same call as initState). Auth user and
+  /// avatar state are intentionally NOT touched here.
+  Future<void> _refreshProfile() async {
+    await ref.read(subscriptionNotifierProvider.notifier).loadMySubscriptions();
+    if (!mounted) return;
+    if (ref.read(subscriptionNotifierProvider).errorMessage != null) {
+      showRefreshError(
+        context,
+        message: 'Could not refresh profile. Showing saved data.',
+        onRetry: _refreshProfile,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -51,15 +67,18 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
         title: const Text('Profile Settings'),
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 120),
-        child: Column(
-          children: [
-            _buildProfileCard(context, ref, authState, activePlanName),
-            const SizedBox(height: AppSpacing.s24),
-            _buildSettingsList(context, ref, themeMode),
-          ],
+      body: AppPullToRefresh(
+        onRefresh: _refreshProfile,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(left: 24, right: 24, bottom: 120),
+          child: Column(
+            children: [
+              _buildProfileCard(context, ref, authState, activePlanName),
+              const SizedBox(height: AppSpacing.s24),
+              _buildSettingsList(context, ref, themeMode),
+            ],
+          ),
         ),
       ),
     );

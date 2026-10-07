@@ -271,6 +271,7 @@ export class FoodsService {
     name: string;
     additionalPrice?: number;
     displayOrder?: number;
+    isActive?: boolean;
   }) {
     const group = await this.prisma.customizationGroup.findUnique({ where: { id: groupId } });
     if (!group) throw new NotFoundException('Customization group not found');
@@ -290,6 +291,7 @@ export class FoodsService {
         name: data.name,
         additionalPrice: data.additionalPrice ?? 0,
         displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? 0) + 1,
+        isActive: data.isActive !== false,
       },
     });
   }

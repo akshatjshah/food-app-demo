@@ -235,6 +235,7 @@ let FoodsService = class FoodsService {
                 name: data.name,
                 additionalPrice: data.additionalPrice ?? 0,
                 displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? 0) + 1,
+                isActive: data.isActive !== false,
             },
         });
     }

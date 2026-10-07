@@ -40,16 +40,38 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
       return;
     }
 
+    // Backend requires foodItemId: resolve from the order when not passed.
+    var foodItemId = widget.foodItemId;
+    if (foodItemId == null || foodItemId.isEmpty) {
+      try {
+        final res = await ApiClient.instance.get('/orders/${widget.orderId}');
+        final payload = res.data;
+        final dynamic data = payload is Map ? payload['data'] ?? payload : payload;
+        final items = (data is Map ? data['items'] : null) as List?;
+        final first = items != null && items.isNotEmpty ? items.first : null;
+        foodItemId = first is Map
+            ? (first['foodItemId'] ?? first['food_item_id'] ?? (first['foodItem'] is Map ? first['foodItem']['id'] : null))?.toString()
+            : null;
+      } catch (_) {}
+    }
+    if (foodItemId == null || foodItemId.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: const Text('Could not determine the ordered item.'),
+            backgroundColor: Theme.of(context).colorScheme.error),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
       final data = <String, dynamic>{
         'orderId': widget.orderId,
+        'foodItemId': foodItemId,
         'rating': _rating,
       };
-      if (widget.foodItemId != null) {
-        data['foodItemId'] = widget.foodItemId;
-      }
       final comment = _commentController.text.trim();
       if (comment.isNotEmpty) {
         data['comment'] = comment;

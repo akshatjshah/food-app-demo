@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_refresh.dart';
 import '../data/models/address.dart';
 import 'address_actions.dart';
 import 'address_provider.dart';
@@ -33,6 +34,20 @@ class _AddressesScreenState extends ConsumerState<AddressesScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          // Header refresh covers empty/error states where pull-to-refresh
+          // is unavailable. Same backend fetch; saved addresses are kept on
+          // failure and a snackbar with Retry is shown instead.
+          AppRefreshIconButton(
+            tooltip: 'Refresh addresses',
+            errorMessage:
+                'Could not refresh addresses. Showing saved data.',
+            onRefresh: () =>
+                ref.read(addressNotifierProvider.notifier).loadAddresses(),
+            hasError: () =>
+                ref.read(addressNotifierProvider).errorMessage != null,
+          ),
+        ],
       ),
       body: _buildBody(context, addressState),
       floatingActionButton: FloatingActionButton.extended(
@@ -73,9 +88,10 @@ class _AddressesScreenState extends ConsumerState<AddressesScreen> {
       return _buildEmptyState(context);
     }
 
-    return RefreshIndicator(
+    return AppPullToRefresh(
       onRefresh: () => ref.read(addressNotifierProvider.notifier).loadAddresses(),
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(AppSpacing.s16),
         itemCount: addressState.addresses.length,
         itemBuilder: (context, index) {

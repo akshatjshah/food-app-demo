@@ -43,6 +43,9 @@ export default function CouponsPage() {
   const save = useMutation({
     mutationFn: async () => {
       const num = (v: string) => (v === "" ? undefined : Number(v));
+      // expiresAt is required by CreateCouponDto — default to +1 year so a
+      // blank date never 400s; isActive is an accepted optional field.
+      const defaultExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
       const payload = {
         code: form.code.trim().toUpperCase(),
         description: form.description || undefined,
@@ -53,7 +56,7 @@ export default function CouponsPage() {
         maxUses: num(form.maxUses),
         maxUsesPerUser: num(form.maxUsesPerUser),
         isFirstOrderOnly: form.isFirstOrderOnly,
-        expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : undefined,
+        expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : defaultExpiry,
         isActive: form.isActive,
       };
       if (editing) await apiClient.patch(`/coupons/${editing.id}`, payload);

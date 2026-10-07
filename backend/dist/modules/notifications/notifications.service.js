@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var NotificationsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationsService = void 0;
@@ -16,10 +19,12 @@ const config_1 = require("@nestjs/config");
 const prisma_service_1 = require("../../config/prisma.service");
 const app_1 = require("firebase-admin/app");
 const messaging_1 = require("firebase-admin/messaging");
+const gateway_service_1 = require("../../gateway/gateway.service");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
-    constructor(prisma, config) {
+    constructor(prisma, config, gateway) {
         this.prisma = prisma;
         this.config = config;
+        this.gateway = gateway;
         this.logger = new common_1.Logger(NotificationsService_1.name);
         this.firebaseApp = null;
     }
@@ -94,11 +99,19 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             const created = await this.prisma.notification.create({
                 data: { userId, ...data },
             });
+            const publicNotif = this.toPublic(created);
+            try {
+                this.gateway?.emitNotificationToUser(userId, publicNotif);
+            }
+            catch {
+            }
             await this.sendPushNotification(userId, data.title, data.body, {
                 type: data.type,
-                referenceId: data.referenceId || '',
+                reference_id: data.referenceId || '',
+                title: data.title,
+                body: data.body,
             });
-            return this.toPublic(created);
+            return publicNotif;
         }
         catch (error) {
             this.logger.warn(`Failed to create notification for user ${userId}: ${error.message}`);
@@ -184,7 +197,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             case 'cancelled':
                 return { title: 'Order Cancelled', body: `Your order #${short} has been cancelled.`, type: 'ORDER_CANCELLED' };
             case 'rejected':
-                return { title: 'Order Not Accepted', body: `Your order #${short} could not be accepted. Please try again.`, type: 'ORDER_CANCELLED' };
+                return { title: 'Order Not Accepted', body: `Your order #${short} could not be accepted. Please try again.`, type: 'ORDER_REJECTED' };
             default:
                 return { title: 'Order Update', body: `Your order #${short} status: ${status}.`, type: 'ORDER_UPDATE' };
         }
@@ -233,18 +246,29 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     async sendBulkNotification(userIds, title, body, type = 'ANNOUNCEMENT', referenceId) {
         let sent = 0;
         let failed = 0;
-        for (const userId of userIds) {
+        const uniqueIds = [...new Set(userIds)];
+        const createdPublic = [];
+        for (const userId of uniqueIds) {
             try {
-                await this.prisma.notification.create({ data: { userId, title, body, type, referenceId } });
+                const created = await this.prisma.notification.create({ data: { userId, title, body, type, referenceId } });
+                createdPublic.push(this.toPublic(created));
                 sent++;
             }
             catch {
                 failed++;
             }
         }
+        try {
+            for (let i = 0; i < uniqueIds.length; i++) {
+                const payload = createdPublic[i] ?? { title, body, type, reference_id: referenceId ?? null };
+                this.gateway?.emitNotificationToUser(uniqueIds[i], payload);
+            }
+        }
+        catch {
+        }
         if (this.firebaseApp) {
             const tokens = await this.prisma.fcmToken.findMany({
-                where: { userId: { in: userIds }, isActive: true },
+                where: { userId: { in: uniqueIds }, isActive: true },
                 select: { token: true },
             });
             const validTokens = tokens.map((t) => t.token);
@@ -253,6 +277,12 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
                 const response = await messaging.sendEachForMulticast({
                     tokens: validTokens,
                     notification: { title, body },
+                    data: {
+                        type,
+                        reference_id: referenceId || '',
+                        title,
+                        body,
+                    },
                     android: { priority: 'high' },
                     apns: { payload: { aps: { sound: 'default' } } },
                 });
@@ -278,7 +308,10 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
 exports.NotificationsService = NotificationsService;
 exports.NotificationsService = NotificationsService = NotificationsService_1 = __decorate([
     (0, common_1.Injectable)(),
+    __param(2, (0, common_1.Optional)()),
+    __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => gateway_service_1.OrderGateway))),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        gateway_service_1.OrderGateway])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map

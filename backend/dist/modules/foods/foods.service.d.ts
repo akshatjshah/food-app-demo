@@ -342,6 +342,7 @@ export declare class FoodsService {
         name: string;
         additionalPrice?: number;
         displayOrder?: number;
+        isActive?: boolean;
     }): Promise<{
         name: string;
         id: string;

@@ -57,6 +57,9 @@ let AuthController = class AuthController {
     async registerFcmToken(req, dto) {
         return this.authService.registerFcmToken(req.user.id, dto.token, dto.platform);
     }
+    async deactivateFcmToken(req, body) {
+        return this.authService.deactivateFcmToken(req.user.id, body?.token);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -151,6 +154,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, register_fcm_token_dto_1.RegisterFcmTokenDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerFcmToken", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('fcm-token/deactivate'),
+    (0, swagger_1.ApiOperation)({ summary: 'Deactivate FCM token on logout' }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "deactivateFcmToken", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),

@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import '../../../home/data/repositories/home_repository.dart'
+    show filterAndSortCategoryJson;
 import '../models/menu_food.dart';
 import '../models/menu_category.dart';
 
@@ -31,11 +33,21 @@ class MenuRepository {
     return MenuFood.fromJson(response.data['data']);
   }
 
+  /// Legacy accessor kept for backward compatibility.
+  ///
+  /// Customer UI (Menu chips, search browse list) reads categories from the
+  /// single source of truth — [HomeRepository] via `homeProvider` — so both
+  /// Home and Menu always render the same active backend categories in admin
+  /// order. This method hits the same `GET /categories` endpoint and applies
+  /// the same shared [filterAndSortCategoryJson] step, so it can never
+  /// return a stale/hardcoded entry either.
   Future<List<MenuCategory>> getCategories() async {
     final response = await _dio.get('/categories');
     final data = response.data['data'];
     if (data is List) {
-      return data.map((e) => MenuCategory.fromJson(e)).toList();
+      return filterAndSortCategoryJson(data)
+          .map((e) => MenuCategory.fromJson(e))
+          .toList();
     }
     return [];
   }
