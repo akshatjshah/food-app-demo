@@ -31,9 +31,13 @@ mixin _$MenuFood {
   int get reviewsCount => throw _privateConstructorUsedError;
   bool get isVeg => throw _privateConstructorUsedError;
   bool get isBestseller => throw _privateConstructorUsedError;
+  bool get isFeatured => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
+  bool get isAvailable => throw _privateConstructorUsedError;
   String? get categoryId => throw _privateConstructorUsedError;
   String? get categoryName => throw _privateConstructorUsedError;
+  String? get subcategory => throw _privateConstructorUsedError;
+  List<String> get mealTags => throw _privateConstructorUsedError;
   List<CustomizationGroup> get customizationGroups =>
       throw _privateConstructorUsedError;
 
@@ -63,9 +67,13 @@ abstract class $MenuFoodCopyWith<$Res> {
     int reviewsCount,
     bool isVeg,
     bool isBestseller,
+    bool isFeatured,
     bool isActive,
+    bool isAvailable,
     String? categoryId,
     String? categoryName,
+    String? subcategory,
+    List<String> mealTags,
     List<CustomizationGroup> customizationGroups,
   });
 }
@@ -95,9 +103,13 @@ class _$MenuFoodCopyWithImpl<$Res, $Val extends MenuFood>
     Object? reviewsCount = null,
     Object? isVeg = null,
     Object? isBestseller = null,
+    Object? isFeatured = null,
     Object? isActive = null,
+    Object? isAvailable = null,
     Object? categoryId = freezed,
     Object? categoryName = freezed,
+    Object? subcategory = freezed,
+    Object? mealTags = null,
     Object? customizationGroups = null,
   }) {
     return _then(
@@ -142,9 +154,17 @@ class _$MenuFoodCopyWithImpl<$Res, $Val extends MenuFood>
                 ? _value.isBestseller
                 : isBestseller // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isFeatured: null == isFeatured
+                ? _value.isFeatured
+                : isFeatured // ignore: cast_nullable_to_non_nullable
+                      as bool,
             isActive: null == isActive
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isAvailable: null == isAvailable
+                ? _value.isAvailable
+                : isAvailable // ignore: cast_nullable_to_non_nullable
                       as bool,
             categoryId: freezed == categoryId
                 ? _value.categoryId
@@ -154,6 +174,14 @@ class _$MenuFoodCopyWithImpl<$Res, $Val extends MenuFood>
                 ? _value.categoryName
                 : categoryName // ignore: cast_nullable_to_non_nullable
                       as String?,
+            subcategory: freezed == subcategory
+                ? _value.subcategory
+                : subcategory // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            mealTags: null == mealTags
+                ? _value.mealTags
+                : mealTags // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             customizationGroups: null == customizationGroups
                 ? _value.customizationGroups
                 : customizationGroups // ignore: cast_nullable_to_non_nullable
@@ -184,9 +212,13 @@ abstract class _$$MenuFoodImplCopyWith<$Res>
     int reviewsCount,
     bool isVeg,
     bool isBestseller,
+    bool isFeatured,
     bool isActive,
+    bool isAvailable,
     String? categoryId,
     String? categoryName,
+    String? subcategory,
+    List<String> mealTags,
     List<CustomizationGroup> customizationGroups,
   });
 }
@@ -215,9 +247,13 @@ class __$$MenuFoodImplCopyWithImpl<$Res>
     Object? reviewsCount = null,
     Object? isVeg = null,
     Object? isBestseller = null,
+    Object? isFeatured = null,
     Object? isActive = null,
+    Object? isAvailable = null,
     Object? categoryId = freezed,
     Object? categoryName = freezed,
+    Object? subcategory = freezed,
+    Object? mealTags = null,
     Object? customizationGroups = null,
   }) {
     return _then(
@@ -262,9 +298,17 @@ class __$$MenuFoodImplCopyWithImpl<$Res>
             ? _value.isBestseller
             : isBestseller // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isFeatured: null == isFeatured
+            ? _value.isFeatured
+            : isFeatured // ignore: cast_nullable_to_non_nullable
+                  as bool,
         isActive: null == isActive
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isAvailable: null == isAvailable
+            ? _value.isAvailable
+            : isAvailable // ignore: cast_nullable_to_non_nullable
                   as bool,
         categoryId: freezed == categoryId
             ? _value.categoryId
@@ -274,6 +318,14 @@ class __$$MenuFoodImplCopyWithImpl<$Res>
             ? _value.categoryName
             : categoryName // ignore: cast_nullable_to_non_nullable
                   as String?,
+        subcategory: freezed == subcategory
+            ? _value.subcategory
+            : subcategory // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        mealTags: null == mealTags
+            ? _value._mealTags
+            : mealTags // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         customizationGroups: null == customizationGroups
             ? _value._customizationGroups
             : customizationGroups // ignore: cast_nullable_to_non_nullable
@@ -297,11 +349,16 @@ class _$MenuFoodImpl implements _MenuFood {
     this.reviewsCount = 0,
     this.isVeg = true,
     this.isBestseller = false,
+    this.isFeatured = false,
     this.isActive = true,
+    this.isAvailable = true,
     this.categoryId,
     this.categoryName,
+    this.subcategory,
+    final List<String> mealTags = const [],
     final List<CustomizationGroup> customizationGroups = const [],
   }) : _imageUrls = imageUrls,
+       _mealTags = mealTags,
        _customizationGroups = customizationGroups;
 
   factory _$MenuFoodImpl.fromJson(Map<String, dynamic> json) =>
@@ -339,11 +396,28 @@ class _$MenuFoodImpl implements _MenuFood {
   final bool isBestseller;
   @override
   @JsonKey()
+  final bool isFeatured;
+  @override
+  @JsonKey()
   final bool isActive;
+  @override
+  @JsonKey()
+  final bool isAvailable;
   @override
   final String? categoryId;
   @override
   final String? categoryName;
+  @override
+  final String? subcategory;
+  final List<String> _mealTags;
+  @override
+  @JsonKey()
+  List<String> get mealTags {
+    if (_mealTags is EqualUnmodifiableListView) return _mealTags;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_mealTags);
+  }
+
   final List<CustomizationGroup> _customizationGroups;
   @override
   @JsonKey()
@@ -356,7 +430,7 @@ class _$MenuFoodImpl implements _MenuFood {
 
   @override
   String toString() {
-    return 'MenuFood(id: $id, name: $name, description: $description, price: $price, originalPrice: $originalPrice, imageUrls: $imageUrls, rating: $rating, reviewsCount: $reviewsCount, isVeg: $isVeg, isBestseller: $isBestseller, isActive: $isActive, categoryId: $categoryId, categoryName: $categoryName, customizationGroups: $customizationGroups)';
+    return 'MenuFood(id: $id, name: $name, description: $description, price: $price, originalPrice: $originalPrice, imageUrls: $imageUrls, rating: $rating, reviewsCount: $reviewsCount, isVeg: $isVeg, isBestseller: $isBestseller, isFeatured: $isFeatured, isActive: $isActive, isAvailable: $isAvailable, categoryId: $categoryId, categoryName: $categoryName, subcategory: $subcategory, mealTags: $mealTags, customizationGroups: $customizationGroups)';
   }
 
   @override
@@ -381,12 +455,19 @@ class _$MenuFoodImpl implements _MenuFood {
             (identical(other.isVeg, isVeg) || other.isVeg == isVeg) &&
             (identical(other.isBestseller, isBestseller) ||
                 other.isBestseller == isBestseller) &&
+            (identical(other.isFeatured, isFeatured) ||
+                other.isFeatured == isFeatured) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.isAvailable, isAvailable) ||
+                other.isAvailable == isAvailable) &&
             (identical(other.categoryId, categoryId) ||
                 other.categoryId == categoryId) &&
             (identical(other.categoryName, categoryName) ||
                 other.categoryName == categoryName) &&
+            (identical(other.subcategory, subcategory) ||
+                other.subcategory == subcategory) &&
+            const DeepCollectionEquality().equals(other._mealTags, _mealTags) &&
             const DeepCollectionEquality().equals(
               other._customizationGroups,
               _customizationGroups,
@@ -407,9 +488,13 @@ class _$MenuFoodImpl implements _MenuFood {
     reviewsCount,
     isVeg,
     isBestseller,
+    isFeatured,
     isActive,
+    isAvailable,
     categoryId,
     categoryName,
+    subcategory,
+    const DeepCollectionEquality().hash(_mealTags),
     const DeepCollectionEquality().hash(_customizationGroups),
   );
 
@@ -439,9 +524,13 @@ abstract class _MenuFood implements MenuFood {
     final int reviewsCount,
     final bool isVeg,
     final bool isBestseller,
+    final bool isFeatured,
     final bool isActive,
+    final bool isAvailable,
     final String? categoryId,
     final String? categoryName,
+    final String? subcategory,
+    final List<String> mealTags,
     final List<CustomizationGroup> customizationGroups,
   }) = _$MenuFoodImpl;
 
@@ -469,11 +558,19 @@ abstract class _MenuFood implements MenuFood {
   @override
   bool get isBestseller;
   @override
+  bool get isFeatured;
+  @override
   bool get isActive;
+  @override
+  bool get isAvailable;
   @override
   String? get categoryId;
   @override
   String? get categoryName;
+  @override
+  String? get subcategory;
+  @override
+  List<String> get mealTags;
   @override
   List<CustomizationGroup> get customizationGroups;
 

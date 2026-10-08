@@ -21,6 +21,7 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
   final TextEditingController _notesController = TextEditingController();
   int _quantity = 1;
   final Map<String, List<String>> _selectedCustomizations = {};
+  String? _validationError;
 
   @override
   void initState() {
@@ -39,20 +40,39 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
     super.dispose();
   }
 
-  void _toggleCustomization(String groupId, String itemId, bool allowMultiple) {
+  void _toggleCustomization(String groupId, String itemId, int maxSelect) {
     setState(() {
-      if (allowMultiple) {
-        final current = _selectedCustomizations[groupId] ?? [];
+      _validationError = null;
+      if (maxSelect <= 1) {
+        _selectedCustomizations[groupId] = [itemId];
+      } else {
+        final current = List<String>.from(_selectedCustomizations[groupId] ?? []);
         if (current.contains(itemId)) {
           current.remove(itemId);
         } else {
+          if (current.length >= maxSelect) {
+            _validationError = 'You can choose up to $maxSelect option(s) in this group.';
+            return;
+          }
           current.add(itemId);
         }
         _selectedCustomizations[groupId] = current;
-      } else {
-        _selectedCustomizations[groupId] = [itemId];
       }
     });
+  }
+
+  /// Returns the first unmet required-group message, or null when valid.
+  String? _validateSelections(MenuFood food) {
+    for (final group in food.customizationGroups) {
+      final count = _selectedCustomizations[group.id]?.length ?? 0;
+      if (count < group.minSelect) {
+        return 'Please choose at least ${group.minSelect} option(s) in "${group.name}".';
+      }
+      if (count > group.maxSelect) {
+        return 'Please choose at most ${group.maxSelect} option(s) in "${group.name}".';
+      }
+    }
+    return null;
   }
 
   double _calculateCurrentPrice(MenuFood food) {
@@ -364,6 +384,7 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
       BuildContext context, MenuFood food, CustomizationGroup group) {
     final selected = _selectedCustomizations[group.id] ?? [];
     final isRequired = group.minSelect > 0;
+    final isSingleSelect = group.maxSelect <= 1;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.s16),
@@ -389,37 +410,74 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                 ),
               ],
               const Spacer(),
-              if (group.maxSelect > 1)
-                Text(
-                  'Choose up to ${group.maxSelect}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
+              Text(
+                isSingleSelect
+                    ? (isRequired ? 'Choose 1' : 'Choose up to 1')
+                    : 'Choose ${group.minSelect == group.maxSelect ? group.maxSelect : '${group.minSelect}–${group.maxSelect}'}',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.s8),
-          ...group.items.where((item) => item.isActive).map((item) {
-            final isSelected = selected.contains(item.id);
-            return CheckboxListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          if (_validationError != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.s8),
+              child: Row(
                 children: [
-                  Text(item.name, style: const TextStyle(fontSize: 14)),
-                  if (item.additionalPrice > 0)
-                    Text(
-                      '+ ₹${item.additionalPrice.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey),
+                  Icon(Icons.error_outline_rounded,
+                      size: 16, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      _validationError!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
+                  ),
                 ],
               ),
+            ),
+          ],
+          ...group.items.where((item) => item.isActive).map((item) {
+            final isSelected = selected.contains(item.id);
+            final subtitle = Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(item.name, style: const TextStyle(fontSize: 14)),
+                if (item.additionalPrice > 0)
+                  Text(
+                    '+ ₹${item.additionalPrice.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey),
+                  ),
+              ],
+            );
+            if (isSingleSelect) {
+              return RadioListTile<String>(
+                title: subtitle,
+                value: item.id,
+                // ignore: deprecated_member_use
+                groupValue:
+                    selected.isEmpty ? null : selected.first,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                onChanged: (_) =>
+                    _toggleCustomization(group.id, item.id, group.maxSelect),
+              );
+            }
+            return CheckboxListTile(
+              title: subtitle,
               value: isSelected,
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
+              dense: true,
               onChanged: (val) {
-                _toggleCustomization(
-                    group.id, item.id, group.maxSelect > 1);
+                _toggleCustomization(group.id, item.id, group.maxSelect);
               },
             );
           }),
@@ -512,6 +570,22 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                 onPressed: () async {
                   final messenger = ScaffoldMessenger.of(context);
                   final errorColor = Theme.of(context).colorScheme.error;
+                  // Client-side required/min/max check (backend re-validates).
+                  final selectionError = _validateSelections(food);
+                  if (selectionError != null) {
+                    setState(() => _validationError = selectionError);
+                    messenger
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        SnackBar(
+                          content: Text(selectionError),
+                          backgroundColor: errorColor,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    return;
+                  }
                   await ref.read(cartProvider.notifier).addItem(
                         foodItemId: food.id,
                         quantity: _quantity,

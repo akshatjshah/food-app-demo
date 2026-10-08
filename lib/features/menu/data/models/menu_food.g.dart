@@ -21,9 +21,15 @@ _$MenuFoodImpl _$$MenuFoodImplFromJson(
   reviewsCount: (json['reviewsCount'] as num?)?.toInt() ?? 0,
   isVeg: json['isVeg'] as bool? ?? true,
   isBestseller: json['isBestseller'] as bool? ?? false,
+  isFeatured: json['isFeatured'] as bool? ?? false,
   isActive: json['isActive'] as bool? ?? true,
+  isAvailable: json['isAvailable'] as bool? ?? true,
   categoryId: json['categoryId'] as String?,
   categoryName: json['categoryName'] as String?,
+  subcategory: json['subcategory'] as String?,
+  mealTags:
+      (json['mealTags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
   customizationGroups:
       (json['customizationGroups'] as List<dynamic>?)
           ?.map((e) => CustomizationGroup.fromJson(e as Map<String, dynamic>))
@@ -43,9 +49,13 @@ Map<String, dynamic> _$$MenuFoodImplToJson(_$MenuFoodImpl instance) =>
       'reviewsCount': instance.reviewsCount,
       'isVeg': instance.isVeg,
       'isBestseller': instance.isBestseller,
+      'isFeatured': instance.isFeatured,
       'isActive': instance.isActive,
+      'isAvailable': instance.isAvailable,
       'categoryId': instance.categoryId,
       'categoryName': instance.categoryName,
+      'subcategory': instance.subcategory,
+      'mealTags': instance.mealTags,
       'customizationGroups': instance.customizationGroups,
     };
 

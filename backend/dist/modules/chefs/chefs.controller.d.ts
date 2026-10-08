@@ -25,6 +25,8 @@ export declare class ChefsController {
             foodItemId: string;
             quantity: number;
             unitPrice: import("@prisma/client/runtime/library").Decimal;
+            foodName: string | null;
+            basePrice: import("@prisma/client/runtime/library").Decimal | null;
             orderId: string;
         })[];
     } & {
@@ -122,22 +124,26 @@ export declare class ChefsController {
         createdAt: Date;
         isActive: boolean;
         tags: import("@prisma/client/runtime/library").JsonValue;
+        isFeatured: boolean;
         displayOrder: number;
         deletedAt: Date | null;
         categoryId: string;
+        subcategory: string | null;
         isVeg: boolean;
         isJainAvailable: boolean;
         isFastingFriendly: boolean;
         isBestseller: boolean;
         isHealthyPick: boolean;
+        isAvailable: boolean;
+        rating: import("@prisma/client/runtime/library").Decimal;
+        reviewsCount: number;
         price: import("@prisma/client/runtime/library").Decimal;
         originalPrice: import("@prisma/client/runtime/library").Decimal | null;
         imageUrls: import("@prisma/client/runtime/library").JsonValue;
         videoUrl: string | null;
         calories: number | null;
         preparationTimeMinutes: number;
+        mealTags: import("@prisma/client/runtime/library").JsonValue;
         stock: number | null;
-        rating: import("@prisma/client/runtime/library").Decimal;
-        reviewsCount: number;
     }>;
 }

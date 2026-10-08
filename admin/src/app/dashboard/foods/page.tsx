@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,80 +9,84 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/admin/empty-state";
 import { Pagination } from "@/components/admin/pagination";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
-import { ImageUpload, resolveImageUrl } from "@/components/admin/image-upload";
+import { resolveImageUrl } from "@/components/admin/image-upload";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, X } from "lucide-react";
 
-const EMPTY_FORM = {
-  name: "",
-  description: "",
-  price: "",
-  originalPrice: "",
-  categoryId: "",
-  imageUrl: "",
-  videoUrl: "",
-  calories: "",
-  preparationTimeMinutes: "20",
-  stock: "",
-  displayOrder: "0",
-  tags: "",
-  isVeg: true,
-  isJainAvailable: false,
-  isFastingFriendly: false,
-  isBestseller: false,
-  isHealthyPick: false,
-  isActive: true,
+const ANY = "any";
+
+type Filters = {
+  search: string;
+  categoryId: string;
+  subcategory: string;
+  isActive: string;
+  isAvailable: string;
+  isFeatured: string;
+  isBestseller: string;
+  mealTag: string;
+  hasCustomization: string;
+  minPrice: string;
+  maxPrice: string;
+  sort: string;
 };
 
-function toPayload(form: typeof EMPTY_FORM) {
-  const num = (v: string) => (v === "" ? undefined : Number(v));
-  return {
-    name: form.name.trim(),
-    description: form.description || undefined,
-    price: Number(form.price),
-    originalPrice: num(form.originalPrice),
-    categoryId: form.categoryId || undefined,
-    imageUrls: form.imageUrl ? [form.imageUrl] : [],
-    videoUrl: form.videoUrl || undefined,
-    calories: num(form.calories),
-    preparationTimeMinutes: num(form.preparationTimeMinutes) ?? 20,
-    // Omit stock when blank (unlimited). Explicit null fails strict DTO number validation.
-    stock: form.stock === "" ? undefined : Number(form.stock),
-    displayOrder: Number(form.displayOrder) || 0,
-    tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-    isVeg: form.isVeg,
-    isJainAvailable: form.isJainAvailable,
-    isFastingFriendly: form.isFastingFriendly,
-    isBestseller: form.isBestseller,
-    isHealthyPick: form.isHealthyPick,
-    isActive: form.isActive,
+const DEFAULT_FILTERS: Filters = {
+  search: "",
+  categoryId: "all",
+  subcategory: "all",
+  isActive: ANY,
+  isAvailable: ANY,
+  isFeatured: ANY,
+  isBestseller: ANY,
+  mealTag: "all",
+  hasCustomization: ANY,
+  minPrice: "",
+  maxPrice: "",
+  sort: "recommended",
+};
+
+function toParams(f: Filters, page: number, pageSize: number) {
+  const p: Record<string, string> = {
+    skip: String(page * pageSize),
+    take: String(pageSize),
   };
+  if (f.search.trim()) p.search = f.search.trim();
+  if (f.categoryId !== "all") p.categoryId = f.categoryId;
+  if (f.subcategory !== "all") p.subcategory = f.subcategory;
+  if (f.isActive !== ANY) p.isActive = f.isActive;
+  if (f.isAvailable !== ANY) p.isAvailable = f.isAvailable;
+  if (f.isFeatured !== ANY) p.isFeatured = f.isFeatured;
+  if (f.isBestseller !== ANY) p.isBestseller = f.isBestseller;
+  if (f.mealTag !== "all") p.mealTag = f.mealTag;
+  if (f.hasCustomization !== ANY) p.hasCustomization = f.hasCustomization;
+  if (f.minPrice !== "") p.minPrice = f.minPrice;
+  if (f.maxPrice !== "") p.maxPrice = f.maxPrice;
+  if (f.sort !== "recommended") p.sort = f.sort;
+  return p;
 }
 
 export default function FoodsPage() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const router = useRouter();
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const pageSize = 15;
   const queryClient = useQueryClient();
 
+  const params = toParams(filters, page, pageSize);
+  const queryKey = ["foods", params];
+
   const { data: foods = [], isLoading } = useQuery({
-    queryKey: ["foods"],
-    queryFn: async () => (await apiClient.get("/foods/admin/all")).data?.data ?? [],
+    queryKey,
+    queryFn: async () => (await apiClient.get("/foods/admin/all", { params })).data?.data ?? [],
   });
 
   const { data: categories = [] } = useQuery({
@@ -89,96 +94,89 @@ export default function FoodsPage() {
     queryFn: async () => (await apiClient.get("/categories/admin/all")).data?.data ?? [],
   });
 
+  // Subcategory suggestions come from the live dataset (backend-driven).
+  const { data: subcatPool = [] } = useQuery({
+    queryKey: ["foods-subcategories"],
+    queryFn: async () =>
+      (await apiClient.get("/foods/admin/all", { params: { take: 500 } })).data?.data ?? [],
+    staleTime: 60_000,
+  });
+  const subcategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of subcatPool as any[]) if (f.subcategory) set.add(f.subcategory);
+    return [...set].sort();
+  }, [subcatPool]);
+
   const categoryName = (id: string) => categories.find((c: any) => c.id === id)?.name ?? "—";
+  const set = (k: keyof Filters, v: string) => {
+    setFilters((f) => ({ ...f, [k]: v }));
+    setPage(0);
+    setSelected(new Set());
+  };
+  const activeFilterCount =
+    (filters.search.trim() ? 1 : 0) +
+    (filters.categoryId !== "all" ? 1 : 0) +
+    (filters.subcategory !== "all" ? 1 : 0) +
+    (filters.isActive !== ANY ? 1 : 0) +
+    (filters.isAvailable !== ANY ? 1 : 0) +
+    (filters.isFeatured !== ANY ? 1 : 0) +
+    (filters.isBestseller !== ANY ? 1 : 0) +
+    (filters.mealTag !== "all" ? 1 : 0) +
+    (filters.hasCustomization !== ANY ? 1 : 0) +
+    (filters.minPrice !== "" || filters.maxPrice !== "" ? 1 : 0);
 
-  const filtered = useMemo(() => {
-    return foods.filter((f: any) => {
-      if (categoryFilter !== "all" && f.categoryId !== categoryFilter) return false;
-      if (search && !f.name?.toLowerCase().includes(search.toLowerCase())) return false;
-      return true;
-    });
-  }, [foods, search, categoryFilter]);
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["foods"] });
+    queryClient.invalidateQueries({ queryKey: ["foods-subcategories"] });
+  };
 
-  const paged = filtered.slice(page * pageSize, page * pageSize + pageSize);
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["foods"] });
-
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const payload = toPayload(form);
-      if (editing) await apiClient.patch(`/foods/${editing.id}`, payload);
-      else await apiClient.post("/foods", payload);
+  const bulk = useMutation({
+    mutationFn: async (payload: { ids: string[]; patch: Record<string, unknown> }) => {
+      await Promise.all(payload.ids.map((id) => apiClient.patch(`/foods/${id}`, payload.patch)));
     },
-    onSuccess: () => {
+    onSuccess: (_d, v) => {
       invalidate();
-      toast.success(editing ? "Food updated — customer app shows the new value" : "Food created");
-      setDialogOpen(false);
-      resetForm();
+      setSelected(new Set());
+      toast.success(`Updated ${v.ids.length} item(s)`);
     },
-    onError: (e: any) => toast.error(e?.response?.data?.error?.message || "Save failed"),
+    onError: (e: any) => toast.error(e?.response?.data?.error?.message || "Bulk update failed"),
   });
 
-  const toggleMutation = useMutation({
-    mutationFn: async ({ id, isActive }: any) => apiClient.patch(`/foods/${id}`, { isActive }),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Availability updated");
-    },
+  const quickToggle = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) =>
+      apiClient.patch(`/foods/${id}`, patch),
+    onSuccess: () => invalidate(),
+    onError: (e: any) => toast.error(e?.response?.data?.error?.message || "Update failed"),
   });
 
-  const deleteMutation = useMutation({
+  const remove = useMutation({
     mutationFn: async (id: string) => apiClient.delete(`/foods/${id}`),
     onSuccess: () => {
       invalidate();
-      toast.success("Food item removed");
+      toast.success("Food item removed (past orders keep their records)");
       setDeleteId(null);
     },
     onError: (e: any) => toast.error(e?.response?.data?.error?.message || "Delete failed"),
   });
 
-  const resetForm = () => {
-    setForm(EMPTY_FORM);
-    setEditing(null);
-  };
-
-  const openEdit = (food: any) => {
-    setEditing(food);
-    const imgs = Array.isArray(food.imageUrls) ? food.imageUrls : [];
-    setForm({
-      name: food.name ?? "",
-      description: food.description ?? "",
-      price: String(food.price ?? ""),
-      originalPrice: food.originalPrice != null ? String(food.originalPrice) : "",
-      categoryId: food.categoryId ?? "",
-      imageUrl: imgs[0] ?? "",
-      videoUrl: food.videoUrl ?? "",
-      calories: food.calories != null ? String(food.calories) : "",
-      preparationTimeMinutes: String(food.preparationTimeMinutes ?? 20),
-      stock: food.stock != null ? String(food.stock) : "",
-      displayOrder: String(food.displayOrder ?? 0),
-      tags: Array.isArray(food.tags) ? food.tags.join(", ") : "",
-      isVeg: food.isVeg !== false,
-      isJainAvailable: !!food.isJainAvailable,
-      isFastingFriendly: !!food.isFastingFriendly,
-      isBestseller: !!food.isBestseller,
-      isHealthyPick: !!food.isHealthyPick,
-      isActive: !!food.isActive,
+  const toggleSelect = (id: string) =>
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
-    setDialogOpen(true);
-  };
 
-  const set = (k: keyof typeof EMPTY_FORM, v: any) => setForm((f) => ({ ...f, [k]: v }));
-
-  const finalPrice = Number(form.price) || 0;
-  const discount = form.originalPrice ? Math.max(0, Number(form.originalPrice) - finalPrice) : 0;
+  const allOnPage = foods.map((f: any) => f.id);
+  const allChecked = allOnPage.length > 0 && allOnPage.every((id: string) => selected.has(id));
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Foods"
-        description="Everything the customer sees — name, price, images, availability. Changes go live via the API."
+        description="Everything the customer sees — filters below query the live dataset, and the pencil opens the full editor."
         actions={
-          <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+          <Button onClick={() => router.push("/dashboard/foods/new")}>
             <Plus className="mr-2 h-4 w-4" /> Add Food
           </Button>
         }
@@ -186,20 +184,19 @@ export default function FoodsPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
+          {/* Filter bar — every control narrows the server query */}
+          <div className="mb-4 grid gap-3 md:grid-cols-4">
+            <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search foods…"
+                placeholder="Search name or description…"
                 className="pl-9"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+                value={filters.search}
+                onChange={(e) => set("search", e.target.value)}
               />
             </div>
-            <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
+            <Select value={filters.categoryId} onValueChange={(v) => set("categoryId", v)}>
+              <SelectTrigger><SelectValue placeholder="All categories" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
                 {categories.map((c: any) => (
@@ -207,18 +204,128 @@ export default function FoodsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={filters.subcategory} onValueChange={(v) => set("subcategory", v)}>
+              <SelectTrigger><SelectValue placeholder="All subcategories" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All subcategories</SelectItem>
+                {subcategories.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filters.isActive} onValueChange={(v) => set("isActive", v)}>
+              <SelectTrigger><SelectValue placeholder="Active status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANY}>Active: all</SelectItem>
+                <SelectItem value="true">Active</SelectItem>
+                <SelectItem value="false">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.isAvailable} onValueChange={(v) => set("isAvailable", v)}>
+              <SelectTrigger><SelectValue placeholder="Availability" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANY}>Available: all</SelectItem>
+                <SelectItem value="true">Available</SelectItem>
+                <SelectItem value="false">Unavailable</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.isFeatured} onValueChange={(v) => set("isFeatured", v)}>
+              <SelectTrigger><SelectValue placeholder="Featured" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANY}>Featured: all</SelectItem>
+                <SelectItem value="true">Featured</SelectItem>
+                <SelectItem value="false">Not featured</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.isBestseller} onValueChange={(v) => set("isBestseller", v)}>
+              <SelectTrigger><SelectValue placeholder="Bestseller" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANY}>Bestseller: all</SelectItem>
+                <SelectItem value="true">Bestseller</SelectItem>
+                <SelectItem value="false">Not bestseller</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.mealTag} onValueChange={(v) => set("mealTag", v)}>
+              <SelectTrigger><SelectValue placeholder="Meal" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Meal: all</SelectItem>
+                <SelectItem value="breakfast">Breakfast</SelectItem>
+                <SelectItem value="lunch">Lunch</SelectItem>
+                <SelectItem value="dinner">Dinner</SelectItem>
+                <SelectItem value="snacks">Snacks</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.hasCustomization} onValueChange={(v) => set("hasCustomization", v)}>
+              <SelectTrigger><SelectValue placeholder="Customization" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANY}>Customization: all</SelectItem>
+                <SelectItem value="true">Has customization</SelectItem>
+                <SelectItem value="false">No customization</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-2">
+              <Input
+                type="number" min="0" placeholder="Min ₹"
+                value={filters.minPrice} onChange={(e) => set("minPrice", e.target.value)}
+              />
+              <Input
+                type="number" min="0" placeholder="Max ₹"
+                value={filters.maxPrice} onChange={(e) => set("maxPrice", e.target.value)}
+              />
+            </div>
+            <Select value={filters.sort} onValueChange={(v) => set("sort", v)}>
+              <SelectTrigger><SelectValue placeholder="Sort" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recommended">Sort: Recommended</SelectItem>
+                <SelectItem value="popular">Sort: Popular</SelectItem>
+                <SelectItem value="priceAsc">Sort: Price low → high</SelectItem>
+                <SelectItem value="priceDesc">Sort: Price high → low</SelectItem>
+                <SelectItem value="nameAsc">Sort: A → Z</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {foods.length} result(s) on this page{activeFilterCount > 0 ? ` · ${activeFilterCount} filter(s) active` : ""}
+            </span>
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => { setFilters(DEFAULT_FILTERS); setPage(0); }}>
+                <X className="mr-1 h-3 w-3" /> Clear all
+              </Button>
+            )}
+            {selected.size > 0 && (
+              <div className="ml-auto flex flex-wrap gap-2">
+                <span className="self-center text-sm font-medium">{selected.size} selected</span>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isActive: true } })}>Activate</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isActive: false } })}>Deactivate</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isAvailable: true } })}>Set available</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isAvailable: false } })}>Set unavailable</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isFeatured: true } })}>★ Featured</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isBestseller: true } })}>Bestseller</Button>
+              </div>
+            )}
           </div>
 
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <input
+                      type="checkbox"
+                      checked={allChecked}
+                      onChange={(e) => setSelected(new Set(e.target.checked ? allOnPage : []))}
+                      aria-label="Select all on page"
+                      className="h-4 w-4 accent-current"
+                    />
+                  </TableHead>
                   <TableHead>Food</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
                   <TableHead>Flags</TableHead>
                   <TableHead>Active</TableHead>
+                  <TableHead>Avail.</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -226,23 +333,33 @@ export default function FoodsPage() {
                 {isLoading ? (
                   [...Array(6)].map((_, i) => (
                     <TableRow key={i}>
-                      {[...Array(7)].map((_, j) => (
+                      {[...Array(8)].map((_, j) => (
                         <TableCell key={j}><div className="h-4 animate-pulse rounded bg-muted" /></TableCell>
                       ))}
                     </TableRow>
                   ))
-                ) : paged.length === 0 ? (
+                ) : foods.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7}>
-                      <EmptyState title="No foods found" description="Add your first food item to show it in the customer app." />
+                    <TableCell colSpan={8}>
+                      <EmptyState title="No foods match these filters" description="Try clearing filters — e.g. active Breakfast foods with customization." />
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paged.map((food: any) => {
+                  foods.map((food: any) => {
                     const imgs = Array.isArray(food.imageUrls) ? food.imageUrls : [];
                     const thumb = resolveImageUrl(imgs[0]);
+                    const groupCount = Array.isArray(food.customizationGroups) ? food.customizationGroups.length : 0;
                     return (
                       <TableRow key={food.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selected.has(food.id)}
+                            onChange={() => toggleSelect(food.id)}
+                            aria-label={`Select ${food.name}`}
+                            className="h-4 w-4 accent-current"
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             {thumb ? (
@@ -253,7 +370,10 @@ export default function FoodsPage() {
                             )}
                             <div>
                               <p className="font-medium">{food.name}</p>
-                              <p className="text-xs text-muted-foreground">#{food.displayOrder ?? 0} · {food.preparationTimeMinutes ?? 20} min</p>
+                              <p className="text-xs text-muted-foreground">
+                                {food.subcategory || "No subcategory"} · #{food.displayOrder ?? 0}
+                                {groupCount > 0 && ` · ${groupCount} option group(s)`}
+                              </p>
                             </div>
                           </div>
                         </TableCell>
@@ -264,23 +384,28 @@ export default function FoodsPage() {
                             <div className="text-xs text-muted-foreground line-through">{formatCurrency(Number(food.originalPrice))}</div>
                           )}
                         </TableCell>
-                        <TableCell>{food.stock == null ? <span className="text-muted-foreground">∞</span> : food.stock}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {food.isBestseller && <Badge>Featured</Badge>}
-                            {food.isHealthyPick && <Badge variant="secondary">Healthy</Badge>}
-                            {food.isJainAvailable && <Badge variant="outline">Jain</Badge>}
+                            {food.isFeatured && <Badge>Featured</Badge>}
+                            {food.isBestseller && <Badge variant="secondary">Bestseller</Badge>}
+                            {groupCount > 0 && <Badge variant="outline">{groupCount} custom</Badge>}
                           </div>
                         </TableCell>
                         <TableCell>
                           <Switch
                             checked={!!food.isActive}
-                            onCheckedChange={(v) => toggleMutation.mutate({ id: food.id, isActive: v })}
+                            onCheckedChange={(v) => quickToggle.mutate({ id: food.id, patch: { isActive: v } })}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={food.isAvailable !== false}
+                            onCheckedChange={(v) => quickToggle.mutate({ id: food.id, patch: { isAvailable: v } })}
                           />
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(food)}>
+                            <Button variant="ghost" size="icon" title="Open full editor" onClick={() => router.push(`/dashboard/foods/${food.id}`)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" onClick={() => setDeleteId(food.id)}>
@@ -295,95 +420,9 @@ export default function FoodsPage() {
               </TableBody>
             </Table>
           </div>
-          <Pagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
+          <Pagination page={page} pageSize={pageSize} total={foods.length === pageSize ? (page + 1) * pageSize + 1 : page * pageSize + foods.length} onPageChange={setPage} />
         </CardContent>
       </Card>
-
-      <Dialog open={dialogOpen} onOpenChange={(v) => { if (!v) { setDialogOpen(false); resetForm(); } }}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Edit Food" : "Add Food"}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4 sm:grid-cols-2">
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Name *</Label>
-              <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Description</Label>
-              <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Price (₹) *</Label>
-              <Input type="number" min="1" value={form.price} onChange={(e) => set("price", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Original price (₹) — shows discount</Label>
-              <Input type="number" min="0" value={form.originalPrice} onChange={(e) => set("originalPrice", e.target.value)} />
-              {discount > 0 && <p className="text-xs text-green-600">Customer saves {formatCurrency(discount)}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label>Category *</Label>
-              <Select value={form.categoryId} onValueChange={(v) => set("categoryId", v)}>
-                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                <SelectContent>
-                  {categories.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Prep time (min)</Label>
-              <Input type="number" min="1" value={form.preparationTimeMinutes} onChange={(e) => set("preparationTimeMinutes", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Stock (blank = unlimited)</Label>
-              <Input type="number" min="0" value={form.stock} onChange={(e) => set("stock", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Sort position</Label>
-              <Input type="number" value={form.displayOrder} onChange={(e) => set("displayOrder", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Calories</Label>
-              <Input type="number" min="0" value={form.calories} onChange={(e) => set("calories", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Tags (comma separated)</Label>
-              <Input value={form.tags} onChange={(e) => set("tags", e.target.value)} placeholder="spicy, lunch" />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <ImageUpload label="Food image" value={form.imageUrl} onChange={(v) => set("imageUrl", v)} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Video URL (optional)</Label>
-              <Input value={form.videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://…" />
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-3 sm:col-span-2">
-              {([
-                ["isVeg", "Veg (always on — pure veg kitchen)"],
-                ["isJainAvailable", "Jain available"],
-                ["isFastingFriendly", "Fasting friendly"],
-                ["isBestseller", "Featured / special"],
-                ["isHealthyPick", "Healthy pick"],
-                ["isActive", "Available for ordering"],
-              ] as const).map(([key, label]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <Switch checked={!!form[key]} onCheckedChange={(v) => set(key, v)} disabled={key === "isVeg"} />
-                  <Label>{label}</Label>
-                </div>
-              ))}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Cancel</Button>
-            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || !form.name || !form.price || !form.categoryId}>
-              {editing ? "Save Changes" : "Create"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <ConfirmDialog
         open={!!deleteId}
@@ -391,9 +430,9 @@ export default function FoodsPage() {
         message="The item will be soft-deleted and hidden from customers. Past orders keep their records."
         confirmLabel="Delete"
         danger
-        loading={deleteMutation.isPending}
+        loading={remove.isPending}
         onCancel={() => setDeleteId(null)}
-        onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
+        onConfirm={() => deleteId && remove.mutate(deleteId)}
       />
     </div>
   );

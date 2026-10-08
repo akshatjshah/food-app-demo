@@ -31,17 +31,24 @@ let FoodsController = class FoodsController {
     constructor(foodsService) {
         this.foodsService = foodsService;
     }
-    async findAll(categoryId, search, isVeg, isJainAvailable, isFastingFriendly, isBestseller, isHealthyPick, minPrice, maxPrice, skip, take) {
+    async findAll(categoryId, search, subcategory, isVeg, isJainAvailable, isFastingFriendly, isBestseller, isFeatured, isHealthyPick, isAvailable, mealTag, hasCustomization, minPrice, maxPrice, sort, skip, take) {
+        const bool = (v) => (v !== undefined ? v === 'true' : undefined);
         return this.foodsService.findAll({
             categoryId,
+            subcategory,
             search,
-            isVeg: isVeg !== undefined ? isVeg === 'true' : undefined,
-            isJainAvailable: isJainAvailable !== undefined ? isJainAvailable === 'true' : undefined,
-            isFastingFriendly: isFastingFriendly !== undefined ? isFastingFriendly === 'true' : undefined,
-            isBestseller: isBestseller !== undefined ? isBestseller === 'true' : undefined,
-            isHealthyPick: isHealthyPick !== undefined ? isHealthyPick === 'true' : undefined,
+            isVeg: bool(isVeg),
+            isJainAvailable: bool(isJainAvailable),
+            isFastingFriendly: bool(isFastingFriendly),
+            isBestseller: bool(isBestseller),
+            isFeatured: bool(isFeatured),
+            isHealthyPick: bool(isHealthyPick),
+            isAvailable: bool(isAvailable),
+            mealTag,
+            hasCustomization: hasCustomization !== undefined ? hasCustomization === 'true' : undefined,
             minPrice: minPrice ? parseFloat(minPrice) : undefined,
             maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+            sort,
             skip: skip ? parseInt(skip) : 0,
             take: take ? parseInt(take) : 50,
         });
@@ -52,8 +59,25 @@ let FoodsController = class FoodsController {
     async findOne(id) {
         return this.foodsService.findOne(id);
     }
-    async findAllAdmin(categoryId, search) {
-        return this.foodsService.findAll({ categoryId, search, includeInactive: true });
+    async findAllAdmin(categoryId, subcategory, search, isActive, isAvailable, isFeatured, isBestseller, mealTag, hasCustomization, minPrice, maxPrice, sort, skip, take) {
+        const bool = (v) => (v !== undefined && v !== '' ? v === 'true' : undefined);
+        return this.foodsService.findAll({
+            categoryId,
+            subcategory,
+            search,
+            isActive: bool(isActive),
+            isAvailable: bool(isAvailable),
+            isFeatured: bool(isFeatured),
+            isBestseller: bool(isBestseller),
+            mealTag,
+            hasCustomization: hasCustomization !== undefined && hasCustomization !== '' ? hasCustomization === 'true' : undefined,
+            minPrice: minPrice ? parseFloat(minPrice) : undefined,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+            sort,
+            skip: skip ? parseInt(skip) : 0,
+            take: take ? parseInt(take) : 500,
+            includeInactive: true,
+        });
     }
     async create(dto) {
         return this.foodsService.create(dto);
@@ -98,29 +122,41 @@ __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get available food items (public)' }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'subcategory', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'isVeg', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'isJainAvailable', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'isFastingFriendly', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'isBestseller', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'isFeatured', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'isHealthyPick', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'isAvailable', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'mealTag', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'hasCustomization', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'minPrice', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'maxPrice', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'sort', required: false, description: 'recommended|popular|priceAsc|priceDesc|nameAsc' }),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false }),
     __param(0, (0, common_1.Query)('categoryId')),
     __param(1, (0, common_1.Query)('search')),
-    __param(2, (0, common_1.Query)('isVeg')),
-    __param(3, (0, common_1.Query)('isJainAvailable')),
-    __param(4, (0, common_1.Query)('isFastingFriendly')),
-    __param(5, (0, common_1.Query)('isBestseller')),
-    __param(6, (0, common_1.Query)('isHealthyPick')),
-    __param(7, (0, common_1.Query)('minPrice')),
-    __param(8, (0, common_1.Query)('maxPrice')),
-    __param(9, (0, common_1.Query)('skip')),
-    __param(10, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('subcategory')),
+    __param(3, (0, common_1.Query)('isVeg')),
+    __param(4, (0, common_1.Query)('isJainAvailable')),
+    __param(5, (0, common_1.Query)('isFastingFriendly')),
+    __param(6, (0, common_1.Query)('isBestseller')),
+    __param(7, (0, common_1.Query)('isFeatured')),
+    __param(8, (0, common_1.Query)('isHealthyPick')),
+    __param(9, (0, common_1.Query)('isAvailable')),
+    __param(10, (0, common_1.Query)('mealTag')),
+    __param(11, (0, common_1.Query)('hasCustomization')),
+    __param(12, (0, common_1.Query)('minPrice')),
+    __param(13, (0, common_1.Query)('maxPrice')),
+    __param(14, (0, common_1.Query)('sort')),
+    __param(15, (0, common_1.Query)('skip')),
+    __param(16, (0, common_1.Query)('take')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], FoodsController.prototype, "findAll", null);
 __decorate([
@@ -147,11 +183,35 @@ __decorate([
     (0, common_1.Get)('admin/all'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all food items including inactive (admin/chef)' }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'subcategory', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'isActive', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'isAvailable', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'isFeatured', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'isBestseller', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'mealTag', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'hasCustomization', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'minPrice', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'maxPrice', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'sort', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false }),
     __param(0, (0, common_1.Query)('categoryId')),
-    __param(1, (0, common_1.Query)('search')),
+    __param(1, (0, common_1.Query)('subcategory')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('isActive')),
+    __param(4, (0, common_1.Query)('isAvailable')),
+    __param(5, (0, common_1.Query)('isFeatured')),
+    __param(6, (0, common_1.Query)('isBestseller')),
+    __param(7, (0, common_1.Query)('mealTag')),
+    __param(8, (0, common_1.Query)('hasCustomization')),
+    __param(9, (0, common_1.Query)('minPrice')),
+    __param(10, (0, common_1.Query)('maxPrice')),
+    __param(11, (0, common_1.Query)('sort')),
+    __param(12, (0, common_1.Query)('skip')),
+    __param(13, (0, common_1.Query)('take')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], FoodsController.prototype, "findAllAdmin", null);
 __decorate([

@@ -16,9 +16,13 @@ class MenuFood with _$MenuFood {
     @Default(0) int reviewsCount,
     @Default(true) bool isVeg,
     @Default(false) bool isBestseller,
+    @Default(false) bool isFeatured,
     @Default(true) bool isActive,
+    @Default(true) bool isAvailable,
     String? categoryId,
     String? categoryName,
+    String? subcategory,
+    @Default([]) List<String> mealTags,
     @Default([])
     List<CustomizationGroup> customizationGroups,
   }) = _MenuFood;

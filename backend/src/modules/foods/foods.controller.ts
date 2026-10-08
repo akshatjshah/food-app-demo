@@ -24,39 +24,58 @@ export class FoodsController {
   @Get()
   @ApiOperation({ summary: 'Get available food items (public)' })
   @ApiQuery({ name: 'categoryId', required: false })
+  @ApiQuery({ name: 'subcategory', required: false })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'isVeg', required: false })
   @ApiQuery({ name: 'isJainAvailable', required: false })
   @ApiQuery({ name: 'isFastingFriendly', required: false })
   @ApiQuery({ name: 'isBestseller', required: false })
+  @ApiQuery({ name: 'isFeatured', required: false })
   @ApiQuery({ name: 'isHealthyPick', required: false })
+  @ApiQuery({ name: 'isAvailable', required: false })
+  @ApiQuery({ name: 'mealTag', required: false })
+  @ApiQuery({ name: 'hasCustomization', required: false })
   @ApiQuery({ name: 'minPrice', required: false })
   @ApiQuery({ name: 'maxPrice', required: false })
+  @ApiQuery({ name: 'sort', required: false, description: 'recommended|popular|priceAsc|priceDesc|nameAsc' })
   @ApiQuery({ name: 'skip', required: false })
   @ApiQuery({ name: 'take', required: false })
   async findAll(
     @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
+    @Query('subcategory') subcategory?: string,
     @Query('isVeg') isVeg?: string,
     @Query('isJainAvailable') isJainAvailable?: string,
     @Query('isFastingFriendly') isFastingFriendly?: string,
     @Query('isBestseller') isBestseller?: string,
+    @Query('isFeatured') isFeatured?: string,
     @Query('isHealthyPick') isHealthyPick?: string,
+    @Query('isAvailable') isAvailable?: string,
+    @Query('mealTag') mealTag?: string,
+    @Query('hasCustomization') hasCustomization?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
+    @Query('sort') sort?: string,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
   ) {
+    const bool = (v?: string) => (v !== undefined ? v === 'true' : undefined);
     return this.foodsService.findAll({
       categoryId,
+      subcategory,
       search,
-      isVeg: isVeg !== undefined ? isVeg === 'true' : undefined,
-      isJainAvailable: isJainAvailable !== undefined ? isJainAvailable === 'true' : undefined,
-      isFastingFriendly: isFastingFriendly !== undefined ? isFastingFriendly === 'true' : undefined,
-      isBestseller: isBestseller !== undefined ? isBestseller === 'true' : undefined,
-      isHealthyPick: isHealthyPick !== undefined ? isHealthyPick === 'true' : undefined,
+      isVeg: bool(isVeg),
+      isJainAvailable: bool(isJainAvailable),
+      isFastingFriendly: bool(isFastingFriendly),
+      isBestseller: bool(isBestseller),
+      isFeatured: bool(isFeatured),
+      isHealthyPick: bool(isHealthyPick),
+      isAvailable: bool(isAvailable),
+      mealTag,
+      hasCustomization: hasCustomization !== undefined ? hasCustomization === 'true' : undefined,
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
       maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      sort,
       skip: skip ? parseInt(skip) : 0,
       take: take ? parseInt(take) : 50,
     });
@@ -84,12 +103,53 @@ export class FoodsController {
   @Get('admin/all')
   @ApiOperation({ summary: 'Get all food items including inactive (admin/chef)' })
   @ApiQuery({ name: 'categoryId', required: false })
+  @ApiQuery({ name: 'subcategory', required: false })
   @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'isActive', required: false })
+  @ApiQuery({ name: 'isAvailable', required: false })
+  @ApiQuery({ name: 'isFeatured', required: false })
+  @ApiQuery({ name: 'isBestseller', required: false })
+  @ApiQuery({ name: 'mealTag', required: false })
+  @ApiQuery({ name: 'hasCustomization', required: false })
+  @ApiQuery({ name: 'minPrice', required: false })
+  @ApiQuery({ name: 'maxPrice', required: false })
+  @ApiQuery({ name: 'sort', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'take', required: false })
   async findAllAdmin(
     @Query('categoryId') categoryId?: string,
+    @Query('subcategory') subcategory?: string,
     @Query('search') search?: string,
+    @Query('isActive') isActive?: string,
+    @Query('isAvailable') isAvailable?: string,
+    @Query('isFeatured') isFeatured?: string,
+    @Query('isBestseller') isBestseller?: string,
+    @Query('mealTag') mealTag?: string,
+    @Query('hasCustomization') hasCustomization?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('sort') sort?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
   ) {
-    return this.foodsService.findAll({ categoryId, search, includeInactive: true });
+    const bool = (v?: string) => (v !== undefined && v !== '' ? v === 'true' : undefined);
+    return this.foodsService.findAll({
+      categoryId,
+      subcategory,
+      search,
+      isActive: bool(isActive),
+      isAvailable: bool(isAvailable),
+      isFeatured: bool(isFeatured),
+      isBestseller: bool(isBestseller),
+      mealTag,
+      hasCustomization: hasCustomization !== undefined && hasCustomization !== '' ? hasCustomization === 'true' : undefined,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      sort,
+      skip: skip ? parseInt(skip) : 0,
+      take: take ? parseInt(take) : 500,
+      includeInactive: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -4,6 +4,8 @@ export declare class CartService {
     constructor(prisma: PrismaService);
     private foodItemSelect;
     private isFoodAvailable;
+    private validateCustomizations;
+    private customizationSignature;
     getCart(userId: string): Promise<{
         id: string;
         items: {

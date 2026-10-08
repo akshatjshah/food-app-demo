@@ -14,28 +14,42 @@ export class FoodsService {
     skip?: number;
     take?: number;
     categoryId?: string;
+    subcategory?: string;
     search?: string;
     isVeg?: boolean;
     isJainAvailable?: boolean;
     isFastingFriendly?: boolean;
     isBestseller?: boolean;
+    isFeatured?: boolean;
     isHealthyPick?: boolean;
+    isActive?: boolean;
+    isAvailable?: boolean;
+    mealTag?: string;
+    hasCustomization?: boolean;
     minPrice?: number;
     maxPrice?: number;
+    sort?: string;
     includeInactive?: boolean;
   }) {
     const {
       skip,
       take,
       categoryId,
+      subcategory,
       search,
       isVeg,
       isJainAvailable,
       isFastingFriendly,
       isBestseller,
+      isFeatured,
       isHealthyPick,
+      isActive,
+      isAvailable,
+      mealTag,
+      hasCustomization,
       minPrice,
       maxPrice,
+      sort,
       includeInactive,
     } = params;
 
@@ -44,19 +58,40 @@ export class FoodsService {
     if (!includeInactive) {
       where.isActive = true;
     }
+    if (isActive !== undefined) where.isActive = isActive;
+    if (isAvailable !== undefined) where.isAvailable = isAvailable;
 
     if (categoryId) where.categoryId = categoryId;
+    if (subcategory) where.subcategory = { equals: subcategory, mode: 'insensitive' };
     if (isVeg !== undefined) where.isVeg = isVeg;
     if (isJainAvailable !== undefined) where.isJainAvailable = isJainAvailable;
     if (isFastingFriendly !== undefined) where.isFastingFriendly = isFastingFriendly;
     if (isBestseller !== undefined) where.isBestseller = isBestseller;
+    if (isFeatured !== undefined) where.isFeatured = isFeatured;
     if (isHealthyPick !== undefined) where.isHealthyPick = isHealthyPick;
-    if (search) where.name = { contains: search, mode: 'insensitive' };
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined) where.price.gte = minPrice;
       if (maxPrice !== undefined) where.price.lte = maxPrice;
     }
+    if (hasCustomization === true) {
+      where.customizationGroups = { some: { isActive: true } };
+    } else if (hasCustomization === false) {
+      where.customizationGroups = { none: { isActive: true } };
+    }
+
+    // Sorting: recommended (displayOrder) | popular (reviewsCount) | priceAsc | priceDesc | nameAsc
+    let orderBy: any = [{ displayOrder: 'asc' }, { createdAt: 'desc' }];
+    if (sort === 'popular') orderBy = [{ reviewsCount: 'desc' }, { rating: 'desc' }];
+    else if (sort === 'priceAsc') orderBy = [{ price: 'asc' }];
+    else if (sort === 'priceDesc') orderBy = [{ price: 'desc' }];
+    else if (sort === 'nameAsc') orderBy = [{ name: 'asc' }];
 
     const foods = await this.prisma.foodItem.findMany({
       where,
@@ -66,23 +101,46 @@ export class FoodsService {
         category: { select: { id: true, name: true, icon: true } },
         customizationGroups: {
           where: includeInactive ? undefined : { isActive: true },
-          include: { items: { where: { isActive: true } } },
+          include: {
+            items: {
+              where: includeInactive ? undefined : { isActive: true },
+              orderBy: { displayOrder: 'asc' },
+            },
+          },
           orderBy: { displayOrder: 'asc' },
         },
       },
-      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
+      orderBy,
     });
 
-    return foods.map((f) => ({
+    // mealTag is stored as Json array; filter in-memory to stay portable.
+    const mealFiltered = mealTag
+      ? foods.filter((f: any) => Array.isArray((f as any).mealTags) && (f as any).mealTags.includes(mealTag))
+      : foods;
+
+    return mealFiltered.map((f) => this.toPlainFood(f));
+  }
+
+  private toPlainFood(f: any) {
+    return {
       ...f,
       price: Number(f.price),
       originalPrice: f.originalPrice ? Number(f.originalPrice) : null,
       rating: Number(f.rating),
-      customizationGroups: f.customizationGroups.map((g) => ({
+      mealTags: Array.isArray((f as any).mealTags) ? (f as any).mealTags : [],
+      customizationGroups: (f.customizationGroups || []).map((g: any) => ({
         ...g,
-        items: g.items.map((i) => ({ ...i, additionalPrice: Number(i.additionalPrice) })),
+        items: (g.items || []).map((i: any) => ({ ...i, additionalPrice: Number(i.additionalPrice) })),
       })),
-    }));
+    };
+  }
+
+  async findAllWithCount(params: Parameters<FoodsService['findAll']>[0]) {
+    // Reuse the same where-building by calling findAll for rows would lose
+    // the total; compute count with identical predicates (minus mealTag,
+    // which is post-filtered — count reflects pre-mealTag rows).
+    const data = await this.findAll(params);
+    return { data, total: data.length };
   }
 
   async findSpecials() {

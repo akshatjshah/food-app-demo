@@ -38,7 +38,7 @@ export class OrdersService {
     const orderItems: any[] = [];
 
     for (const ci of cart.items) {
-      if (!ci.foodItem.isActive) {
+      if (!ci.foodItem.isActive || (ci.foodItem as any).isAvailable === false) {
         errors.push(`${ci.foodItem.name} is no longer available`);
         continue;
       }
@@ -47,24 +47,60 @@ export class OrdersService {
         continue;
       }
       const basePrice = Number(ci.foodItem.price);
-      const customizationItems = Array.isArray(ci.customizationItems)
+      // Server-authoritative customization revalidation at checkout:
+      // never trust the client/cart snapshot — reload groups + DB prices.
+      const rawCustom = Array.isArray(ci.customizationItems)
         ? (ci.customizationItems as any[])
         : [];
-      const customizationTotal = customizationItems.reduce(
-        (s: number, c: any) => s + Number(c.additional_price || 0),
-        0,
-      );
+      const groups = await this.prisma.customizationGroup.findMany({
+        where: { foodItemId: ci.foodItemId, isActive: true },
+        include: { items: true },
+      });
+      const itemById = new Map<string, { item: any; group: any }>();
+      for (const g of groups) for (const it of g.items) itemById.set(it.id, { item: it, group: g });
+      const seenByGroup = new Map<string, number>();
+      let customizationTotal = 0;
+      const snapshotCustom: any[] = [];
+      let invalid = false;
+      for (const c of rawCustom) {
+        const id = c.customization_item_id || c.id;
+        const found = itemById.get(id);
+        if (!found || !found.item.isActive || !found.group.isActive) {
+          errors.push(`${ci.foodItem.name}: a selected option is no longer available — please reconfigure in cart`);
+          invalid = true;
+          break;
+        }
+        seenByGroup.set(found.group.id, (seenByGroup.get(found.group.id) ?? 0) + 1);
+        const price = Number(found.item.additionalPrice);
+        customizationTotal += price;
+        snapshotCustom.push({
+          customizationItemId: found.item.id,
+          name: found.item.name,
+          additionalPrice: price,
+          groupName: found.group.name,
+        });
+      }
+      if (invalid) continue;
+      for (const g of groups) {
+        const count = seenByGroup.get(g.id) ?? 0;
+        if (count < g.minSelections || count > g.maxSelections) {
+          errors.push(
+            `${ci.foodItem.name}: "${g.name}" needs ${g.minSelections}–${g.maxSelections} selection(s) — please reconfigure in cart`,
+          );
+          invalid = true;
+          break;
+        }
+      }
+      if (invalid) continue;
       const unitPrice = basePrice + customizationTotal;
       itemTotal += unitPrice * ci.quantity;
       orderItems.push({
         foodItemId: ci.foodItemId,
         quantity: ci.quantity,
         unitPrice,
-        customizations: customizationItems.map((c: any) => ({
-          customizationItemId: c.customization_item_id || c.id,
-          name: c.name || '',
-          additionalPrice: Number(c.additional_price || 0),
-        })),
+        foodName: ci.foodItem.name,
+        basePrice,
+        customizations: snapshotCustom,
       });
     }
 
@@ -129,11 +165,14 @@ export class OrdersService {
               foodItemId: oi.foodItemId,
               quantity: oi.quantity,
               unitPrice: oi.unitPrice,
+              foodName: oi.foodName,
+              basePrice: oi.basePrice,
               customizations: {
                 create: (oi.customizations || []).map((c: any) => ({
                   customizationItemId: c.customizationItemId,
                   name: c.name,
                   additionalPrice: c.additionalPrice,
+                  groupName: c.groupName,
                 })),
               },
             })),
@@ -298,7 +337,7 @@ export class OrdersService {
   async reorder(userId: string, orderId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true },
+      include: { items: { include: { customizations: true } } },
     });
     if (!order) throw new NotFoundException('Order not found');
     if (order.userId !== userId) throw new BadRequestException('Not authorized');
@@ -311,14 +350,39 @@ export class OrdersService {
     for (const item of order.items) {
       const foodItem = await this.prisma.foodItem.findUnique({
         where: { id: item.foodItemId },
+        include: { customizationGroups: { where: { isActive: true }, include: { items: true } } },
       });
-      if (foodItem && foodItem.isActive && !foodItem.deletedAt) {
+      if (foodItem && foodItem.isActive && (foodItem as any).isAvailable !== false && !foodItem.deletedAt) {
+        // Preserve the historical customization snapshot, but only for
+        // options that still exist and are active today.
+        const validIds = new Set(
+          foodItem.customizationGroups.flatMap((g) => g.items.filter((i) => i.isActive).map((i) => i.id)),
+        );
+        const groupByItem = new Map<string, { item: any; group: any }>();
+        for (const g of foodItem.customizationGroups) {
+          for (const it of g.items) groupByItem.set(it.id, { item: it, group: g });
+        }
+        const kept: any[] = [];
+        for (const c of (item as any).customizations || []) {
+          const found = groupByItem.get(c.customizationItemId);
+          if (found && found.item.isActive) {
+            kept.push({
+              customization_group_id: found.group.id,
+              customization_item_id: found.item.id,
+              id: found.item.id,
+              name: found.item.name,
+              additional_price: Number(found.item.additionalPrice),
+              group: found.group.name,
+            });
+          }
+        }
+        void validIds;
         await this.prisma.cartItem.create({
           data: {
             cartId: cart.id,
             foodItemId: item.foodItemId,
             quantity: item.quantity,
-            customizationItems: [],
+            customizationItems: kept as any,
           },
         });
       }

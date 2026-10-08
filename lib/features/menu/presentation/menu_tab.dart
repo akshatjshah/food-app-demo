@@ -21,12 +21,18 @@ class MenuTab extends ConsumerStatefulWidget {
 
 class _MenuTabState extends ConsumerState<MenuTab> {
   String _selectedCategory = 'all';
-  bool _onlyVeg = false;
-  String _sortBy = 'Popularity';
   bool _searchMode = false;
   Timer? _searchDebounce;
   final TextEditingController _searchController = TextEditingController();
   bool _wishlistLoaded = false;
+
+  static const _sortLabels = {
+    'recommended': 'Recommended',
+    'popular': 'Popular',
+    'priceAsc': 'Price: Low to High',
+    'priceDesc': 'Price: High to Low',
+    'nameAsc': 'A to Z',
+  };
 
   @override
   void initState() {
@@ -48,19 +54,6 @@ class _MenuTabState extends ConsumerState<MenuTab> {
     _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
-  }
-
-  List<MenuFood> _applySorting(List<MenuFood> foods) {
-    final sorted = List<MenuFood>.from(foods);
-    switch (_sortBy) {
-      case 'Price: Low to High':
-        sorted.sort((a, b) => a.price.compareTo(b.price));
-      case 'Price: High to Low':
-        sorted.sort((a, b) => b.price.compareTo(a.price));
-      default:
-        sorted.sort((a, b) => (b.reviewsCount).compareTo(a.reviewsCount));
-    }
-    return sorted;
   }
 
   void _applySearch(String raw) {
@@ -127,7 +120,9 @@ class _MenuTabState extends ConsumerState<MenuTab> {
     final homeState = ref.watch(homeProvider);
     final cartState = ref.watch(cartProvider);
 
-    final filteredFoods = _applySorting(foodState.foods);
+    // Sorting + filtering happen server-side (provider passes sort/filters
+    // to GET /foods), so the list renders backend order directly.
+    final filteredFoods = foodState.foods;
     final isSearching =
         foodState.search != null && foodState.search!.isNotEmpty;
 
@@ -483,80 +478,147 @@ class _MenuTabState extends ConsumerState<MenuTab> {
     );
   }
 
+  /// Distinct subcategories in the currently loaded foods (backend-driven).
+  List<String> _availableSubcategories(List<MenuFood> foods) {
+    final set = <String>{};
+    for (final f in foods) {
+      if (f.subcategory != null && f.subcategory!.trim().isNotEmpty) {
+        set.add(f.subcategory!.trim());
+      }
+    }
+    return set.toList()..sort();
+  }
+
+  int _activeFilterCount() {
+    final s = ref.read(foodListProvider);
+    var n = 0;
+    if (s.subcategory != null) n++;
+    if (s.mealTag != null) n++;
+    if (s.minPrice != null || s.maxPrice != null) n++;
+    if (s.isBestseller == true) n++;
+    if (s.isFeatured == true) n++;
+    if (s.isVeg == true) n++;
+    return n;
+  }
+
   Widget _buildFiltersRow(BuildContext context) {
+    final foodState = ref.watch(foodListProvider);
+    final count = _activeFilterCount();
+    final chips = <Widget>[];
+    if (foodState.isVeg == true) {
+      chips.add(_activeChip(context, 'Veg Only',
+          () => ref.read(foodListProvider.notifier).setVegFilter(null)));
+    }
+    if (foodState.subcategory != null) {
+      chips.add(_activeChip(context, foodState.subcategory!,
+          () => ref.read(foodListProvider.notifier).setSubcategory(null)));
+    }
+    if (foodState.mealTag != null) {
+      chips.add(_activeChip(context, 'Meal: ${foodState.mealTag}',
+          () => ref.read(foodListProvider.notifier).setMeal(null)));
+    }
+    if (foodState.minPrice != null || foodState.maxPrice != null) {
+      final min = foodState.minPrice?.toStringAsFixed(0) ?? '0';
+      final max = foodState.maxPrice?.toStringAsFixed(0) ?? '∞';
+      chips.add(_activeChip(context, '₹$min – ₹$max',
+          () => ref.read(foodListProvider.notifier).setPriceRange(null, null)));
+    }
+    if (foodState.isBestseller == true) {
+      chips.add(_activeChip(context, 'Bestseller',
+          () => ref.read(foodListProvider.notifier).setBestsellerFilter(null)));
+    }
+    if (foodState.isFeatured == true) {
+      chips.add(_activeChip(context, 'Featured',
+          () => ref.read(foodListProvider.notifier).setFeaturedFilter(null)));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.s20, vertical: 4),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FilterChip(
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.green, width: 1.5),
-                    color: Colors.white,
-                  ),
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 5,
-                    height: 5,
-                    decoration: const BoxDecoration(
-                        color: Colors.green, shape: BoxShape.circle),
+          Row(
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _openFilterSheet(context),
+                icon: const Icon(Icons.tune_rounded, size: 16),
+                label: Text(count > 0 ? 'Filters ($count)' : 'Filters'),
+                style: OutlinedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  textStyle: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(width: 8),
+              PopupMenuButton<String>(
+                initialValue: foodState.sort,
+                onSelected: (val) {
+                  ref.read(foodListProvider.notifier).setSort(val);
+                },
+                itemBuilder: (context) => [
+                  for (final e in _sortLabels.entries)
+                    CheckedPopupMenuItem(
+                      value: e.key,
+                      checked: foodState.sort == e.key,
+                      child: Text(e.value),
+                    ),
+                ],
+                child: Chip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Sort: ${_sortLabels[foodState.sort] ?? foodState.sort}',
+                          style: const TextStyle(fontSize: 11)),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_drop_down, size: 16),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                const Text('Veg Only',
-                    style:
-                        TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-              ],
-            ),
-            selected: _onlyVeg,
-            onSelected: (val) {
-              setState(() {
-                _onlyVeg = val;
-              });
-              ref
-                  .read(foodListProvider.notifier)
-                  .setVegFilter(val ? true : null);
-            },
-            selectedColor: AppColors.primary.withValues(alpha: 0.1),
-            checkmarkColor: AppColors.primary,
-          ),
-          const SizedBox(width: 8),
-          PopupMenuButton<String>(
-            onSelected: (val) {
-              setState(() {
-                _sortBy = val;
-              });
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                  value: 'Popularity', child: Text('Popularity')),
-              const PopupMenuItem(
-                  value: 'Price: Low to High',
-                  child: Text('Price: Low to High')),
-              const PopupMenuItem(
-                  value: 'Price: High to Low',
-                  child: Text('Price: High to Low')),
-            ],
-            child: Chip(
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Sort: $_sortBy',
-                      style: const TextStyle(fontSize: 11)),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_drop_down, size: 16),
-                ],
               ),
-            ),
+              const Spacer(),
+              Text('${foodState.foods.length} item(s)',
+                  style: const TextStyle(color: Colors.grey, fontSize: 11)),
+            ],
           ),
+          if (chips.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              ...chips,
+              ActionChip(
+                label: const Text('Clear all',
+                    style: TextStyle(fontSize: 11)),
+                onPressed: () => ref
+                    .read(foodListProvider.notifier)
+                    .clearAllFilters(),
+              ),
+            ]),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _activeChip(
+      BuildContext context, String label, VoidCallback onRemove) {
+    return Chip(
+      label: Text(label, style: const TextStyle(fontSize: 11)),
+      deleteIcon: const Icon(Icons.close_rounded, size: 14),
+      onDeleted: onRemove,
+      backgroundColor:
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+    );
+  }
+
+  Future<void> _openFilterSheet(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => const _MenuFilterSheet(),
     );
   }
 
@@ -907,6 +969,253 @@ class _MenuTabState extends ConsumerState<MenuTab> {
                       ],
                     ),
                   ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom-sheet filter editor. Drafts live locally until Apply, then the
+/// provider pushes them to the backend query (server-side filtering).
+class _MenuFilterSheet extends ConsumerStatefulWidget {
+  const _MenuFilterSheet();
+
+  @override
+  ConsumerState<_MenuFilterSheet> createState() => _MenuFilterSheetState();
+}
+
+class _MenuFilterSheetState extends ConsumerState<_MenuFilterSheet> {
+  String? _subcategory;
+  String? _mealTag;
+  final TextEditingController _minCtrl = TextEditingController();
+  final TextEditingController _maxCtrl = TextEditingController();
+  bool _vegOnly = false;
+  bool _bestseller = false;
+  bool _featured = false;
+  String _sort = 'recommended';
+
+  @override
+  void initState() {
+    super.initState();
+    final s = ref.read(foodListProvider);
+    _subcategory = s.subcategory;
+    _mealTag = s.mealTag;
+    if (s.minPrice != null) _minCtrl.text = s.minPrice!.toStringAsFixed(0);
+    if (s.maxPrice != null) _maxCtrl.text = s.maxPrice!.toStringAsFixed(0);
+    _vegOnly = s.isVeg == true;
+    _bestseller = s.isBestseller == true;
+    _featured = s.isFeatured == true;
+    _sort = s.sort;
+  }
+
+  @override
+  void dispose() {
+    _minCtrl.dispose();
+    _maxCtrl.dispose();
+    super.dispose();
+  }
+
+  void _apply() {
+    final notifier = ref.read(foodListProvider.notifier);
+    notifier.setSubcategory(_subcategory);
+    notifier.setMeal(_mealTag);
+    final min = double.tryParse(_minCtrl.text.trim());
+    final max = double.tryParse(_maxCtrl.text.trim());
+    notifier.setPriceRange(min, max);
+    notifier.setVegFilter(_vegOnly ? true : null);
+    notifier.setBestsellerFilter(_bestseller ? true : null);
+    notifier.setFeaturedFilter(_featured ? true : null);
+    notifier.setSort(_sort);
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final foods = ref.watch(foodListProvider).foods;
+    final subcats = <String>{};
+    for (final f in foods) {
+      if (f.subcategory != null && f.subcategory!.trim().isNotEmpty) {
+        subcats.add(f.subcategory!.trim());
+      }
+    }
+    final subcatList = subcats.toList()..sort();
+    const meals = ['breakfast', 'lunch', 'dinner', 'snacks'];
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 12,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Text('Filters',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(foodListProvider.notifier).clearAllFilters();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Clear all'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text('Subcategory',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              if (subcatList.isEmpty)
+                const Text('No subcategories in the current list.',
+                    style: TextStyle(color: Colors.grey, fontSize: 12)),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: const Text('All'),
+                    selected: _subcategory == null,
+                    onSelected: (_) =>
+                        setState(() => _subcategory = null),
+                  ),
+                  for (final s in subcatList)
+                    ChoiceChip(
+                      label: Text(s),
+                      selected: _subcategory == s,
+                      onSelected: (_) =>
+                          setState(() => _subcategory = s),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text('Meal',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: const Text('All'),
+                    selected: _mealTag == null,
+                    onSelected: (_) => setState(() => _mealTag = null),
+                  ),
+                  for (final m in meals)
+                    ChoiceChip(
+                      label: Text(m[0].toUpperCase() + m.substring(1)),
+                      selected: _mealTag == m,
+                      onSelected: (_) => setState(() => _mealTag = m),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text('Price range (₹)',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _minCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Min',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text('–'),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _maxCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Max',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                title: const Text('Veg only'),
+                value: _vegOnly,
+                contentPadding: EdgeInsets.zero,
+                onChanged: (v) => setState(() => _vegOnly = v),
+              ),
+              SwitchListTile(
+                title: const Text('Bestseller only'),
+                value: _bestseller,
+                contentPadding: EdgeInsets.zero,
+                onChanged: (v) => setState(() => _bestseller = v),
+              ),
+              SwitchListTile(
+                title: const Text('Featured only'),
+                value: _featured,
+                contentPadding: EdgeInsets.zero,
+                onChanged: (v) => setState(() => _featured = v),
+              ),
+              Text('Sort by',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              for (final e in _MenuTabState._sortLabels.entries)
+                RadioListTile<String>(
+                  title: Text(e.value),
+                  value: e.key,
+                  // ignore: deprecated_member_use
+                  groupValue: _sort,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  onChanged: (v) =>
+                      setState(() => _sort = v ?? 'recommended'),
+                ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _apply,
+                  child: Text(
+                      'Apply · ${ref.watch(foodListProvider).foods.length} item(s)'),
                 ),
               ),
             ],

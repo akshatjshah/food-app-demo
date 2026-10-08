@@ -74,6 +74,27 @@ export class CreateFoodDto {
   @IsOptional()
   isBestseller?: boolean;
 
+  @ApiPropertyOptional({ description: 'Admin featured flag (homepage/featured lists)' })
+  @IsBoolean()
+  @IsOptional()
+  isFeatured?: boolean;
+
+  @ApiPropertyOptional({ description: 'Available for ordering right now (separate from active listing)' })
+  @IsBoolean()
+  @IsOptional()
+  isAvailable?: boolean;
+
+  @ApiPropertyOptional({ description: 'Subcategory within the category, e.g. Shaak, Dal / Kadhi, Rice & Khichdi' })
+  @IsString()
+  @IsOptional()
+  subcategory?: string;
+
+  @ApiPropertyOptional({ type: [String], example: ['breakfast', 'lunch'] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  mealTags?: string[];
+
   @ApiPropertyOptional()
   @IsBoolean()
   @IsOptional()

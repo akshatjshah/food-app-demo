@@ -101,6 +101,31 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateFoodDto.prototype, "isBestseller", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Admin featured flag (homepage/featured lists)' }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateFoodDto.prototype, "isFeatured", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Available for ordering right now (separate from active listing)' }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateFoodDto.prototype, "isAvailable", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Subcategory within the category, e.g. Shaak, Dal / Kadhi, Rice & Khichdi' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateFoodDto.prototype, "subcategory", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: [String], example: ['breakfast', 'lunch'] }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateFoodDto.prototype, "mealTags", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),

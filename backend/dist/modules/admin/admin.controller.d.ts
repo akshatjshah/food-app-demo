@@ -58,6 +58,8 @@ export declare class AdminController {
                 foodItemId: string;
                 quantity: number;
                 unitPrice: import("@prisma/client/runtime/library").Decimal;
+                foodName: string | null;
+                basePrice: import("@prisma/client/runtime/library").Decimal | null;
                 orderId: string;
             })[];
             deliverySlot: string;

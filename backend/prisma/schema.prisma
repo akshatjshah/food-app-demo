@@ -166,8 +166,12 @@ model FoodItem {
   isJainAvailable        Boolean   @default(false) @map("is_jain_available")
   isFastingFriendly      Boolean   @default(false) @map("is_fasting_friendly")
   isActive               Boolean   @default(true) @map("is_active")
+  isAvailable            Boolean   @default(true) @map("is_available")
   isBestseller           Boolean   @default(false) @map("is_bestseller")
+  isFeatured             Boolean   @default(false) @map("is_featured")
   isHealthyPick          Boolean   @default(false) @map("is_healthy_pick")
+  subcategory            String?   @db.VarChar(100)
+  mealTags               Json      @default("[]") @map("meal_tags")
   stock                  Int?
   displayOrder           Int       @default(0) @map("display_order")
   tags                   Json      @default("[]")
@@ -186,6 +190,9 @@ model FoodItem {
 
   @@index([categoryId])
   @@index([isActive])
+  @@index([isAvailable])
+  @@index([isFeatured])
+  @@index([subcategory])
   @@index([name])
   @@index([isBestseller])
   @@index([deletedAt])
@@ -369,6 +376,8 @@ model OrderItem {
   foodItemId String   @map("food_item_id") @db.Uuid
   quantity   Int
   unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
+  foodName   String?  @map("food_name") @db.VarChar(150)
+  basePrice  Decimal? @map("base_price") @db.Decimal(10, 2)
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   order          Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -385,6 +394,7 @@ model OrderItemCustomization {
   customizationItemId String  @map("customization_item_id") @db.Uuid
   name                String  @db.VarChar(100)
   price               Decimal @db.Decimal(10, 2)
+  groupName           String? @map("group_name") @db.VarChar(100)
 
   orderItem         OrderItem         @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
   customizationItem CustomizationItem @relation(fields: [customizationItemId], references: [id], onDelete: Restrict)

@@ -667,6 +667,9 @@ video {
 .mt-4 {
   margin-top: 1rem;
 }
+.ml-auto {
+  margin-left: auto;
+}
 .block {
   display: block;
 }
@@ -741,6 +744,9 @@ video {
 }
 .h-screen {
   height: 100vh;
+}
+.h-64 {
+  height: 16rem;
 }
 .max-h-96 {
   max-height: 24rem;
@@ -847,6 +853,9 @@ video {
 .max-w-sm {
   max-width: 24rem;
 }
+.max-w-5xl {
+  max-width: 64rem;
+}
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -927,6 +936,9 @@ video {
 .justify-start {
   justify-content: flex-start;
 }
+.justify-end {
+  justify-content: flex-end;
+}
 .justify-center {
   justify-content: center;
 }
@@ -1000,6 +1012,9 @@ video {
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
   border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
 }
+.self-center {
+  align-self: center;
+}
 .overflow-auto {
   overflow: auto;
 }
@@ -1055,6 +1070,9 @@ video {
 }
 .border-t {
   border-top-width: 1px;
+}
+.border-dashed {
+  border-style: dashed;
 }
 .border-amber-200 {
   --tw-border-opacity: 1;
@@ -1170,6 +1188,9 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
 }
+.bg-muted\/50 {
+  background-color: hsl(var(--muted) / 0.5);
+}
 .stroke-muted {
   stroke: hsl(var(--muted));
 }
@@ -1194,6 +1215,9 @@ video {
 }
 .p-6 {
   padding: 1.5rem;
+}
+.p-3 {
+  padding: 0.75rem;
 }
 .px-2 {
   padding-left: 0.5rem;
@@ -1275,6 +1299,9 @@ video {
 }
 .pt-6 {
   padding-top: 1.5rem;
+}
+.pb-8 {
+  padding-bottom: 2rem;
 }
 .text-left {
   text-align: left;
@@ -1480,6 +1507,9 @@ video {
 .antialiased {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+.accent-current {
+  accent-color: currentColor;
 }
 .opacity-50 {
   opacity: 0.5;
@@ -1961,8 +1991,20 @@ video {
 
 @media (min-width: 768px) {
 
+  .md\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

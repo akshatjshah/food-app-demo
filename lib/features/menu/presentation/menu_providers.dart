@@ -37,48 +37,88 @@ final categoriesProvider = FutureProvider<List<MenuCategory>>((ref) async {
 
 // --- Foods list ---
 
+/// Backend sort values: recommended | popular | priceAsc | priceDesc | nameAsc
 class FoodListState {
   final List<MenuFood> foods;
   final bool isLoading;
   final String? error;
   final String? categoryId;
+  final String? subcategory;
   final String? search;
   final bool? isVeg;
   final bool? isBestseller;
+  final bool? isFeatured;
+  final String? mealTag;
+  final double? minPrice;
+  final double? maxPrice;
+  final String sort;
 
   FoodListState({
     this.foods = const [],
     this.isLoading = false,
     this.error,
     this.categoryId,
+    this.subcategory,
     this.search,
     this.isVeg,
     this.isBestseller,
+    this.isFeatured,
+    this.mealTag,
+    this.minPrice,
+    this.maxPrice,
+    this.sort = 'recommended',
   });
+
+  bool get hasActiveFilters =>
+      categoryId != null ||
+      subcategory != null ||
+      search != null ||
+      isVeg != null ||
+      isBestseller != null ||
+      isFeatured != null ||
+      mealTag != null ||
+      minPrice != null ||
+      maxPrice != null;
 
   FoodListState copyWith({
     List<MenuFood>? foods,
     bool? isLoading,
     String? error,
     String? categoryId,
+    String? subcategory,
     String? search,
     bool? isVeg,
     bool? isBestseller,
+    bool? isFeatured,
+    String? mealTag,
+    double? minPrice,
+    double? maxPrice,
+    String? sort,
     bool clearError = false,
     bool clearSearch = false,
     bool clearCategory = false,
+    bool clearSubcategory = false,
     bool clearVeg = false,
     bool clearBestseller = false,
+    bool clearFeatured = false,
+    bool clearMeal = false,
+    bool clearPrices = false,
   }) {
     return FoodListState(
       foods: foods ?? this.foods,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
+      subcategory: clearSubcategory ? null : (subcategory ?? this.subcategory),
       search: clearSearch ? null : (search ?? this.search),
       isVeg: clearVeg ? null : (isVeg ?? this.isVeg),
       isBestseller:
           clearBestseller ? null : (isBestseller ?? this.isBestseller),
+      isFeatured: clearFeatured ? null : (isFeatured ?? this.isFeatured),
+      mealTag: clearMeal ? null : (mealTag ?? this.mealTag),
+      minPrice: clearPrices ? null : (minPrice ?? this.minPrice),
+      maxPrice: clearPrices ? null : (maxPrice ?? this.maxPrice),
+      sort: sort ?? this.sort,
     );
   }
 }
@@ -97,9 +137,15 @@ class FoodListNotifier extends StateNotifier<FoodListState> {
     try {
       final foods = await _repo.getFoods(
         categoryId: state.categoryId,
+        subcategory: state.subcategory,
         search: state.search,
         isVeg: state.isVeg,
         isBestseller: state.isBestseller,
+        isFeatured: state.isFeatured,
+        mealTag: state.mealTag,
+        minPrice: state.minPrice,
+        maxPrice: state.maxPrice,
+        sort: state.sort == 'recommended' ? null : state.sort,
       );
       if (seq != _requestSeq) return;
       state = state.copyWith(foods: foods, isLoading: false);
@@ -119,6 +165,17 @@ class FoodListNotifier extends StateNotifier<FoodListState> {
     state = state.copyWith(
       categoryId: categoryId,
       clearCategory: categoryId == null,
+      // A new category resets the subcategory (it belongs to the old one).
+      subcategory: null,
+      clearSubcategory: true,
+    );
+    loadFoods();
+  }
+
+  void setSubcategory(String? subcategory) {
+    state = state.copyWith(
+      subcategory: subcategory,
+      clearSubcategory: subcategory == null,
     );
     loadFoods();
   }
@@ -128,11 +185,41 @@ class FoodListNotifier extends StateNotifier<FoodListState> {
     loadFoods();
   }
 
+  void setBestsellerFilter(bool? v) {
+    state = state.copyWith(isBestseller: v, clearBestseller: v == null);
+    loadFoods();
+  }
+
+  void setFeaturedFilter(bool? v) {
+    state = state.copyWith(isFeatured: v, clearFeatured: v == null);
+    loadFoods();
+  }
+
+  void setMeal(String? mealTag) {
+    state = state.copyWith(mealTag: mealTag, clearMeal: mealTag == null);
+    loadFoods();
+  }
+
+  void setPriceRange(double? min, double? max) {
+    state = state.copyWith(minPrice: min, maxPrice: max, clearPrices: min == null && max == null);
+    loadFoods();
+  }
+
+  void setSort(String sort) {
+    state = state.copyWith(sort: sort);
+    loadFoods();
+  }
+
   void setSearch(String? search) {
     state = state.copyWith(
       search: search,
       clearSearch: search == null || search.trim().isEmpty,
     );
+    loadFoods();
+  }
+
+  void clearAllFilters() {
+    state = FoodListState(sort: state.sort);
     loadFoods();
   }
 }
