@@ -6,7 +6,7 @@ part of 'order.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
+_Order _$OrderFromJson(Map<String, dynamic> json) => _Order(
   id: json['id'] as String,
   status: json['status'] as String,
   itemTotal: (json['itemTotal'] as num).toDouble(),
@@ -37,31 +37,28 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
       const [],
 );
 
-Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'status': instance.status,
-      'itemTotal': instance.itemTotal,
-      'deliveryFee': instance.deliveryFee,
-      'platformFee': instance.platformFee,
-      'taxAmount': instance.taxAmount,
-      'discountAmount': instance.discountAmount,
-      'grandTotal': instance.grandTotal,
-      'deliveryAddress': instance.deliveryAddress,
-      'paymentMethod': instance.paymentMethod,
-      'paymentStatus': instance.paymentStatus,
-      'specialInstructions': instance.specialInstructions,
-      'estimatedDeliveryTime': instance.estimatedDeliveryTime,
-      'actualDeliveryTime': instance.actualDeliveryTime?.toIso8601String(),
-      'otpCode': instance.otpCode,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
-      'items': instance.items,
-    };
+Map<String, dynamic> _$OrderToJson(_Order instance) => <String, dynamic>{
+  'id': instance.id,
+  'status': instance.status,
+  'itemTotal': instance.itemTotal,
+  'deliveryFee': instance.deliveryFee,
+  'platformFee': instance.platformFee,
+  'taxAmount': instance.taxAmount,
+  'discountAmount': instance.discountAmount,
+  'grandTotal': instance.grandTotal,
+  'deliveryAddress': instance.deliveryAddress,
+  'paymentMethod': instance.paymentMethod,
+  'paymentStatus': instance.paymentStatus,
+  'specialInstructions': instance.specialInstructions,
+  'estimatedDeliveryTime': instance.estimatedDeliveryTime,
+  'actualDeliveryTime': instance.actualDeliveryTime?.toIso8601String(),
+  'otpCode': instance.otpCode,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt.toIso8601String(),
+  'items': instance.items,
+};
 
-_$OrderItemImpl _$$OrderItemImplFromJson(
-  Map<String, dynamic> json,
-) => _$OrderItemImpl(
+_OrderItem _$OrderItemFromJson(Map<String, dynamic> json) => _OrderItem(
   id: json['id'] as String,
   foodItem: OrderFoodItem.fromJson(json['foodItem'] as Map<String, dynamic>),
   quantity: (json['quantity'] as num?)?.toInt() ?? 1,
@@ -74,7 +71,7 @@ _$OrderItemImpl _$$OrderItemImplFromJson(
       const [],
 );
 
-Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
+Map<String, dynamic> _$OrderItemToJson(_OrderItem instance) =>
     <String, dynamic>{
       'id': instance.id,
       'foodItem': instance.foodItem,
@@ -84,8 +81,8 @@ Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
       'customizations': instance.customizations,
     };
 
-_$OrderFoodItemImpl _$$OrderFoodItemImplFromJson(Map<String, dynamic> json) =>
-    _$OrderFoodItemImpl(
+_OrderFoodItem _$OrderFoodItemFromJson(Map<String, dynamic> json) =>
+    _OrderFoodItem(
       id: json['id'] as String,
       name: json['name'] as String,
       imageUrls:
@@ -96,7 +93,7 @@ _$OrderFoodItemImpl _$$OrderFoodItemImplFromJson(Map<String, dynamic> json) =>
       isVeg: json['isVeg'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$$OrderFoodItemImplToJson(_$OrderFoodItemImpl instance) =>
+Map<String, dynamic> _$OrderFoodItemToJson(_OrderFoodItem instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -104,48 +101,44 @@ Map<String, dynamic> _$$OrderFoodItemImplToJson(_$OrderFoodItemImpl instance) =>
       'isVeg': instance.isVeg,
     };
 
-_$OrderCustomizationImpl _$$OrderCustomizationImplFromJson(
-  Map<String, dynamic> json,
-) => _$OrderCustomizationImpl(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  additionalPrice: (json['additionalPrice'] as num?)?.toDouble() ?? 0.0,
-);
+_OrderCustomization _$OrderCustomizationFromJson(Map<String, dynamic> json) =>
+    _OrderCustomization(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      additionalPrice: (json['additionalPrice'] as num?)?.toDouble() ?? 0.0,
+    );
 
-Map<String, dynamic> _$$OrderCustomizationImplToJson(
-  _$OrderCustomizationImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'additionalPrice': instance.additionalPrice,
-};
+Map<String, dynamic> _$OrderCustomizationToJson(_OrderCustomization instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'additionalPrice': instance.additionalPrice,
+    };
 
-_$DeliveryAddressImpl _$$DeliveryAddressImplFromJson(
-  Map<String, dynamic> json,
-) => _$DeliveryAddressImpl(
-  id: json['id'] as String,
-  label: json['label'] as String,
-  addressLine1: json['addressLine1'] as String,
-  addressLine2: json['addressLine2'] as String?,
-  city: json['city'] as String,
-  state: json['state'] as String,
-  postalCode: json['postalCode'] as String,
-  latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
-  longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
-  phone: json['phone'] as String,
-);
+_DeliveryAddress _$DeliveryAddressFromJson(Map<String, dynamic> json) =>
+    _DeliveryAddress(
+      id: json['id'] as String,
+      label: json['label'] as String,
+      addressLine1: json['addressLine1'] as String,
+      addressLine2: json['addressLine2'] as String?,
+      city: json['city'] as String,
+      state: json['state'] as String,
+      postalCode: json['postalCode'] as String,
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      phone: json['phone'] as String,
+    );
 
-Map<String, dynamic> _$$DeliveryAddressImplToJson(
-  _$DeliveryAddressImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'label': instance.label,
-  'addressLine1': instance.addressLine1,
-  'addressLine2': instance.addressLine2,
-  'city': instance.city,
-  'state': instance.state,
-  'postalCode': instance.postalCode,
-  'latitude': instance.latitude,
-  'longitude': instance.longitude,
-  'phone': instance.phone,
-};
+Map<String, dynamic> _$DeliveryAddressToJson(_DeliveryAddress instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'label': instance.label,
+      'addressLine1': instance.addressLine1,
+      'addressLine2': instance.addressLine2,
+      'city': instance.city,
+      'state': instance.state,
+      'postalCode': instance.postalCode,
+      'latitude': instance.latitude,
+      'longitude': instance.longitude,
+      'phone': instance.phone,
+    };

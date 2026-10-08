@@ -6,8 +6,8 @@ part of 'cart.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CartFoodItemImpl _$$CartFoodItemImplFromJson(Map<String, dynamic> json) =>
-    _$CartFoodItemImpl(
+_CartFoodItem _$CartFoodItemFromJson(Map<String, dynamic> json) =>
+    _CartFoodItem(
       id: json['id'] as String,
       name: json['name'] as String,
       price: (json['price'] as num).toDouble(),
@@ -21,7 +21,7 @@ _$CartFoodItemImpl _$$CartFoodItemImplFromJson(Map<String, dynamic> json) =>
           (json['preparationTimeMinutes'] as num?)?.toInt() ?? 20,
     );
 
-Map<String, dynamic> _$$CartFoodItemImplToJson(_$CartFoodItemImpl instance) =>
+Map<String, dynamic> _$CartFoodItemToJson(_CartFoodItem instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -31,42 +31,39 @@ Map<String, dynamic> _$$CartFoodItemImplToJson(_$CartFoodItemImpl instance) =>
       'preparationTimeMinutes': instance.preparationTimeMinutes,
     };
 
-_$CartItemImpl _$$CartItemImplFromJson(Map<String, dynamic> json) =>
-    _$CartItemImpl(
-      id: json['id'] as String,
-      foodItemId: json['foodItemId'] as String,
-      quantity: (json['quantity'] as num).toInt(),
-      customizationItems:
-          (json['customizationItems'] as List<dynamic>?)
-              ?.map(
-                (e) =>
-                    SelectedCustomization.fromJson(e as Map<String, dynamic>),
-              )
-              .toList() ??
-          const [],
-      specialInstructions: json['specialInstructions'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      foodItem: CartFoodItem.fromJson(json['foodItem'] as Map<String, dynamic>),
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      itemTotal: (json['itemTotal'] as num).toDouble(),
-      isAvailable: json['isAvailable'] as bool? ?? true,
-    );
+_CartItem _$CartItemFromJson(Map<String, dynamic> json) => _CartItem(
+  id: json['id'] as String,
+  foodItemId: json['foodItemId'] as String,
+  quantity: (json['quantity'] as num).toInt(),
+  customizationItems:
+      (json['customizationItems'] as List<dynamic>?)
+          ?.map(
+            (e) => SelectedCustomization.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
+  specialInstructions: json['specialInstructions'] as String?,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  foodItem: CartFoodItem.fromJson(json['foodItem'] as Map<String, dynamic>),
+  unitPrice: (json['unitPrice'] as num).toDouble(),
+  itemTotal: (json['itemTotal'] as num).toDouble(),
+  isAvailable: json['isAvailable'] as bool? ?? true,
+);
 
-Map<String, dynamic> _$$CartItemImplToJson(_$CartItemImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'foodItemId': instance.foodItemId,
-      'quantity': instance.quantity,
-      'customizationItems': instance.customizationItems,
-      'specialInstructions': instance.specialInstructions,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'foodItem': instance.foodItem,
-      'unitPrice': instance.unitPrice,
-      'itemTotal': instance.itemTotal,
-      'isAvailable': instance.isAvailable,
-    };
+Map<String, dynamic> _$CartItemToJson(_CartItem instance) => <String, dynamic>{
+  'id': instance.id,
+  'foodItemId': instance.foodItemId,
+  'quantity': instance.quantity,
+  'customizationItems': instance.customizationItems,
+  'specialInstructions': instance.specialInstructions,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'foodItem': instance.foodItem,
+  'unitPrice': instance.unitPrice,
+  'itemTotal': instance.itemTotal,
+  'isAvailable': instance.isAvailable,
+};
 
-_$CartImpl _$$CartImplFromJson(Map<String, dynamic> json) => _$CartImpl(
+_Cart _$CartFromJson(Map<String, dynamic> json) => _Cart(
   id: json['id'] as String,
   items:
       (json['items'] as List<dynamic>?)
@@ -83,12 +80,11 @@ _$CartImpl _$$CartImplFromJson(Map<String, dynamic> json) => _$CartImpl(
   hasUnavailableItems: json['hasUnavailableItems'] as bool? ?? false,
 );
 
-Map<String, dynamic> _$$CartImplToJson(_$CartImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'items': instance.items,
-      'unavailableItems': instance.unavailableItems,
-      'itemTotal': instance.itemTotal,
-      'itemCount': instance.itemCount,
-      'hasUnavailableItems': instance.hasUnavailableItems,
-    };
+Map<String, dynamic> _$CartToJson(_Cart instance) => <String, dynamic>{
+  'id': instance.id,
+  'items': instance.items,
+  'unavailableItems': instance.unavailableItems,
+  'itemTotal': instance.itemTotal,
+  'itemCount': instance.itemCount,
+  'hasUnavailableItems': instance.hasUnavailableItems,
+};

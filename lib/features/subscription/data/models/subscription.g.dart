@@ -32,9 +32,9 @@ Map<String, dynamic> _$SubscriptionPlanToJson(SubscriptionPlan instance) =>
       'isActive': instance.isActive,
     };
 
-_$UserSubscriptionImpl _$$UserSubscriptionImplFromJson(
+_UserSubscription _$UserSubscriptionFromJson(
   Map<String, dynamic> json,
-) => _$UserSubscriptionImpl(
+) => _UserSubscription(
   id: json['id'] as String,
   subscriptionId: json['subscriptionId'] as String,
   startDate: DateTime.parse(json['startDate'] as String),
@@ -50,16 +50,15 @@ _$UserSubscriptionImpl _$$UserSubscriptionImplFromJson(
       : SubscriptionPlan.fromJson(json['subscription'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$$UserSubscriptionImplToJson(
-  _$UserSubscriptionImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'subscriptionId': instance.subscriptionId,
-  'startDate': instance.startDate.toIso8601String(),
-  'endDate': instance.endDate.toIso8601String(),
-  'mealsRemaining': instance.mealsRemaining,
-  'status': instance.status,
-  'skipDates': instance.skipDates,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'subscription': instance.subscription,
-};
+Map<String, dynamic> _$UserSubscriptionToJson(_UserSubscription instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'subscriptionId': instance.subscriptionId,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
+      'mealsRemaining': instance.mealsRemaining,
+      'status': instance.status,
+      'skipDates': instance.skipDates,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'subscription': instance.subscription,
+    };

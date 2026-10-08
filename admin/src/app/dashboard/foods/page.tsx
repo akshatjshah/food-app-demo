@@ -104,7 +104,7 @@ export default function FoodsPage() {
   const subcategories = useMemo(() => {
     const set = new Set<string>();
     for (const f of subcatPool as any[]) if (f.subcategory) set.add(f.subcategory);
-    return [...set].sort();
+    return Array.from(set).sort();
   }, [subcatPool]);
 
   const categoryName = (id: string) => categories.find((c: any) => c.id === id)?.name ?? "—";
@@ -297,12 +297,12 @@ export default function FoodsPage() {
             {selected.size > 0 && (
               <div className="ml-auto flex flex-wrap gap-2">
                 <span className="self-center text-sm font-medium">{selected.size} selected</span>
-                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isActive: true } })}>Activate</Button>
-                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isActive: false } })}>Deactivate</Button>
-                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isAvailable: true } })}>Set available</Button>
-                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isAvailable: false } })}>Set unavailable</Button>
-                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isFeatured: true } })}>★ Featured</Button>
-                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: [...selected], patch: { isBestseller: true } })}>Bestseller</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: Array.from(selected), patch: { isActive: true } })}>Activate</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: Array.from(selected), patch: { isActive: false } })}>Deactivate</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: Array.from(selected), patch: { isAvailable: true } })}>Set available</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: Array.from(selected), patch: { isAvailable: false } })}>Set unavailable</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: Array.from(selected), patch: { isFeatured: true } })}>★ Featured</Button>
+                <Button size="sm" variant="outline" onClick={() => bulk.mutate({ ids: Array.from(selected), patch: { isBestseller: true } })}>Bestseller</Button>
               </div>
             )}
           </div>

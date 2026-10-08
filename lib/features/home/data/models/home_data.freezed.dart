@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'home_data.dart';
@@ -9,1076 +9,1146 @@ part of 'home_data.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-HomeData _$HomeDataFromJson(Map<String, dynamic> json) {
-  return _HomeData.fromJson(json);
-}
 
 /// @nodoc
 mixin _$HomeData {
-  List<BannerItem> get banners => throw _privateConstructorUsedError;
-  List<HomeCategory> get categories => throw _privateConstructorUsedError;
-  List<HomeFood> get featuredFoods => throw _privateConstructorUsedError;
-  List<HomeFood> get bestsellers => throw _privateConstructorUsedError;
-  List<HomeFood> get healthyPicks => throw _privateConstructorUsedError;
+
+ List<BannerItem> get banners; List<HomeCategory> get categories; List<HomeFood> get featuredFoods; List<HomeFood> get bestsellers; List<HomeFood> get healthyPicks;
+/// Create a copy of HomeData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$HomeDataCopyWith<HomeData> get copyWith => _$HomeDataCopyWithImpl<HomeData>(this as HomeData, _$identity);
 
   /// Serializes this HomeData to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of HomeData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $HomeDataCopyWith<HomeData> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeData&&const DeepCollectionEquality().equals(other.banners, banners)&&const DeepCollectionEquality().equals(other.categories, categories)&&const DeepCollectionEquality().equals(other.featuredFoods, featuredFoods)&&const DeepCollectionEquality().equals(other.bestsellers, bestsellers)&&const DeepCollectionEquality().equals(other.healthyPicks, healthyPicks));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(banners),const DeepCollectionEquality().hash(categories),const DeepCollectionEquality().hash(featuredFoods),const DeepCollectionEquality().hash(bestsellers),const DeepCollectionEquality().hash(healthyPicks));
+
+@override
+String toString() {
+  return 'HomeData(banners: $banners, categories: $categories, featuredFoods: $featuredFoods, bestsellers: $bestsellers, healthyPicks: $healthyPicks)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $HomeDataCopyWith<$Res> {
-  factory $HomeDataCopyWith(HomeData value, $Res Function(HomeData) then) =
-      _$HomeDataCopyWithImpl<$Res, HomeData>;
-  @useResult
-  $Res call({
-    List<BannerItem> banners,
-    List<HomeCategory> categories,
-    List<HomeFood> featuredFoods,
-    List<HomeFood> bestsellers,
-    List<HomeFood> healthyPicks,
-  });
-}
+abstract mixin class $HomeDataCopyWith<$Res>  {
+  factory $HomeDataCopyWith(HomeData value, $Res Function(HomeData) _then) = _$HomeDataCopyWithImpl;
+@useResult
+$Res call({
+ List<BannerItem> banners, List<HomeCategory> categories, List<HomeFood> featuredFoods, List<HomeFood> bestsellers, List<HomeFood> healthyPicks
+});
 
+
+
+
+}
 /// @nodoc
-class _$HomeDataCopyWithImpl<$Res, $Val extends HomeData>
+class _$HomeDataCopyWithImpl<$Res>
     implements $HomeDataCopyWith<$Res> {
-  _$HomeDataCopyWithImpl(this._value, this._then);
+  _$HomeDataCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final HomeData _self;
+  final $Res Function(HomeData) _then;
 
-  /// Create a copy of HomeData
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? banners = null,
-    Object? categories = null,
-    Object? featuredFoods = null,
-    Object? bestsellers = null,
-    Object? healthyPicks = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            banners: null == banners
-                ? _value.banners
-                : banners // ignore: cast_nullable_to_non_nullable
-                      as List<BannerItem>,
-            categories: null == categories
-                ? _value.categories
-                : categories // ignore: cast_nullable_to_non_nullable
-                      as List<HomeCategory>,
-            featuredFoods: null == featuredFoods
-                ? _value.featuredFoods
-                : featuredFoods // ignore: cast_nullable_to_non_nullable
-                      as List<HomeFood>,
-            bestsellers: null == bestsellers
-                ? _value.bestsellers
-                : bestsellers // ignore: cast_nullable_to_non_nullable
-                      as List<HomeFood>,
-            healthyPicks: null == healthyPicks
-                ? _value.healthyPicks
-                : healthyPicks // ignore: cast_nullable_to_non_nullable
-                      as List<HomeFood>,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of HomeData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? banners = null,Object? categories = null,Object? featuredFoods = null,Object? bestsellers = null,Object? healthyPicks = null,}) {
+  return _then(HomeData(
+banners: null == banners ? _self.banners : banners // ignore: cast_nullable_to_non_nullable
+as List<BannerItem>,categories: null == categories ? _self.categories : categories // ignore: cast_nullable_to_non_nullable
+as List<HomeCategory>,featuredFoods: null == featuredFoods ? _self.featuredFoods : featuredFoods // ignore: cast_nullable_to_non_nullable
+as List<HomeFood>,bestsellers: null == bestsellers ? _self.bestsellers : bestsellers // ignore: cast_nullable_to_non_nullable
+as List<HomeFood>,healthyPicks: null == healthyPicks ? _self.healthyPicks : healthyPicks // ignore: cast_nullable_to_non_nullable
+as List<HomeFood>,
+  ));
 }
 
-/// @nodoc
-abstract class _$$HomeDataImplCopyWith<$Res>
-    implements $HomeDataCopyWith<$Res> {
-  factory _$$HomeDataImplCopyWith(
-    _$HomeDataImpl value,
-    $Res Function(_$HomeDataImpl) then,
-  ) = __$$HomeDataImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    List<BannerItem> banners,
-    List<HomeCategory> categories,
-    List<HomeFood> featuredFoods,
-    List<HomeFood> bestsellers,
-    List<HomeFood> healthyPicks,
-  });
 }
 
-/// @nodoc
-class __$$HomeDataImplCopyWithImpl<$Res>
-    extends _$HomeDataCopyWithImpl<$Res, _$HomeDataImpl>
-    implements _$$HomeDataImplCopyWith<$Res> {
-  __$$HomeDataImplCopyWithImpl(
-    _$HomeDataImpl _value,
-    $Res Function(_$HomeDataImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of HomeData
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? banners = null,
-    Object? categories = null,
-    Object? featuredFoods = null,
-    Object? bestsellers = null,
-    Object? healthyPicks = null,
-  }) {
-    return _then(
-      _$HomeDataImpl(
-        banners: null == banners
-            ? _value._banners
-            : banners // ignore: cast_nullable_to_non_nullable
-                  as List<BannerItem>,
-        categories: null == categories
-            ? _value._categories
-            : categories // ignore: cast_nullable_to_non_nullable
-                  as List<HomeCategory>,
-        featuredFoods: null == featuredFoods
-            ? _value._featuredFoods
-            : featuredFoods // ignore: cast_nullable_to_non_nullable
-                  as List<HomeFood>,
-        bestsellers: null == bestsellers
-            ? _value._bestsellers
-            : bestsellers // ignore: cast_nullable_to_non_nullable
-                  as List<HomeFood>,
-        healthyPicks: null == healthyPicks
-            ? _value._healthyPicks
-            : healthyPicks // ignore: cast_nullable_to_non_nullable
-                  as List<HomeFood>,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [HomeData].
+extension HomeDataPatterns on HomeData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _HomeData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _HomeData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _HomeData value)  $default,){
+final _that = this;
+switch (_that) {
+case _HomeData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _HomeData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _HomeData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<BannerItem> banners,  List<HomeCategory> categories,  List<HomeFood> featuredFoods,  List<HomeFood> bestsellers,  List<HomeFood> healthyPicks)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _HomeData() when $default != null:
+return $default(_that.banners,_that.categories,_that.featuredFoods,_that.bestsellers,_that.healthyPicks);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<BannerItem> banners,  List<HomeCategory> categories,  List<HomeFood> featuredFoods,  List<HomeFood> bestsellers,  List<HomeFood> healthyPicks)  $default,) {final _that = this;
+switch (_that) {
+case _HomeData():
+return $default(_that.banners,_that.categories,_that.featuredFoods,_that.bestsellers,_that.healthyPicks);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<BannerItem> banners,  List<HomeCategory> categories,  List<HomeFood> featuredFoods,  List<HomeFood> bestsellers,  List<HomeFood> healthyPicks)?  $default,) {final _that = this;
+switch (_that) {
+case _HomeData() when $default != null:
+return $default(_that.banners,_that.categories,_that.featuredFoods,_that.bestsellers,_that.healthyPicks);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$HomeDataImpl implements _HomeData {
-  const _$HomeDataImpl({
-    final List<BannerItem> banners = const [],
-    final List<HomeCategory> categories = const [],
-    final List<HomeFood> featuredFoods = const [],
-    final List<HomeFood> bestsellers = const [],
-    final List<HomeFood> healthyPicks = const [],
-  }) : _banners = banners,
-       _categories = categories,
-       _featuredFoods = featuredFoods,
-       _bestsellers = bestsellers,
-       _healthyPicks = healthyPicks;
 
-  factory _$HomeDataImpl.fromJson(Map<String, dynamic> json) =>
-      _$$HomeDataImplFromJson(json);
+class _HomeData implements HomeData {
+  const _HomeData({ List<BannerItem> banners = const [],  List<HomeCategory> categories = const [],  List<HomeFood> featuredFoods = const [],  List<HomeFood> bestsellers = const [],  List<HomeFood> healthyPicks = const []}): _banners = banners,_categories = categories,_featuredFoods = featuredFoods,_bestsellers = bestsellers,_healthyPicks = healthyPicks;
+  factory _HomeData.fromJson(Map<String, dynamic> json) => _$HomeDataFromJson(json);
 
-  final List<BannerItem> _banners;
-  @override
-  @JsonKey()
-  List<BannerItem> get banners {
-    if (_banners is EqualUnmodifiableListView) return _banners;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_banners);
-  }
-
-  final List<HomeCategory> _categories;
-  @override
-  @JsonKey()
-  List<HomeCategory> get categories {
-    if (_categories is EqualUnmodifiableListView) return _categories;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_categories);
-  }
-
-  final List<HomeFood> _featuredFoods;
-  @override
-  @JsonKey()
-  List<HomeFood> get featuredFoods {
-    if (_featuredFoods is EqualUnmodifiableListView) return _featuredFoods;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_featuredFoods);
-  }
-
-  final List<HomeFood> _bestsellers;
-  @override
-  @JsonKey()
-  List<HomeFood> get bestsellers {
-    if (_bestsellers is EqualUnmodifiableListView) return _bestsellers;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_bestsellers);
-  }
-
-  final List<HomeFood> _healthyPicks;
-  @override
-  @JsonKey()
-  List<HomeFood> get healthyPicks {
-    if (_healthyPicks is EqualUnmodifiableListView) return _healthyPicks;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_healthyPicks);
-  }
-
-  @override
-  String toString() {
-    return 'HomeData(banners: $banners, categories: $categories, featuredFoods: $featuredFoods, bestsellers: $bestsellers, healthyPicks: $healthyPicks)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$HomeDataImpl &&
-            const DeepCollectionEquality().equals(other._banners, _banners) &&
-            const DeepCollectionEquality().equals(
-              other._categories,
-              _categories,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._featuredFoods,
-              _featuredFoods,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._bestsellers,
-              _bestsellers,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._healthyPicks,
-              _healthyPicks,
-            ));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    const DeepCollectionEquality().hash(_banners),
-    const DeepCollectionEquality().hash(_categories),
-    const DeepCollectionEquality().hash(_featuredFoods),
-    const DeepCollectionEquality().hash(_bestsellers),
-    const DeepCollectionEquality().hash(_healthyPicks),
-  );
-
-  /// Create a copy of HomeData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$HomeDataImplCopyWith<_$HomeDataImpl> get copyWith =>
-      __$$HomeDataImplCopyWithImpl<_$HomeDataImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$HomeDataImplToJson(this);
-  }
+ final  List<BannerItem> _banners;
+@override@JsonKey() List<BannerItem> get banners {
+  if (_banners is EqualUnmodifiableListView) return _banners;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_banners);
 }
 
-abstract class _HomeData implements HomeData {
-  const factory _HomeData({
-    final List<BannerItem> banners,
-    final List<HomeCategory> categories,
-    final List<HomeFood> featuredFoods,
-    final List<HomeFood> bestsellers,
-    final List<HomeFood> healthyPicks,
-  }) = _$HomeDataImpl;
-
-  factory _HomeData.fromJson(Map<String, dynamic> json) =
-      _$HomeDataImpl.fromJson;
-
-  @override
-  List<BannerItem> get banners;
-  @override
-  List<HomeCategory> get categories;
-  @override
-  List<HomeFood> get featuredFoods;
-  @override
-  List<HomeFood> get bestsellers;
-  @override
-  List<HomeFood> get healthyPicks;
-
-  /// Create a copy of HomeData
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$HomeDataImplCopyWith<_$HomeDataImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+ final  List<HomeCategory> _categories;
+@override@JsonKey() List<HomeCategory> get categories {
+  if (_categories is EqualUnmodifiableListView) return _categories;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_categories);
 }
 
-BannerItem _$BannerItemFromJson(Map<String, dynamic> json) {
-  return _BannerItem.fromJson(json);
+ final  List<HomeFood> _featuredFoods;
+@override@JsonKey() List<HomeFood> get featuredFoods {
+  if (_featuredFoods is EqualUnmodifiableListView) return _featuredFoods;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_featuredFoods);
 }
+
+ final  List<HomeFood> _bestsellers;
+@override@JsonKey() List<HomeFood> get bestsellers {
+  if (_bestsellers is EqualUnmodifiableListView) return _bestsellers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bestsellers);
+}
+
+ final  List<HomeFood> _healthyPicks;
+@override@JsonKey() List<HomeFood> get healthyPicks {
+  if (_healthyPicks is EqualUnmodifiableListView) return _healthyPicks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_healthyPicks);
+}
+
+
+/// Create a copy of HomeData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$HomeDataCopyWith<_HomeData> get copyWith => __$HomeDataCopyWithImpl<_HomeData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$HomeDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeData&&const DeepCollectionEquality().equals(other._banners, _banners)&&const DeepCollectionEquality().equals(other._categories, _categories)&&const DeepCollectionEquality().equals(other._featuredFoods, _featuredFoods)&&const DeepCollectionEquality().equals(other._bestsellers, _bestsellers)&&const DeepCollectionEquality().equals(other._healthyPicks, _healthyPicks));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_banners),const DeepCollectionEquality().hash(_categories),const DeepCollectionEquality().hash(_featuredFoods),const DeepCollectionEquality().hash(_bestsellers),const DeepCollectionEquality().hash(_healthyPicks));
+
+@override
+String toString() {
+  return 'HomeData(banners: $banners, categories: $categories, featuredFoods: $featuredFoods, bestsellers: $bestsellers, healthyPicks: $healthyPicks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$HomeDataCopyWith<$Res> implements $HomeDataCopyWith<$Res> {
+  factory _$HomeDataCopyWith(_HomeData value, $Res Function(_HomeData) _then) = __$HomeDataCopyWithImpl;
+@override @useResult
+$Res call({
+ List<BannerItem> banners, List<HomeCategory> categories, List<HomeFood> featuredFoods, List<HomeFood> bestsellers, List<HomeFood> healthyPicks
+});
+
+
+
+
+}
+/// @nodoc
+class __$HomeDataCopyWithImpl<$Res>
+    implements _$HomeDataCopyWith<$Res> {
+  __$HomeDataCopyWithImpl(this._self, this._then);
+
+  final _HomeData _self;
+  final $Res Function(_HomeData) _then;
+
+/// Create a copy of HomeData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? banners = null,Object? categories = null,Object? featuredFoods = null,Object? bestsellers = null,Object? healthyPicks = null,}) {
+  return _then(_HomeData(
+banners: null == banners ? _self._banners : banners // ignore: cast_nullable_to_non_nullable
+as List<BannerItem>,categories: null == categories ? _self._categories : categories // ignore: cast_nullable_to_non_nullable
+as List<HomeCategory>,featuredFoods: null == featuredFoods ? _self._featuredFoods : featuredFoods // ignore: cast_nullable_to_non_nullable
+as List<HomeFood>,bestsellers: null == bestsellers ? _self._bestsellers : bestsellers // ignore: cast_nullable_to_non_nullable
+as List<HomeFood>,healthyPicks: null == healthyPicks ? _self._healthyPicks : healthyPicks // ignore: cast_nullable_to_non_nullable
+as List<HomeFood>,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$BannerItem {
-  String get id => throw _privateConstructorUsedError;
-  String? get title => throw _privateConstructorUsedError;
-  String? get imageUrl => throw _privateConstructorUsedError;
-  String? get link => throw _privateConstructorUsedError;
+
+ String get id; String? get title; String? get imageUrl; String? get link;
+/// Create a copy of BannerItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BannerItemCopyWith<BannerItem> get copyWith => _$BannerItemCopyWithImpl<BannerItem>(this as BannerItem, _$identity);
 
   /// Serializes this BannerItem to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of BannerItem
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $BannerItemCopyWith<BannerItem> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BannerItem&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.link, link) || other.link == link));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,title,imageUrl,link);
+
+@override
+String toString() {
+  return 'BannerItem(id: $id, title: $title, imageUrl: $imageUrl, link: $link)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $BannerItemCopyWith<$Res> {
-  factory $BannerItemCopyWith(
-    BannerItem value,
-    $Res Function(BannerItem) then,
-  ) = _$BannerItemCopyWithImpl<$Res, BannerItem>;
-  @useResult
-  $Res call({String id, String? title, String? imageUrl, String? link});
-}
+abstract mixin class $BannerItemCopyWith<$Res>  {
+  factory $BannerItemCopyWith(BannerItem value, $Res Function(BannerItem) _then) = _$BannerItemCopyWithImpl;
+@useResult
+$Res call({
+ String id, String? title, String? imageUrl, String? link
+});
 
+
+
+
+}
 /// @nodoc
-class _$BannerItemCopyWithImpl<$Res, $Val extends BannerItem>
+class _$BannerItemCopyWithImpl<$Res>
     implements $BannerItemCopyWith<$Res> {
-  _$BannerItemCopyWithImpl(this._value, this._then);
+  _$BannerItemCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final BannerItem _self;
+  final $Res Function(BannerItem) _then;
 
-  /// Create a copy of BannerItem
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? title = freezed,
-    Object? imageUrl = freezed,
-    Object? link = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            title: freezed == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            imageUrl: freezed == imageUrl
-                ? _value.imageUrl
-                : imageUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            link: freezed == link
-                ? _value.link
-                : link // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of BannerItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? imageUrl = freezed,Object? link = freezed,}) {
+  return _then(BannerItem(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,link: freezed == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$BannerItemImplCopyWith<$Res>
-    implements $BannerItemCopyWith<$Res> {
-  factory _$$BannerItemImplCopyWith(
-    _$BannerItemImpl value,
-    $Res Function(_$BannerItemImpl) then,
-  ) = __$$BannerItemImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({String id, String? title, String? imageUrl, String? link});
 }
 
-/// @nodoc
-class __$$BannerItemImplCopyWithImpl<$Res>
-    extends _$BannerItemCopyWithImpl<$Res, _$BannerItemImpl>
-    implements _$$BannerItemImplCopyWith<$Res> {
-  __$$BannerItemImplCopyWithImpl(
-    _$BannerItemImpl _value,
-    $Res Function(_$BannerItemImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of BannerItem
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? title = freezed,
-    Object? imageUrl = freezed,
-    Object? link = freezed,
-  }) {
-    return _then(
-      _$BannerItemImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        title: freezed == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        imageUrl: freezed == imageUrl
-            ? _value.imageUrl
-            : imageUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        link: freezed == link
-            ? _value.link
-            : link // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [BannerItem].
+extension BannerItemPatterns on BannerItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BannerItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BannerItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BannerItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _BannerItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BannerItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BannerItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? title,  String? imageUrl,  String? link)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BannerItem() when $default != null:
+return $default(_that.id,_that.title,_that.imageUrl,_that.link);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? title,  String? imageUrl,  String? link)  $default,) {final _that = this;
+switch (_that) {
+case _BannerItem():
+return $default(_that.id,_that.title,_that.imageUrl,_that.link);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? title,  String? imageUrl,  String? link)?  $default,) {final _that = this;
+switch (_that) {
+case _BannerItem() when $default != null:
+return $default(_that.id,_that.title,_that.imageUrl,_that.link);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$BannerItemImpl implements _BannerItem {
-  const _$BannerItemImpl({
-    required this.id,
-    this.title,
-    this.imageUrl,
-    this.link,
-  });
 
-  factory _$BannerItemImpl.fromJson(Map<String, dynamic> json) =>
-      _$$BannerItemImplFromJson(json);
+class _BannerItem implements BannerItem {
+  const _BannerItem({required this.id, this.title, this.imageUrl, this.link});
+  factory _BannerItem.fromJson(Map<String, dynamic> json) => _$BannerItemFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String? title;
-  @override
-  final String? imageUrl;
-  @override
-  final String? link;
+@override final  String id;
+@override final  String? title;
+@override final  String? imageUrl;
+@override final  String? link;
 
-  @override
-  String toString() {
-    return 'BannerItem(id: $id, title: $title, imageUrl: $imageUrl, link: $link)';
-  }
+/// Create a copy of BannerItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BannerItemCopyWith<_BannerItem> get copyWith => __$BannerItemCopyWithImpl<_BannerItem>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$BannerItemImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl) &&
-            (identical(other.link, link) || other.link == link));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, id, title, imageUrl, link);
-
-  /// Create a copy of BannerItem
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$BannerItemImplCopyWith<_$BannerItemImpl> get copyWith =>
-      __$$BannerItemImplCopyWithImpl<_$BannerItemImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$BannerItemImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$BannerItemToJson(this, );
 }
 
-abstract class _BannerItem implements BannerItem {
-  const factory _BannerItem({
-    required final String id,
-    final String? title,
-    final String? imageUrl,
-    final String? link,
-  }) = _$BannerItemImpl;
-
-  factory _BannerItem.fromJson(Map<String, dynamic> json) =
-      _$BannerItemImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String? get title;
-  @override
-  String? get imageUrl;
-  @override
-  String? get link;
-
-  /// Create a copy of BannerItem
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$BannerItemImplCopyWith<_$BannerItemImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BannerItem&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.link, link) || other.link == link));
 }
 
-HomeCategory _$HomeCategoryFromJson(Map<String, dynamic> json) {
-  return _HomeCategory.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,title,imageUrl,link);
+
+@override
+String toString() {
+  return 'BannerItem(id: $id, title: $title, imageUrl: $imageUrl, link: $link)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BannerItemCopyWith<$Res> implements $BannerItemCopyWith<$Res> {
+  factory _$BannerItemCopyWith(_BannerItem value, $Res Function(_BannerItem) _then) = __$BannerItemCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String? title, String? imageUrl, String? link
+});
+
+
+
+
+}
+/// @nodoc
+class __$BannerItemCopyWithImpl<$Res>
+    implements _$BannerItemCopyWith<$Res> {
+  __$BannerItemCopyWithImpl(this._self, this._then);
+
+  final _BannerItem _self;
+  final $Res Function(_BannerItem) _then;
+
+/// Create a copy of BannerItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? imageUrl = freezed,Object? link = freezed,}) {
+  return _then(_BannerItem(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,link: freezed == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$HomeCategory {
-  String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String? get icon => throw _privateConstructorUsedError;
-  String? get imageUrl => throw _privateConstructorUsedError;
-  int get foodCount => throw _privateConstructorUsedError;
+
+ String get id; String get name; String? get icon; String? get imageUrl; int get foodCount;
+/// Create a copy of HomeCategory
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$HomeCategoryCopyWith<HomeCategory> get copyWith => _$HomeCategoryCopyWithImpl<HomeCategory>(this as HomeCategory, _$identity);
 
   /// Serializes this HomeCategory to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of HomeCategory
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $HomeCategoryCopyWith<HomeCategory> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeCategory&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.foodCount, foodCount) || other.foodCount == foodCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,icon,imageUrl,foodCount);
+
+@override
+String toString() {
+  return 'HomeCategory(id: $id, name: $name, icon: $icon, imageUrl: $imageUrl, foodCount: $foodCount)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $HomeCategoryCopyWith<$Res> {
-  factory $HomeCategoryCopyWith(
-    HomeCategory value,
-    $Res Function(HomeCategory) then,
-  ) = _$HomeCategoryCopyWithImpl<$Res, HomeCategory>;
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    String? icon,
-    String? imageUrl,
-    int foodCount,
-  });
-}
+abstract mixin class $HomeCategoryCopyWith<$Res>  {
+  factory $HomeCategoryCopyWith(HomeCategory value, $Res Function(HomeCategory) _then) = _$HomeCategoryCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name, String? icon, String? imageUrl, int foodCount
+});
 
+
+
+
+}
 /// @nodoc
-class _$HomeCategoryCopyWithImpl<$Res, $Val extends HomeCategory>
+class _$HomeCategoryCopyWithImpl<$Res>
     implements $HomeCategoryCopyWith<$Res> {
-  _$HomeCategoryCopyWithImpl(this._value, this._then);
+  _$HomeCategoryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final HomeCategory _self;
+  final $Res Function(HomeCategory) _then;
 
-  /// Create a copy of HomeCategory
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? icon = freezed,
-    Object? imageUrl = freezed,
-    Object? foodCount = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            icon: freezed == icon
-                ? _value.icon
-                : icon // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            imageUrl: freezed == imageUrl
-                ? _value.imageUrl
-                : imageUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            foodCount: null == foodCount
-                ? _value.foodCount
-                : foodCount // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of HomeCategory
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? icon = freezed,Object? imageUrl = freezed,Object? foodCount = null,}) {
+  return _then(HomeCategory(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,icon: freezed == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,foodCount: null == foodCount ? _self.foodCount : foodCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
 }
 
-/// @nodoc
-abstract class _$$HomeCategoryImplCopyWith<$Res>
-    implements $HomeCategoryCopyWith<$Res> {
-  factory _$$HomeCategoryImplCopyWith(
-    _$HomeCategoryImpl value,
-    $Res Function(_$HomeCategoryImpl) then,
-  ) = __$$HomeCategoryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    String? icon,
-    String? imageUrl,
-    int foodCount,
-  });
 }
 
-/// @nodoc
-class __$$HomeCategoryImplCopyWithImpl<$Res>
-    extends _$HomeCategoryCopyWithImpl<$Res, _$HomeCategoryImpl>
-    implements _$$HomeCategoryImplCopyWith<$Res> {
-  __$$HomeCategoryImplCopyWithImpl(
-    _$HomeCategoryImpl _value,
-    $Res Function(_$HomeCategoryImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of HomeCategory
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? icon = freezed,
-    Object? imageUrl = freezed,
-    Object? foodCount = null,
-  }) {
-    return _then(
-      _$HomeCategoryImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        icon: freezed == icon
-            ? _value.icon
-            : icon // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        imageUrl: freezed == imageUrl
-            ? _value.imageUrl
-            : imageUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        foodCount: null == foodCount
-            ? _value.foodCount
-            : foodCount // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [HomeCategory].
+extension HomeCategoryPatterns on HomeCategory {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _HomeCategory value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _HomeCategory() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _HomeCategory value)  $default,){
+final _that = this;
+switch (_that) {
+case _HomeCategory():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _HomeCategory value)?  $default,){
+final _that = this;
+switch (_that) {
+case _HomeCategory() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? icon,  String? imageUrl,  int foodCount)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _HomeCategory() when $default != null:
+return $default(_that.id,_that.name,_that.icon,_that.imageUrl,_that.foodCount);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? icon,  String? imageUrl,  int foodCount)  $default,) {final _that = this;
+switch (_that) {
+case _HomeCategory():
+return $default(_that.id,_that.name,_that.icon,_that.imageUrl,_that.foodCount);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? icon,  String? imageUrl,  int foodCount)?  $default,) {final _that = this;
+switch (_that) {
+case _HomeCategory() when $default != null:
+return $default(_that.id,_that.name,_that.icon,_that.imageUrl,_that.foodCount);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$HomeCategoryImpl implements _HomeCategory {
-  const _$HomeCategoryImpl({
-    required this.id,
-    required this.name,
-    this.icon,
-    this.imageUrl,
-    this.foodCount = 0,
-  });
 
-  factory _$HomeCategoryImpl.fromJson(Map<String, dynamic> json) =>
-      _$$HomeCategoryImplFromJson(json);
+class _HomeCategory implements HomeCategory {
+  const _HomeCategory({required this.id, required this.name, this.icon, this.imageUrl, this.foodCount = 0});
+  factory _HomeCategory.fromJson(Map<String, dynamic> json) => _$HomeCategoryFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String name;
-  @override
-  final String? icon;
-  @override
-  final String? imageUrl;
-  @override
-  @JsonKey()
-  final int foodCount;
+@override final  String id;
+@override final  String name;
+@override final  String? icon;
+@override final  String? imageUrl;
+@override@JsonKey() final  int foodCount;
 
-  @override
-  String toString() {
-    return 'HomeCategory(id: $id, name: $name, icon: $icon, imageUrl: $imageUrl, foodCount: $foodCount)';
-  }
+/// Create a copy of HomeCategory
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$HomeCategoryCopyWith<_HomeCategory> get copyWith => __$HomeCategoryCopyWithImpl<_HomeCategory>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$HomeCategoryImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.icon, icon) || other.icon == icon) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl) &&
-            (identical(other.foodCount, foodCount) ||
-                other.foodCount == foodCount));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, name, icon, imageUrl, foodCount);
-
-  /// Create a copy of HomeCategory
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$HomeCategoryImplCopyWith<_$HomeCategoryImpl> get copyWith =>
-      __$$HomeCategoryImplCopyWithImpl<_$HomeCategoryImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$HomeCategoryImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$HomeCategoryToJson(this, );
 }
 
-abstract class _HomeCategory implements HomeCategory {
-  const factory _HomeCategory({
-    required final String id,
-    required final String name,
-    final String? icon,
-    final String? imageUrl,
-    final int foodCount,
-  }) = _$HomeCategoryImpl;
-
-  factory _HomeCategory.fromJson(Map<String, dynamic> json) =
-      _$HomeCategoryImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String get name;
-  @override
-  String? get icon;
-  @override
-  String? get imageUrl;
-  @override
-  int get foodCount;
-
-  /// Create a copy of HomeCategory
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$HomeCategoryImplCopyWith<_$HomeCategoryImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeCategory&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.foodCount, foodCount) || other.foodCount == foodCount));
 }
 
-HomeFood _$HomeFoodFromJson(Map<String, dynamic> json) {
-  return _HomeFood.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,icon,imageUrl,foodCount);
+
+@override
+String toString() {
+  return 'HomeCategory(id: $id, name: $name, icon: $icon, imageUrl: $imageUrl, foodCount: $foodCount)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$HomeCategoryCopyWith<$Res> implements $HomeCategoryCopyWith<$Res> {
+  factory _$HomeCategoryCopyWith(_HomeCategory value, $Res Function(_HomeCategory) _then) = __$HomeCategoryCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name, String? icon, String? imageUrl, int foodCount
+});
+
+
+
+
+}
+/// @nodoc
+class __$HomeCategoryCopyWithImpl<$Res>
+    implements _$HomeCategoryCopyWith<$Res> {
+  __$HomeCategoryCopyWithImpl(this._self, this._then);
+
+  final _HomeCategory _self;
+  final $Res Function(_HomeCategory) _then;
+
+/// Create a copy of HomeCategory
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? icon = freezed,Object? imageUrl = freezed,Object? foodCount = null,}) {
+  return _then(_HomeCategory(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,icon: freezed == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,foodCount: null == foodCount ? _self.foodCount : foodCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$HomeFood {
-  String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  double get price => throw _privateConstructorUsedError;
-  @JsonKey(name: 'imageUrls')
-  List<String> get imageUrls => throw _privateConstructorUsedError;
-  double? get rating => throw _privateConstructorUsedError;
-  @JsonKey(name: 'isVeg')
-  bool get isVeg => throw _privateConstructorUsedError;
-  @JsonKey(name: 'isBestseller')
-  bool get isBestseller => throw _privateConstructorUsedError;
+
+ String get id; String get name; double get price;@JsonKey(name: 'imageUrls') List<String> get imageUrls; double? get rating;@JsonKey(name: 'isVeg') bool get isVeg;@JsonKey(name: 'isBestseller') bool get isBestseller;
+/// Create a copy of HomeFood
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$HomeFoodCopyWith<HomeFood> get copyWith => _$HomeFoodCopyWithImpl<HomeFood>(this as HomeFood, _$identity);
 
   /// Serializes this HomeFood to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of HomeFood
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $HomeFoodCopyWith<HomeFood> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeFood&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.isVeg, isVeg) || other.isVeg == isVeg)&&(identical(other.isBestseller, isBestseller) || other.isBestseller == isBestseller));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,price,const DeepCollectionEquality().hash(imageUrls),rating,isVeg,isBestseller);
+
+@override
+String toString() {
+  return 'HomeFood(id: $id, name: $name, price: $price, imageUrls: $imageUrls, rating: $rating, isVeg: $isVeg, isBestseller: $isBestseller)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $HomeFoodCopyWith<$Res> {
-  factory $HomeFoodCopyWith(HomeFood value, $Res Function(HomeFood) then) =
-      _$HomeFoodCopyWithImpl<$Res, HomeFood>;
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    double price,
-    @JsonKey(name: 'imageUrls') List<String> imageUrls,
-    double? rating,
-    @JsonKey(name: 'isVeg') bool isVeg,
-    @JsonKey(name: 'isBestseller') bool isBestseller,
-  });
-}
+abstract mixin class $HomeFoodCopyWith<$Res>  {
+  factory $HomeFoodCopyWith(HomeFood value, $Res Function(HomeFood) _then) = _$HomeFoodCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name, double price,@JsonKey(name: 'imageUrls') List<String> imageUrls, double? rating,@JsonKey(name: 'isVeg') bool isVeg,@JsonKey(name: 'isBestseller') bool isBestseller
+});
 
+
+
+
+}
 /// @nodoc
-class _$HomeFoodCopyWithImpl<$Res, $Val extends HomeFood>
+class _$HomeFoodCopyWithImpl<$Res>
     implements $HomeFoodCopyWith<$Res> {
-  _$HomeFoodCopyWithImpl(this._value, this._then);
+  _$HomeFoodCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final HomeFood _self;
+  final $Res Function(HomeFood) _then;
 
-  /// Create a copy of HomeFood
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? price = null,
-    Object? imageUrls = null,
-    Object? rating = freezed,
-    Object? isVeg = null,
-    Object? isBestseller = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            price: null == price
-                ? _value.price
-                : price // ignore: cast_nullable_to_non_nullable
-                      as double,
-            imageUrls: null == imageUrls
-                ? _value.imageUrls
-                : imageUrls // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            rating: freezed == rating
-                ? _value.rating
-                : rating // ignore: cast_nullable_to_non_nullable
-                      as double?,
-            isVeg: null == isVeg
-                ? _value.isVeg
-                : isVeg // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            isBestseller: null == isBestseller
-                ? _value.isBestseller
-                : isBestseller // ignore: cast_nullable_to_non_nullable
-                      as bool,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of HomeFood
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? price = null,Object? imageUrls = null,Object? rating = freezed,Object? isVeg = null,Object? isBestseller = null,}) {
+  return _then(HomeFood(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,imageUrls: null == imageUrls ? _self.imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,rating: freezed == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
+as double?,isVeg: null == isVeg ? _self.isVeg : isVeg // ignore: cast_nullable_to_non_nullable
+as bool,isBestseller: null == isBestseller ? _self.isBestseller : isBestseller // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
 }
 
-/// @nodoc
-abstract class _$$HomeFoodImplCopyWith<$Res>
-    implements $HomeFoodCopyWith<$Res> {
-  factory _$$HomeFoodImplCopyWith(
-    _$HomeFoodImpl value,
-    $Res Function(_$HomeFoodImpl) then,
-  ) = __$$HomeFoodImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    double price,
-    @JsonKey(name: 'imageUrls') List<String> imageUrls,
-    double? rating,
-    @JsonKey(name: 'isVeg') bool isVeg,
-    @JsonKey(name: 'isBestseller') bool isBestseller,
-  });
 }
 
-/// @nodoc
-class __$$HomeFoodImplCopyWithImpl<$Res>
-    extends _$HomeFoodCopyWithImpl<$Res, _$HomeFoodImpl>
-    implements _$$HomeFoodImplCopyWith<$Res> {
-  __$$HomeFoodImplCopyWithImpl(
-    _$HomeFoodImpl _value,
-    $Res Function(_$HomeFoodImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of HomeFood
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? price = null,
-    Object? imageUrls = null,
-    Object? rating = freezed,
-    Object? isVeg = null,
-    Object? isBestseller = null,
-  }) {
-    return _then(
-      _$HomeFoodImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        price: null == price
-            ? _value.price
-            : price // ignore: cast_nullable_to_non_nullable
-                  as double,
-        imageUrls: null == imageUrls
-            ? _value._imageUrls
-            : imageUrls // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        rating: freezed == rating
-            ? _value.rating
-            : rating // ignore: cast_nullable_to_non_nullable
-                  as double?,
-        isVeg: null == isVeg
-            ? _value.isVeg
-            : isVeg // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        isBestseller: null == isBestseller
-            ? _value.isBestseller
-            : isBestseller // ignore: cast_nullable_to_non_nullable
-                  as bool,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [HomeFood].
+extension HomeFoodPatterns on HomeFood {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _HomeFood value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _HomeFood() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _HomeFood value)  $default,){
+final _that = this;
+switch (_that) {
+case _HomeFood():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _HomeFood value)?  $default,){
+final _that = this;
+switch (_that) {
+case _HomeFood() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  double price, @JsonKey(name: 'imageUrls')  List<String> imageUrls,  double? rating, @JsonKey(name: 'isVeg')  bool isVeg, @JsonKey(name: 'isBestseller')  bool isBestseller)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _HomeFood() when $default != null:
+return $default(_that.id,_that.name,_that.price,_that.imageUrls,_that.rating,_that.isVeg,_that.isBestseller);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  double price, @JsonKey(name: 'imageUrls')  List<String> imageUrls,  double? rating, @JsonKey(name: 'isVeg')  bool isVeg, @JsonKey(name: 'isBestseller')  bool isBestseller)  $default,) {final _that = this;
+switch (_that) {
+case _HomeFood():
+return $default(_that.id,_that.name,_that.price,_that.imageUrls,_that.rating,_that.isVeg,_that.isBestseller);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  double price, @JsonKey(name: 'imageUrls')  List<String> imageUrls,  double? rating, @JsonKey(name: 'isVeg')  bool isVeg, @JsonKey(name: 'isBestseller')  bool isBestseller)?  $default,) {final _that = this;
+switch (_that) {
+case _HomeFood() when $default != null:
+return $default(_that.id,_that.name,_that.price,_that.imageUrls,_that.rating,_that.isVeg,_that.isBestseller);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$HomeFoodImpl implements _HomeFood {
-  const _$HomeFoodImpl({
-    required this.id,
-    required this.name,
-    required this.price,
-    @JsonKey(name: 'imageUrls') final List<String> imageUrls = const [],
-    this.rating,
-    @JsonKey(name: 'isVeg') this.isVeg = true,
-    @JsonKey(name: 'isBestseller') this.isBestseller = false,
-  }) : _imageUrls = imageUrls;
 
-  factory _$HomeFoodImpl.fromJson(Map<String, dynamic> json) =>
-      _$$HomeFoodImplFromJson(json);
+class _HomeFood implements HomeFood {
+  const _HomeFood({required this.id, required this.name, required this.price, @JsonKey(name: 'imageUrls')  List<String> imageUrls = const [], this.rating, @JsonKey(name: 'isVeg') this.isVeg = true, @JsonKey(name: 'isBestseller') this.isBestseller = false}): _imageUrls = imageUrls;
+  factory _HomeFood.fromJson(Map<String, dynamic> json) => _$HomeFoodFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String name;
-  @override
-  final double price;
-  final List<String> _imageUrls;
-  @override
-  @JsonKey(name: 'imageUrls')
-  List<String> get imageUrls {
-    if (_imageUrls is EqualUnmodifiableListView) return _imageUrls;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_imageUrls);
-  }
-
-  @override
-  final double? rating;
-  @override
-  @JsonKey(name: 'isVeg')
-  final bool isVeg;
-  @override
-  @JsonKey(name: 'isBestseller')
-  final bool isBestseller;
-
-  @override
-  String toString() {
-    return 'HomeFood(id: $id, name: $name, price: $price, imageUrls: $imageUrls, rating: $rating, isVeg: $isVeg, isBestseller: $isBestseller)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$HomeFoodImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.price, price) || other.price == price) &&
-            const DeepCollectionEquality().equals(
-              other._imageUrls,
-              _imageUrls,
-            ) &&
-            (identical(other.rating, rating) || other.rating == rating) &&
-            (identical(other.isVeg, isVeg) || other.isVeg == isVeg) &&
-            (identical(other.isBestseller, isBestseller) ||
-                other.isBestseller == isBestseller));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    price,
-    const DeepCollectionEquality().hash(_imageUrls),
-    rating,
-    isVeg,
-    isBestseller,
-  );
-
-  /// Create a copy of HomeFood
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$HomeFoodImplCopyWith<_$HomeFoodImpl> get copyWith =>
-      __$$HomeFoodImplCopyWithImpl<_$HomeFoodImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$HomeFoodImplToJson(this);
-  }
+@override final  String id;
+@override final  String name;
+@override final  double price;
+ final  List<String> _imageUrls;
+@override@JsonKey(name: 'imageUrls') List<String> get imageUrls {
+  if (_imageUrls is EqualUnmodifiableListView) return _imageUrls;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_imageUrls);
 }
 
-abstract class _HomeFood implements HomeFood {
-  const factory _HomeFood({
-    required final String id,
-    required final String name,
-    required final double price,
-    @JsonKey(name: 'imageUrls') final List<String> imageUrls,
-    final double? rating,
-    @JsonKey(name: 'isVeg') final bool isVeg,
-    @JsonKey(name: 'isBestseller') final bool isBestseller,
-  }) = _$HomeFoodImpl;
+@override final  double? rating;
+@override@JsonKey(name: 'isVeg') final  bool isVeg;
+@override@JsonKey(name: 'isBestseller') final  bool isBestseller;
 
-  factory _HomeFood.fromJson(Map<String, dynamic> json) =
-      _$HomeFoodImpl.fromJson;
+/// Create a copy of HomeFood
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$HomeFoodCopyWith<_HomeFood> get copyWith => __$HomeFoodCopyWithImpl<_HomeFood>(this, _$identity);
 
-  @override
-  String get id;
-  @override
-  String get name;
-  @override
-  double get price;
-  @override
-  @JsonKey(name: 'imageUrls')
-  List<String> get imageUrls;
-  @override
-  double? get rating;
-  @override
-  @JsonKey(name: 'isVeg')
-  bool get isVeg;
-  @override
-  @JsonKey(name: 'isBestseller')
-  bool get isBestseller;
-
-  /// Create a copy of HomeFood
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$HomeFoodImplCopyWith<_$HomeFoodImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+Map<String, dynamic> toJson() {
+  return _$HomeFoodToJson(this, );
 }
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeFood&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.isVeg, isVeg) || other.isVeg == isVeg)&&(identical(other.isBestseller, isBestseller) || other.isBestseller == isBestseller));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,price,const DeepCollectionEquality().hash(_imageUrls),rating,isVeg,isBestseller);
+
+@override
+String toString() {
+  return 'HomeFood(id: $id, name: $name, price: $price, imageUrls: $imageUrls, rating: $rating, isVeg: $isVeg, isBestseller: $isBestseller)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$HomeFoodCopyWith<$Res> implements $HomeFoodCopyWith<$Res> {
+  factory _$HomeFoodCopyWith(_HomeFood value, $Res Function(_HomeFood) _then) = __$HomeFoodCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name, double price,@JsonKey(name: 'imageUrls') List<String> imageUrls, double? rating,@JsonKey(name: 'isVeg') bool isVeg,@JsonKey(name: 'isBestseller') bool isBestseller
+});
+
+
+
+
+}
+/// @nodoc
+class __$HomeFoodCopyWithImpl<$Res>
+    implements _$HomeFoodCopyWith<$Res> {
+  __$HomeFoodCopyWithImpl(this._self, this._then);
+
+  final _HomeFood _self;
+  final $Res Function(_HomeFood) _then;
+
+/// Create a copy of HomeFood
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? price = null,Object? imageUrls = null,Object? rating = freezed,Object? isVeg = null,Object? isBestseller = null,}) {
+  return _then(_HomeFood(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,imageUrls: null == imageUrls ? _self._imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,rating: freezed == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
+as double?,isVeg: null == isVeg ? _self.isVeg : isVeg // ignore: cast_nullable_to_non_nullable
+as bool,isBestseller: null == isBestseller ? _self.isBestseller : isBestseller // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+// dart format on

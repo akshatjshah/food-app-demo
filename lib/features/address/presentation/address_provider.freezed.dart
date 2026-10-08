@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'address_provider.dart';
@@ -9,251 +9,303 @@ part of 'address_provider.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
 /// @nodoc
 mixin _$AddressState {
-  List<Address> get addresses => throw _privateConstructorUsedError;
-  bool get isLoading => throw _privateConstructorUsedError;
-  String? get errorMessage => throw _privateConstructorUsedError;
-  Address? get selectedAddress => throw _privateConstructorUsedError;
 
-  /// Create a copy of AddressState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $AddressStateCopyWith<AddressState> get copyWith =>
-      throw _privateConstructorUsedError;
+ List<Address> get addresses; bool get isLoading; String? get errorMessage; Address? get selectedAddress;
+/// Create a copy of AddressState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AddressStateCopyWith<AddressState> get copyWith => _$AddressStateCopyWithImpl<AddressState>(this as AddressState, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AddressState&&const DeepCollectionEquality().equals(other.addresses, addresses)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.selectedAddress, selectedAddress) || other.selectedAddress == selectedAddress));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(addresses),isLoading,errorMessage,selectedAddress);
+
+@override
+String toString() {
+  return 'AddressState(addresses: $addresses, isLoading: $isLoading, errorMessage: $errorMessage, selectedAddress: $selectedAddress)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $AddressStateCopyWith<$Res> {
-  factory $AddressStateCopyWith(
-    AddressState value,
-    $Res Function(AddressState) then,
-  ) = _$AddressStateCopyWithImpl<$Res, AddressState>;
-  @useResult
-  $Res call({
-    List<Address> addresses,
-    bool isLoading,
-    String? errorMessage,
-    Address? selectedAddress,
-  });
+abstract mixin class $AddressStateCopyWith<$Res>  {
+  factory $AddressStateCopyWith(AddressState value, $Res Function(AddressState) _then) = _$AddressStateCopyWithImpl;
+@useResult
+$Res call({
+ List<Address> addresses, bool isLoading, String? errorMessage, Address? selectedAddress
+});
 
-  $AddressCopyWith<$Res>? get selectedAddress;
+
+$AddressCopyWith<$Res>? get selectedAddress;
+
 }
-
 /// @nodoc
-class _$AddressStateCopyWithImpl<$Res, $Val extends AddressState>
+class _$AddressStateCopyWithImpl<$Res>
     implements $AddressStateCopyWith<$Res> {
-  _$AddressStateCopyWithImpl(this._value, this._then);
+  _$AddressStateCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final AddressState _self;
+  final $Res Function(AddressState) _then;
 
-  /// Create a copy of AddressState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? addresses = null,
-    Object? isLoading = null,
-    Object? errorMessage = freezed,
-    Object? selectedAddress = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            addresses: null == addresses
-                ? _value.addresses
-                : addresses // ignore: cast_nullable_to_non_nullable
-                      as List<Address>,
-            isLoading: null == isLoading
-                ? _value.isLoading
-                : isLoading // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            errorMessage: freezed == errorMessage
-                ? _value.errorMessage
-                : errorMessage // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            selectedAddress: freezed == selectedAddress
-                ? _value.selectedAddress
-                : selectedAddress // ignore: cast_nullable_to_non_nullable
-                      as Address?,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of AddressState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $AddressCopyWith<$Res>? get selectedAddress {
-    if (_value.selectedAddress == null) {
-      return null;
-    }
-
-    return $AddressCopyWith<$Res>(_value.selectedAddress!, (value) {
-      return _then(_value.copyWith(selectedAddress: value) as $Val);
-    });
-  }
+/// Create a copy of AddressState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? addresses = null,Object? isLoading = null,Object? errorMessage = freezed,Object? selectedAddress = freezed,}) {
+  return _then(AddressState(
+addresses: null == addresses ? _self.addresses : addresses // ignore: cast_nullable_to_non_nullable
+as List<Address>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,selectedAddress: freezed == selectedAddress ? _self.selectedAddress : selectedAddress // ignore: cast_nullable_to_non_nullable
+as Address?,
+  ));
 }
+/// Create a copy of AddressState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AddressCopyWith<$Res>? get selectedAddress {
+    if (_self.selectedAddress == null) {
+    return null;
+  }
 
-/// @nodoc
-abstract class _$$AddressStateImplCopyWith<$Res>
-    implements $AddressStateCopyWith<$Res> {
-  factory _$$AddressStateImplCopyWith(
-    _$AddressStateImpl value,
-    $Res Function(_$AddressStateImpl) then,
-  ) = __$$AddressStateImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    List<Address> addresses,
-    bool isLoading,
-    String? errorMessage,
-    Address? selectedAddress,
+  return $AddressCopyWith<$Res>(_self.selectedAddress!, (value) {
+    return _then(_self.copyWith(selectedAddress: value));
   });
+}
+}
 
-  @override
-  $AddressCopyWith<$Res>? get selectedAddress;
+
+/// Adds pattern-matching-related methods to [AddressState].
+extension AddressStatePatterns on AddressState {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AddressState value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _AddressState() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AddressState value)  $default,){
+final _that = this;
+switch (_that) {
+case _AddressState():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AddressState value)?  $default,){
+final _that = this;
+switch (_that) {
+case _AddressState() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Address> addresses,  bool isLoading,  String? errorMessage,  Address? selectedAddress)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _AddressState() when $default != null:
+return $default(_that.addresses,_that.isLoading,_that.errorMessage,_that.selectedAddress);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Address> addresses,  bool isLoading,  String? errorMessage,  Address? selectedAddress)  $default,) {final _that = this;
+switch (_that) {
+case _AddressState():
+return $default(_that.addresses,_that.isLoading,_that.errorMessage,_that.selectedAddress);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Address> addresses,  bool isLoading,  String? errorMessage,  Address? selectedAddress)?  $default,) {final _that = this;
+switch (_that) {
+case _AddressState() when $default != null:
+return $default(_that.addresses,_that.isLoading,_that.errorMessage,_that.selectedAddress);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-class __$$AddressStateImplCopyWithImpl<$Res>
-    extends _$AddressStateCopyWithImpl<$Res, _$AddressStateImpl>
-    implements _$$AddressStateImplCopyWith<$Res> {
-  __$$AddressStateImplCopyWithImpl(
-    _$AddressStateImpl _value,
-    $Res Function(_$AddressStateImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of AddressState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? addresses = null,
-    Object? isLoading = null,
-    Object? errorMessage = freezed,
-    Object? selectedAddress = freezed,
-  }) {
-    return _then(
-      _$AddressStateImpl(
-        addresses: null == addresses
-            ? _value._addresses
-            : addresses // ignore: cast_nullable_to_non_nullable
-                  as List<Address>,
-        isLoading: null == isLoading
-            ? _value.isLoading
-            : isLoading // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        errorMessage: freezed == errorMessage
-            ? _value.errorMessage
-            : errorMessage // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        selectedAddress: freezed == selectedAddress
-            ? _value.selectedAddress
-            : selectedAddress // ignore: cast_nullable_to_non_nullable
-                  as Address?,
-      ),
-    );
-  }
+
+class _AddressState implements AddressState {
+  const _AddressState({ List<Address> addresses = const [], this.isLoading = false, this.errorMessage, this.selectedAddress}): _addresses = addresses;
+  
+
+ final  List<Address> _addresses;
+@override@JsonKey() List<Address> get addresses {
+  if (_addresses is EqualUnmodifiableListView) return _addresses;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_addresses);
+}
+
+@override@JsonKey() final  bool isLoading;
+@override final  String? errorMessage;
+@override final  Address? selectedAddress;
+
+/// Create a copy of AddressState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$AddressStateCopyWith<_AddressState> get copyWith => __$AddressStateCopyWithImpl<_AddressState>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AddressState&&const DeepCollectionEquality().equals(other._addresses, _addresses)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.selectedAddress, selectedAddress) || other.selectedAddress == selectedAddress));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_addresses),isLoading,errorMessage,selectedAddress);
+
+@override
+String toString() {
+  return 'AddressState(addresses: $addresses, isLoading: $isLoading, errorMessage: $errorMessage, selectedAddress: $selectedAddress)';
+}
+
+
 }
 
 /// @nodoc
+abstract mixin class _$AddressStateCopyWith<$Res> implements $AddressStateCopyWith<$Res> {
+  factory _$AddressStateCopyWith(_AddressState value, $Res Function(_AddressState) _then) = __$AddressStateCopyWithImpl;
+@override @useResult
+$Res call({
+ List<Address> addresses, bool isLoading, String? errorMessage, Address? selectedAddress
+});
 
-class _$AddressStateImpl implements _AddressState {
-  const _$AddressStateImpl({
-    final List<Address> addresses = const [],
-    this.isLoading = false,
-    this.errorMessage,
-    this.selectedAddress,
-  }) : _addresses = addresses;
 
-  final List<Address> _addresses;
-  @override
-  @JsonKey()
-  List<Address> get addresses {
-    if (_addresses is EqualUnmodifiableListView) return _addresses;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_addresses);
-  }
+@override $AddressCopyWith<$Res>? get selectedAddress;
 
-  @override
-  @JsonKey()
-  final bool isLoading;
-  @override
-  final String? errorMessage;
-  @override
-  final Address? selectedAddress;
+}
+/// @nodoc
+class __$AddressStateCopyWithImpl<$Res>
+    implements _$AddressStateCopyWith<$Res> {
+  __$AddressStateCopyWithImpl(this._self, this._then);
 
-  @override
-  String toString() {
-    return 'AddressState(addresses: $addresses, isLoading: $isLoading, errorMessage: $errorMessage, selectedAddress: $selectedAddress)';
-  }
+  final _AddressState _self;
+  final $Res Function(_AddressState) _then;
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$AddressStateImpl &&
-            const DeepCollectionEquality().equals(
-              other._addresses,
-              _addresses,
-            ) &&
-            (identical(other.isLoading, isLoading) ||
-                other.isLoading == isLoading) &&
-            (identical(other.errorMessage, errorMessage) ||
-                other.errorMessage == errorMessage) &&
-            (identical(other.selectedAddress, selectedAddress) ||
-                other.selectedAddress == selectedAddress));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    const DeepCollectionEquality().hash(_addresses),
-    isLoading,
-    errorMessage,
-    selectedAddress,
-  );
-
-  /// Create a copy of AddressState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$AddressStateImplCopyWith<_$AddressStateImpl> get copyWith =>
-      __$$AddressStateImplCopyWithImpl<_$AddressStateImpl>(this, _$identity);
+/// Create a copy of AddressState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? addresses = null,Object? isLoading = null,Object? errorMessage = freezed,Object? selectedAddress = freezed,}) {
+  return _then(_AddressState(
+addresses: null == addresses ? _self._addresses : addresses // ignore: cast_nullable_to_non_nullable
+as List<Address>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,selectedAddress: freezed == selectedAddress ? _self.selectedAddress : selectedAddress // ignore: cast_nullable_to_non_nullable
+as Address?,
+  ));
 }
 
-abstract class _AddressState implements AddressState {
-  const factory _AddressState({
-    final List<Address> addresses,
-    final bool isLoading,
-    final String? errorMessage,
-    final Address? selectedAddress,
-  }) = _$AddressStateImpl;
+/// Create a copy of AddressState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AddressCopyWith<$Res>? get selectedAddress {
+    if (_self.selectedAddress == null) {
+    return null;
+  }
 
-  @override
-  List<Address> get addresses;
-  @override
-  bool get isLoading;
-  @override
-  String? get errorMessage;
-  @override
-  Address? get selectedAddress;
-
-  /// Create a copy of AddressState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AddressStateImplCopyWith<_$AddressStateImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  return $AddressCopyWith<$Res>(_self.selectedAddress!, (value) {
+    return _then(_self.copyWith(selectedAddress: value));
+  });
 }
+}
+
+// dart format on

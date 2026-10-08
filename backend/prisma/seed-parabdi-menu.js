@@ -1,152 +1,41 @@
-/**
- * Parabdi master menu seed — IDEMPOTENT.
+﻿/**
+ * Parabdi master menu seed - IDEMPOTENT.
  *
- * Source: task specification derived from Parabdi_Final_Organized_Menu.pdf
- * (the PDF file itself was not present in the workspace, so ONLY dishes
- * explicitly enumerated in the task brief are seeded — nothing invented).
+ * Source: Parabdi_Final_Organized_Menu.pdf as transcribed into the FOODS /
+ * VARIANT_GROUPS tables below (exact PDF names/sections; nothing invented).
+ * NOTE: the PDF file itself is not in the repo; if the PDF is (re-)supplied,
+ * transcribe any additional Visarati / Sweets / Snacks & Beverages pages here
+ * and re-run - existing rows are updated in place, never duplicated.
+ *
+ * Price policy: the seed NEVER writes a business price.
+ * - Existing rows: price is NEVER touched (nor description, displayOrder,
+ *   isActive, isAvailable, soft-delete state, or any other admin field).
+ *   Only structural master fields sync: category / subcategory / mealTags /
+ *   isVeg, plus isFastingFriendly on create.
+ * - New rows: the PDF specifies no price and FoodItem.price is schema-required
+ *   (non-null Decimal), so new rows are created PRICE-PENDING — technical
+ *   price 0, isActive=false, isAvailable=false, tags ['price-pending'], NULL
+ *   description — hidden from the customer menu until an admin sets a real
+ *   price (Food Edit rejects price <= 0) and activates the item.
+ * - Variant option prices: missing options are created at neutral 0;
+ *   existing options' additionalPrice is NEVER overwritten.
  *
  * Safe to run multiple times:
  *  - categories: upsert by unique name
- *  - foods: match by (name) — update in place, never duplicate
+ *  - foods: match by (name) - update in place, never duplicate
  *  - customization groups/items: match by (food, group name) / (group, item name)
- *  - demo foods from the old generic seed (Punjabi Thali, Chicken Biryani,
- *    …) are soft-deleted (isActive=false, deletedAt set) so order history
- *    (FK Restrict) is never broken.
+ *  - orphan variant groups belonging to soft-deleted/archived foods are
+ *    removed (they have no order_item_customizations FK pointing at groups,
+ *    only at items - items referenced by history are kept).
+ *  - demo foods from the old generic seed are soft-deleted (isActive=false,
+ *    deletedAt set) so order history (FK Restrict) is never broken.
  *
  * Run: node prisma/seed-parabdi-menu.js
  */
 const { PrismaClient } = require('@prisma/client');
+const { CATEGORIES, FOODS, VARIANT_GROUPS, DEMO_FOOD_NAMES, DEMO_CATEGORY_NAMES } = require('./menu-master');
 
 const prisma = new PrismaClient();
-
-const CATEGORIES = [
-  { name: 'Breakfast', icon: '🥞', displayOrder: 1, description: 'Breakfast & morning favourites' },
-  { name: 'Shaak & Gujarati Main Dishes', icon: '🍲', displayOrder: 2, description: 'Vegetable / Shaak · Dal / Kadhi / Main preparations' },
-  { name: 'Rice & Khichdi', icon: '🍚', displayOrder: 3, description: 'Rice & Khichdi' },
-  { name: 'Rotli, Bhakhri & Puri', icon: '🫓', displayOrder: 4, description: 'Rotli / Bhakhri / Puri' },
-  { name: 'Visarati Vangio', icon: '🥘', displayOrder: 5, description: 'Traditional / lesser-seen dishes' },
-  { name: 'Sweets & Traditional Desserts', icon: '🍮', displayOrder: 6, description: 'Sweets & traditional desserts' },
-  { name: 'Snacks & Beverages', icon: '🥤', displayOrder: 7, description: 'Snacks & beverages' },
-];
-
-// [name, category, subcategory, price, mealTags]
-const FOODS = [
-  // ── BREAKFAST ──
-  ['White Dhokla', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Khatta Dhokla', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Handvo', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Muthiya', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Patra', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Khichu', 'Breakfast', 'Breakfast & Morning Favourites', 50, ['breakfast']],
-  ['Thepla', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Methi Thepla', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Bajra Rotla', 'Breakfast', 'Breakfast & Morning Favourites', 50, ['breakfast']],
-  ['Makai no Chevdo', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Nylon Poha Chevdo', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Sev Mamra', 'Breakfast', 'Breakfast & Morning Favourites', 50, ['breakfast']],
-  ['Besan Chilla', 'Breakfast', 'Breakfast & Morning Favourites', 80, ['breakfast']],
-  ['Vegetable Sandwich', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Aloo Sandwiches', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Idli', 'Breakfast', 'Breakfast & Morning Favourites', 60, ['breakfast']],
-  ['Uttapam', 'Breakfast', 'Breakfast & Morning Favourites', 80, ['breakfast']],
-  ['Chakri', 'Breakfast', 'Breakfast & Morning Favourites', 50, ['breakfast']],
-  ['Mamra', 'Breakfast', 'Breakfast & Morning Favourites', 40, ['breakfast']],
-  ['Sabudana Bataka', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Tikhi Puri', 'Breakfast', 'Breakfast & Morning Favourites', 50, ['breakfast']],
-  ['Farsi Puri', 'Breakfast', 'Breakfast & Morning Favourites', 50, ['breakfast']],
-  ['Lilva Kachori', 'Breakfast', 'Breakfast & Morning Favourites', 70, ['breakfast']],
-  ['Aloo Paratha', 'Breakfast', 'Breakfast & Morning Favourites', 80, ['breakfast']],
-
-  // ── SHAAK & MAIN ──
-  ['Ringana Bateta', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Ooro', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 120, ['lunch', 'dinner']],
-  ['Sev Tameta', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Dudhi Chana Dal', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Dudhi Muthiya', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 100, ['lunch', 'dinner']],
-  ['Kora nu Shak', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Tarelu Rataru', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Tindora Fry', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Turiya Patra', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Kobi Vatana', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 100, ['lunch', 'dinner']],
-  ['Bhinda nu Shak', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Flowers Vatana', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Choli Bateta', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Tuver Lilva', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 120, ['lunch', 'dinner']],
-  ['Valor Papdi', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 120, ['lunch', 'dinner']],
-  ['Valor Dal', 'Shaak & Gujarati Main Dishes', 'Dal / Kadhi / Main Preparations', 110, ['lunch', 'dinner']],
-  ['Va nu Shak', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Rasavala Bateta', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 100, ['lunch', 'dinner']],
-  ['Guvar Bateta', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Methi Alu', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 110, ['lunch', 'dinner']],
-  ['Guju Dal', 'Shaak & Gujarati Main Dishes', 'Dal / Kadhi / Main Preparations', 90, ['lunch', 'dinner']],
-  ['Mung Dal', 'Shaak & Gujarati Main Dishes', 'Dal / Kadhi / Main Preparations', 90, ['lunch', 'dinner']],
-  ['Rajasthani Daal', 'Shaak & Gujarati Main Dishes', 'Dal / Kadhi / Main Preparations', 110, ['lunch', 'dinner']],
-  ['Besan ni Sabji', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 100, ['lunch', 'dinner']],
-  ['Drum Stick Sabji', 'Shaak & Gujarati Main Dishes', 'Vegetable / Shaak', 120, ['lunch', 'dinner']],
-  ['Dal Dhokli', 'Shaak & Gujarati Main Dishes', 'Dal / Kadhi / Main Preparations', 110, ['lunch', 'dinner']],
-
-  // ── RICE & KHICHDI ──
-  ['Steam Rice', 'Rice & Khichdi', 'Rice & Khichdi', 80, ['lunch', 'dinner']],
-  ['Jeera Rice', 'Rice & Khichdi', 'Rice & Khichdi', 100, ['lunch', 'dinner']],
-  ['Khichdi', 'Rice & Khichdi', 'Rice & Khichdi', 90, ['lunch', 'dinner']],
-  ['Vaghareli Khichdi', 'Rice & Khichdi', 'Rice & Khichdi', 100, ['lunch', 'dinner']],
-  ['Fada Khichdi', 'Rice & Khichdi', 'Rice & Khichdi', 100, ['lunch', 'dinner']],
-
-  // ── ROTLI / BHAKHRI / PURI ──
-  ['Phulka Roti', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 15, ['lunch', 'dinner']],
-  ['Tawa Roti', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 15, ['lunch', 'dinner']],
-  ['Bajra Roti', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 25, ['lunch', 'dinner']],
-  ['Makai Rotla', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 25, ['lunch', 'dinner']],
-  ['Jowar Bhakhri', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 25, ['lunch', 'dinner']],
-  ['Wheat Bhakhri', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 25, ['lunch', 'dinner']],
-  ['Puri', 'Rotli, Bhakhri & Puri', 'Rotli / Bhakhri / Puri', 30, ['lunch', 'dinner']],
-];
-
-// Variant groups from the brief §4: [foodName, groupName, min, max, [[option, price]]]
-const VARIANT_GROUPS = [
-  ['Nylon Poha Chevdo', 'Choose your type', 1, 1, [['Diet', 0], ['Regular', 0]]],
-  ['Besan Chilla', 'Choose your style', 1, 1, [['Normal', 0], ['Fully Veg Loaded', 30]]],
-  ['Vegetable Sandwich', 'Choose your toast', 1, 1, [['Without Toast', 0], ['Hand Toasted', 10]]],
-  ['Steam Rice', 'Choose your rice', 1, 1, [['Chutta', 0], ['Chadela', 0]]],
-  ['Besan ni Sabji', 'Choose your variety', 1, 1, [['Plain', 0], ['Onion', 0], ['Methi', 0], ['Ringan Vado', 10]]],
-  ['Drum Stick Sabji', 'Choose your type', 1, 1, [['Type 1', 0], ['Type 2', 0]]],
-  ['Dal Dhokli', 'Choose your type', 1, 1, [['Type 1', 0], ['Type 2', 0], ['Type 3', 0]]],
-  ['Puri', 'Choose your puri', 1, 1, [['Yellow', 0], ['White', 0]]],
-];
-
-// Old generic/demo seed names — NOT Parabdi menu. Soft-delete only.
-const DEMO_FOOD_NAMES = [
-  'Gujarati Thali',
-  'Punjabi Thali',
-  'Rajasthani Thali',
-  'Chicken Biryani',
-  'Paneer Biryani',
-  'Butter Naan',
-  'Garlic Naan',
-  'Tandoori Roti',
-  'Samosa (2 pcs)',
-  'Pav Bhaji',
-  'Masala Dosa',
-  'Idli Sambar (4 pcs)',
-  'Buddha Bowl',
-  'Grilled Chicken Salad',
-  'Gulab Jamun (4 pcs)',
-  'Rasmalai (2 pcs)',
-  'Mango Lassi',
-  'Masala Chai',
-  'Buttermilk',
-];
-
-const DEMO_CATEGORY_NAMES = [
-  'Thali',
-  'Rice & Biryani',
-  'Breads',
-  'Snacks',
-  'South Indian',
-  'Healthy Bowls',
-  'Desserts',
-  'Beverages',
-];
 
 async function main() {
   console.log('Seeding Parabdi master menu (idempotent)...');
@@ -165,30 +54,46 @@ async function main() {
   }
   console.log(`  categories: ${catByName.size}`);
 
-  // 2. Foods (match by exact name; preserve existing IDs)
+  // 2. Foods (match by exact name; preserve existing IDs AND admin-managed fields)
   let created = 0;
   let updated = 0;
+  // Append new items after the highest admin-managed position.
+  const maxOrderRow = await prisma.foodItem.aggregate({ _max: { displayOrder: true } });
+  let nextOrder = (maxOrderRow._max.displayOrder ?? FOODS.length) + 1;
   for (let i = 0; i < FOODS.length; i++) {
-    const [name, catName, subcategory, price, mealTags] = FOODS[i];
+    const [name, catName, subcategory, mealTags, extra] = FOODS[i];
     const cat = catByName.get(catName);
+    if (!cat) throw new Error(`Unknown category in menu-master: ${catName} (item: ${name})`);
     const existing = await prisma.foodItem.findFirst({ where: { name } });
-    const data = {
-      categoryId: cat.id,
-      description: existing?.description ?? `${name} — authentic Parabdi preparation`,
-      price,
-      subcategory,
-      mealTags,
-      isVeg: true,
-      isActive: true,
-      isAvailable: true,
-      deletedAt: null,
-      displayOrder: i + 1,
-    };
     if (existing) {
-      await prisma.foodItem.update({ where: { id: existing.id }, data });
+      // Structural sync only: category / subcategory / meal tags / veg.
+      // Admin-managed fields (price, description, display order, active,
+      // availability, soft-delete, tags) are NEVER clobbered by a re-run.
+      await prisma.foodItem.update({
+        where: { id: existing.id },
+        data: { categoryId: cat.id, subcategory, mealTags, isVeg: true },
+      });
       updated++;
     } else {
-      await prisma.foodItem.create({ data: { name, ...data } });
+      // Price-pending create: NO invented business price or description.
+      // Technical price 0 satisfies the non-null schema column; the row stays
+      // invisible to customers (inactive + unavailable) until admin prices it.
+      await prisma.foodItem.create({
+        data: {
+          name,
+          categoryId: cat.id,
+          description: null,
+          price: 0,
+          subcategory,
+          mealTags,
+          tags: ['price-pending'],
+          isVeg: true,
+          isFastingFriendly: extra?.fasting === true,
+          isActive: false,
+          isAvailable: false,
+          displayOrder: nextOrder++,
+        },
+      });
       created++;
     }
   }
@@ -223,14 +128,17 @@ async function main() {
         where: { groupId: group.id, name: optName },
       });
       if (!existingOpt) {
+        // Missing options are created at the neutral 0 delta from master.
         await prisma.customizationItem.create({
           data: { groupId: group.id, name: optName, additionalPrice: optPrice, displayOrder: oi, isActive: true },
         });
         options++;
       } else {
+        // Preserve the existing option's additionalPrice (admin-managed);
+        // only ensure spec options stay structurally present and ordered.
         await prisma.customizationItem.update({
           where: { id: existingOpt.id },
-          data: { additionalPrice: optPrice, isActive: true },
+          data: { isActive: true },
         });
       }
     }
@@ -259,6 +167,27 @@ async function main() {
       await prisma.category.updateMany({ where: { name: n }, data: { isActive: false } });
     }
   }
+
+  // 6. Remove orphan variant groups of soft-deleted foods (e.g. leftover
+  //    "Mango Lassi :: meduium"). Groups have no order-history FK pointing at
+  //    them (OrderItemCustomization -> CustomizationItem only), so deleting an
+  //    EMPTY group (no items) or a group whose food is deleted is safe.
+  //    Groups with items referenced by order history are left untouched.
+  const orphanGroups = await prisma.customizationGroup.findMany({
+    where: { foodItem: { deletedAt: { not: null } } },
+    include: { items: { include: { _count: { select: { orderItemCustomizations: true } } } } },
+  });
+  let orphanRemoved = 0;
+  for (const g of orphanGroups) {
+    const referenced = g.items.some((it) => it._count.orderItemCustomizations > 0);
+    if (referenced) {
+      console.log(`  keep orphan group with order history: ${g.name}`);
+      continue;
+    }
+    await prisma.customizationGroup.delete({ where: { id: g.id } });
+    orphanRemoved++;
+  }
+  console.log(`  orphan variant groups removed: ${orphanRemoved}`);
   console.log('Done.');
 }
 

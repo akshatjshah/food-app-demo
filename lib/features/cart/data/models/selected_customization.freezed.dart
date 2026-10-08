@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'selected_customization.dart';
@@ -9,231 +9,276 @@ part of 'selected_customization.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-SelectedCustomization _$SelectedCustomizationFromJson(
-  Map<String, dynamic> json,
-) {
-  return _SelectedCustomization.fromJson(json);
-}
 
 /// @nodoc
 mixin _$SelectedCustomization {
-  @JsonKey(name: 'customization_item_id')
-  String get customizationItemId => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  @JsonKey(name: 'additional_price')
-  double get additionalPrice => throw _privateConstructorUsedError;
+
+@JsonKey(name: 'customization_item_id') String get customizationItemId; String get name;@JsonKey(name: 'additional_price') double get additionalPrice;
+/// Create a copy of SelectedCustomization
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SelectedCustomizationCopyWith<SelectedCustomization> get copyWith => _$SelectedCustomizationCopyWithImpl<SelectedCustomization>(this as SelectedCustomization, _$identity);
 
   /// Serializes this SelectedCustomization to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of SelectedCustomization
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $SelectedCustomizationCopyWith<SelectedCustomization> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SelectedCustomization&&(identical(other.customizationItemId, customizationItemId) || other.customizationItemId == customizationItemId)&&(identical(other.name, name) || other.name == name)&&(identical(other.additionalPrice, additionalPrice) || other.additionalPrice == additionalPrice));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,customizationItemId,name,additionalPrice);
+
+@override
+String toString() {
+  return 'SelectedCustomization(customizationItemId: $customizationItemId, name: $name, additionalPrice: $additionalPrice)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $SelectedCustomizationCopyWith<$Res> {
-  factory $SelectedCustomizationCopyWith(
-    SelectedCustomization value,
-    $Res Function(SelectedCustomization) then,
-  ) = _$SelectedCustomizationCopyWithImpl<$Res, SelectedCustomization>;
-  @useResult
-  $Res call({
-    @JsonKey(name: 'customization_item_id') String customizationItemId,
-    String name,
-    @JsonKey(name: 'additional_price') double additionalPrice,
-  });
-}
+abstract mixin class $SelectedCustomizationCopyWith<$Res>  {
+  factory $SelectedCustomizationCopyWith(SelectedCustomization value, $Res Function(SelectedCustomization) _then) = _$SelectedCustomizationCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'customization_item_id') String customizationItemId, String name,@JsonKey(name: 'additional_price') double additionalPrice
+});
 
+
+
+
+}
 /// @nodoc
-class _$SelectedCustomizationCopyWithImpl<
-  $Res,
-  $Val extends SelectedCustomization
->
+class _$SelectedCustomizationCopyWithImpl<$Res>
     implements $SelectedCustomizationCopyWith<$Res> {
-  _$SelectedCustomizationCopyWithImpl(this._value, this._then);
+  _$SelectedCustomizationCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final SelectedCustomization _self;
+  final $Res Function(SelectedCustomization) _then;
 
-  /// Create a copy of SelectedCustomization
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? customizationItemId = null,
-    Object? name = null,
-    Object? additionalPrice = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            customizationItemId: null == customizationItemId
-                ? _value.customizationItemId
-                : customizationItemId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            additionalPrice: null == additionalPrice
-                ? _value.additionalPrice
-                : additionalPrice // ignore: cast_nullable_to_non_nullable
-                      as double,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of SelectedCustomization
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? customizationItemId = null,Object? name = null,Object? additionalPrice = null,}) {
+  return _then(SelectedCustomization(
+customizationItemId: null == customizationItemId ? _self.customizationItemId : customizationItemId // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,additionalPrice: null == additionalPrice ? _self.additionalPrice : additionalPrice // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
 }
 
-/// @nodoc
-abstract class _$$SelectedCustomizationImplCopyWith<$Res>
-    implements $SelectedCustomizationCopyWith<$Res> {
-  factory _$$SelectedCustomizationImplCopyWith(
-    _$SelectedCustomizationImpl value,
-    $Res Function(_$SelectedCustomizationImpl) then,
-  ) = __$$SelectedCustomizationImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    @JsonKey(name: 'customization_item_id') String customizationItemId,
-    String name,
-    @JsonKey(name: 'additional_price') double additionalPrice,
-  });
 }
 
-/// @nodoc
-class __$$SelectedCustomizationImplCopyWithImpl<$Res>
-    extends
-        _$SelectedCustomizationCopyWithImpl<$Res, _$SelectedCustomizationImpl>
-    implements _$$SelectedCustomizationImplCopyWith<$Res> {
-  __$$SelectedCustomizationImplCopyWithImpl(
-    _$SelectedCustomizationImpl _value,
-    $Res Function(_$SelectedCustomizationImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of SelectedCustomization
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? customizationItemId = null,
-    Object? name = null,
-    Object? additionalPrice = null,
-  }) {
-    return _then(
-      _$SelectedCustomizationImpl(
-        customizationItemId: null == customizationItemId
-            ? _value.customizationItemId
-            : customizationItemId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        additionalPrice: null == additionalPrice
-            ? _value.additionalPrice
-            : additionalPrice // ignore: cast_nullable_to_non_nullable
-                  as double,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [SelectedCustomization].
+extension SelectedCustomizationPatterns on SelectedCustomization {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SelectedCustomization value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SelectedCustomization() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SelectedCustomization value)  $default,){
+final _that = this;
+switch (_that) {
+case _SelectedCustomization():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SelectedCustomization value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SelectedCustomization() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'customization_item_id')  String customizationItemId,  String name, @JsonKey(name: 'additional_price')  double additionalPrice)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SelectedCustomization() when $default != null:
+return $default(_that.customizationItemId,_that.name,_that.additionalPrice);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'customization_item_id')  String customizationItemId,  String name, @JsonKey(name: 'additional_price')  double additionalPrice)  $default,) {final _that = this;
+switch (_that) {
+case _SelectedCustomization():
+return $default(_that.customizationItemId,_that.name,_that.additionalPrice);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'customization_item_id')  String customizationItemId,  String name, @JsonKey(name: 'additional_price')  double additionalPrice)?  $default,) {final _that = this;
+switch (_that) {
+case _SelectedCustomization() when $default != null:
+return $default(_that.customizationItemId,_that.name,_that.additionalPrice);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$SelectedCustomizationImpl implements _SelectedCustomization {
-  const _$SelectedCustomizationImpl({
-    @JsonKey(name: 'customization_item_id') required this.customizationItemId,
-    required this.name,
-    @JsonKey(name: 'additional_price') this.additionalPrice = 0.0,
-  });
 
-  factory _$SelectedCustomizationImpl.fromJson(Map<String, dynamic> json) =>
-      _$$SelectedCustomizationImplFromJson(json);
+class _SelectedCustomization implements SelectedCustomization {
+  const _SelectedCustomization({@JsonKey(name: 'customization_item_id') required this.customizationItemId, required this.name, @JsonKey(name: 'additional_price') this.additionalPrice = 0.0});
+  factory _SelectedCustomization.fromJson(Map<String, dynamic> json) => _$SelectedCustomizationFromJson(json);
 
-  @override
-  @JsonKey(name: 'customization_item_id')
-  final String customizationItemId;
-  @override
-  final String name;
-  @override
-  @JsonKey(name: 'additional_price')
-  final double additionalPrice;
+@override@JsonKey(name: 'customization_item_id') final  String customizationItemId;
+@override final  String name;
+@override@JsonKey(name: 'additional_price') final  double additionalPrice;
 
-  @override
-  String toString() {
-    return 'SelectedCustomization(customizationItemId: $customizationItemId, name: $name, additionalPrice: $additionalPrice)';
-  }
+/// Create a copy of SelectedCustomization
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SelectedCustomizationCopyWith<_SelectedCustomization> get copyWith => __$SelectedCustomizationCopyWithImpl<_SelectedCustomization>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$SelectedCustomizationImpl &&
-            (identical(other.customizationItemId, customizationItemId) ||
-                other.customizationItemId == customizationItemId) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.additionalPrice, additionalPrice) ||
-                other.additionalPrice == additionalPrice));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, customizationItemId, name, additionalPrice);
-
-  /// Create a copy of SelectedCustomization
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$SelectedCustomizationImplCopyWith<_$SelectedCustomizationImpl>
-  get copyWith =>
-      __$$SelectedCustomizationImplCopyWithImpl<_$SelectedCustomizationImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$SelectedCustomizationImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$SelectedCustomizationToJson(this, );
 }
 
-abstract class _SelectedCustomization implements SelectedCustomization {
-  const factory _SelectedCustomization({
-    @JsonKey(name: 'customization_item_id')
-    required final String customizationItemId,
-    required final String name,
-    @JsonKey(name: 'additional_price') final double additionalPrice,
-  }) = _$SelectedCustomizationImpl;
-
-  factory _SelectedCustomization.fromJson(Map<String, dynamic> json) =
-      _$SelectedCustomizationImpl.fromJson;
-
-  @override
-  @JsonKey(name: 'customization_item_id')
-  String get customizationItemId;
-  @override
-  String get name;
-  @override
-  @JsonKey(name: 'additional_price')
-  double get additionalPrice;
-
-  /// Create a copy of SelectedCustomization
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$SelectedCustomizationImplCopyWith<_$SelectedCustomizationImpl>
-  get copyWith => throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SelectedCustomization&&(identical(other.customizationItemId, customizationItemId) || other.customizationItemId == customizationItemId)&&(identical(other.name, name) || other.name == name)&&(identical(other.additionalPrice, additionalPrice) || other.additionalPrice == additionalPrice));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,customizationItemId,name,additionalPrice);
+
+@override
+String toString() {
+  return 'SelectedCustomization(customizationItemId: $customizationItemId, name: $name, additionalPrice: $additionalPrice)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SelectedCustomizationCopyWith<$Res> implements $SelectedCustomizationCopyWith<$Res> {
+  factory _$SelectedCustomizationCopyWith(_SelectedCustomization value, $Res Function(_SelectedCustomization) _then) = __$SelectedCustomizationCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'customization_item_id') String customizationItemId, String name,@JsonKey(name: 'additional_price') double additionalPrice
+});
+
+
+
+
+}
+/// @nodoc
+class __$SelectedCustomizationCopyWithImpl<$Res>
+    implements _$SelectedCustomizationCopyWith<$Res> {
+  __$SelectedCustomizationCopyWithImpl(this._self, this._then);
+
+  final _SelectedCustomization _self;
+  final $Res Function(_SelectedCustomization) _then;
+
+/// Create a copy of SelectedCustomization
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? customizationItemId = null,Object? name = null,Object? additionalPrice = null,}) {
+  return _then(_SelectedCustomization(
+customizationItemId: null == customizationItemId ? _self.customizationItemId : customizationItemId // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,additionalPrice: null == additionalPrice ? _self.additionalPrice : additionalPrice // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+// dart format on

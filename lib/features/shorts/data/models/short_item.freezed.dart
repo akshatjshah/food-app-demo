@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'short_item.dart';
@@ -9,339 +9,291 @@ part of 'short_item.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-ShortItem _$ShortItemFromJson(Map<String, dynamic> json) {
-  return _ShortItem.fromJson(json);
-}
 
 /// @nodoc
 mixin _$ShortItem {
-  String get id => throw _privateConstructorUsedError;
-  String? get title => throw _privateConstructorUsedError;
-  String? get description => throw _privateConstructorUsedError;
-  @JsonKey(name: 'video_url')
-  String? get videoUrl => throw _privateConstructorUsedError;
-  @JsonKey(name: 'thumbnail_url')
-  String? get thumbnailUrl => throw _privateConstructorUsedError;
-  @JsonKey(name: 'likes_count')
-  int get likesCount => throw _privateConstructorUsedError;
-  @JsonKey(name: 'views_count')
-  int get viewsCount => throw _privateConstructorUsedError;
-  @JsonKey(name: 'is_liked')
-  bool get isLiked => throw _privateConstructorUsedError;
+
+ String get id; String? get title; String? get description;@JsonKey(name: 'video_url') String? get videoUrl;@JsonKey(name: 'thumbnail_url') String? get thumbnailUrl;@JsonKey(name: 'likes_count') int get likesCount;@JsonKey(name: 'views_count') int get viewsCount;@JsonKey(name: 'is_liked') bool get isLiked;
+/// Create a copy of ShortItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ShortItemCopyWith<ShortItem> get copyWith => _$ShortItemCopyWithImpl<ShortItem>(this as ShortItem, _$identity);
 
   /// Serializes this ShortItem to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of ShortItem
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $ShortItemCopyWith<ShortItem> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShortItem&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.videoUrl, videoUrl) || other.videoUrl == videoUrl)&&(identical(other.thumbnailUrl, thumbnailUrl) || other.thumbnailUrl == thumbnailUrl)&&(identical(other.likesCount, likesCount) || other.likesCount == likesCount)&&(identical(other.viewsCount, viewsCount) || other.viewsCount == viewsCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,title,description,videoUrl,thumbnailUrl,likesCount,viewsCount,isLiked);
+
+@override
+String toString() {
+  return 'ShortItem(id: $id, title: $title, description: $description, videoUrl: $videoUrl, thumbnailUrl: $thumbnailUrl, likesCount: $likesCount, viewsCount: $viewsCount, isLiked: $isLiked)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $ShortItemCopyWith<$Res> {
-  factory $ShortItemCopyWith(ShortItem value, $Res Function(ShortItem) then) =
-      _$ShortItemCopyWithImpl<$Res, ShortItem>;
-  @useResult
-  $Res call({
-    String id,
-    String? title,
-    String? description,
-    @JsonKey(name: 'video_url') String? videoUrl,
-    @JsonKey(name: 'thumbnail_url') String? thumbnailUrl,
-    @JsonKey(name: 'likes_count') int likesCount,
-    @JsonKey(name: 'views_count') int viewsCount,
-    @JsonKey(name: 'is_liked') bool isLiked,
-  });
-}
+abstract mixin class $ShortItemCopyWith<$Res>  {
+  factory $ShortItemCopyWith(ShortItem value, $Res Function(ShortItem) _then) = _$ShortItemCopyWithImpl;
+@useResult
+$Res call({
+ String id, String? title, String? description,@JsonKey(name: 'video_url') String? videoUrl,@JsonKey(name: 'thumbnail_url') String? thumbnailUrl,@JsonKey(name: 'likes_count') int likesCount,@JsonKey(name: 'views_count') int viewsCount,@JsonKey(name: 'is_liked') bool isLiked
+});
 
+
+
+
+}
 /// @nodoc
-class _$ShortItemCopyWithImpl<$Res, $Val extends ShortItem>
+class _$ShortItemCopyWithImpl<$Res>
     implements $ShortItemCopyWith<$Res> {
-  _$ShortItemCopyWithImpl(this._value, this._then);
+  _$ShortItemCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final ShortItem _self;
+  final $Res Function(ShortItem) _then;
 
-  /// Create a copy of ShortItem
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? title = freezed,
-    Object? description = freezed,
-    Object? videoUrl = freezed,
-    Object? thumbnailUrl = freezed,
-    Object? likesCount = null,
-    Object? viewsCount = null,
-    Object? isLiked = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            title: freezed == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            description: freezed == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            videoUrl: freezed == videoUrl
-                ? _value.videoUrl
-                : videoUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            thumbnailUrl: freezed == thumbnailUrl
-                ? _value.thumbnailUrl
-                : thumbnailUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            likesCount: null == likesCount
-                ? _value.likesCount
-                : likesCount // ignore: cast_nullable_to_non_nullable
-                      as int,
-            viewsCount: null == viewsCount
-                ? _value.viewsCount
-                : viewsCount // ignore: cast_nullable_to_non_nullable
-                      as int,
-            isLiked: null == isLiked
-                ? _value.isLiked
-                : isLiked // ignore: cast_nullable_to_non_nullable
-                      as bool,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of ShortItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? videoUrl = freezed,Object? thumbnailUrl = freezed,Object? likesCount = null,Object? viewsCount = null,Object? isLiked = null,}) {
+  return _then(ShortItem(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,videoUrl: freezed == videoUrl ? _self.videoUrl : videoUrl // ignore: cast_nullable_to_non_nullable
+as String?,thumbnailUrl: freezed == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+as String?,likesCount: null == likesCount ? _self.likesCount : likesCount // ignore: cast_nullable_to_non_nullable
+as int,viewsCount: null == viewsCount ? _self.viewsCount : viewsCount // ignore: cast_nullable_to_non_nullable
+as int,isLiked: null == isLiked ? _self.isLiked : isLiked // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
 }
 
-/// @nodoc
-abstract class _$$ShortItemImplCopyWith<$Res>
-    implements $ShortItemCopyWith<$Res> {
-  factory _$$ShortItemImplCopyWith(
-    _$ShortItemImpl value,
-    $Res Function(_$ShortItemImpl) then,
-  ) = __$$ShortItemImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String? title,
-    String? description,
-    @JsonKey(name: 'video_url') String? videoUrl,
-    @JsonKey(name: 'thumbnail_url') String? thumbnailUrl,
-    @JsonKey(name: 'likes_count') int likesCount,
-    @JsonKey(name: 'views_count') int viewsCount,
-    @JsonKey(name: 'is_liked') bool isLiked,
-  });
 }
 
-/// @nodoc
-class __$$ShortItemImplCopyWithImpl<$Res>
-    extends _$ShortItemCopyWithImpl<$Res, _$ShortItemImpl>
-    implements _$$ShortItemImplCopyWith<$Res> {
-  __$$ShortItemImplCopyWithImpl(
-    _$ShortItemImpl _value,
-    $Res Function(_$ShortItemImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of ShortItem
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? title = freezed,
-    Object? description = freezed,
-    Object? videoUrl = freezed,
-    Object? thumbnailUrl = freezed,
-    Object? likesCount = null,
-    Object? viewsCount = null,
-    Object? isLiked = null,
-  }) {
-    return _then(
-      _$ShortItemImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        title: freezed == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        description: freezed == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        videoUrl: freezed == videoUrl
-            ? _value.videoUrl
-            : videoUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        thumbnailUrl: freezed == thumbnailUrl
-            ? _value.thumbnailUrl
-            : thumbnailUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        likesCount: null == likesCount
-            ? _value.likesCount
-            : likesCount // ignore: cast_nullable_to_non_nullable
-                  as int,
-        viewsCount: null == viewsCount
-            ? _value.viewsCount
-            : viewsCount // ignore: cast_nullable_to_non_nullable
-                  as int,
-        isLiked: null == isLiked
-            ? _value.isLiked
-            : isLiked // ignore: cast_nullable_to_non_nullable
-                  as bool,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [ShortItem].
+extension ShortItemPatterns on ShortItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ShortItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ShortItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ShortItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _ShortItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ShortItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ShortItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? title,  String? description, @JsonKey(name: 'video_url')  String? videoUrl, @JsonKey(name: 'thumbnail_url')  String? thumbnailUrl, @JsonKey(name: 'likes_count')  int likesCount, @JsonKey(name: 'views_count')  int viewsCount, @JsonKey(name: 'is_liked')  bool isLiked)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ShortItem() when $default != null:
+return $default(_that.id,_that.title,_that.description,_that.videoUrl,_that.thumbnailUrl,_that.likesCount,_that.viewsCount,_that.isLiked);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? title,  String? description, @JsonKey(name: 'video_url')  String? videoUrl, @JsonKey(name: 'thumbnail_url')  String? thumbnailUrl, @JsonKey(name: 'likes_count')  int likesCount, @JsonKey(name: 'views_count')  int viewsCount, @JsonKey(name: 'is_liked')  bool isLiked)  $default,) {final _that = this;
+switch (_that) {
+case _ShortItem():
+return $default(_that.id,_that.title,_that.description,_that.videoUrl,_that.thumbnailUrl,_that.likesCount,_that.viewsCount,_that.isLiked);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? title,  String? description, @JsonKey(name: 'video_url')  String? videoUrl, @JsonKey(name: 'thumbnail_url')  String? thumbnailUrl, @JsonKey(name: 'likes_count')  int likesCount, @JsonKey(name: 'views_count')  int viewsCount, @JsonKey(name: 'is_liked')  bool isLiked)?  $default,) {final _that = this;
+switch (_that) {
+case _ShortItem() when $default != null:
+return $default(_that.id,_that.title,_that.description,_that.videoUrl,_that.thumbnailUrl,_that.likesCount,_that.viewsCount,_that.isLiked);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$ShortItemImpl implements _ShortItem {
-  const _$ShortItemImpl({
-    required this.id,
-    this.title,
-    this.description,
-    @JsonKey(name: 'video_url') this.videoUrl,
-    @JsonKey(name: 'thumbnail_url') this.thumbnailUrl,
-    @JsonKey(name: 'likes_count') this.likesCount = 0,
-    @JsonKey(name: 'views_count') this.viewsCount = 0,
-    @JsonKey(name: 'is_liked') this.isLiked = false,
-  });
 
-  factory _$ShortItemImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ShortItemImplFromJson(json);
+class _ShortItem implements ShortItem {
+  const _ShortItem({required this.id, this.title, this.description, @JsonKey(name: 'video_url') this.videoUrl, @JsonKey(name: 'thumbnail_url') this.thumbnailUrl, @JsonKey(name: 'likes_count') this.likesCount = 0, @JsonKey(name: 'views_count') this.viewsCount = 0, @JsonKey(name: 'is_liked') this.isLiked = false});
+  factory _ShortItem.fromJson(Map<String, dynamic> json) => _$ShortItemFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String? title;
-  @override
-  final String? description;
-  @override
-  @JsonKey(name: 'video_url')
-  final String? videoUrl;
-  @override
-  @JsonKey(name: 'thumbnail_url')
-  final String? thumbnailUrl;
-  @override
-  @JsonKey(name: 'likes_count')
-  final int likesCount;
-  @override
-  @JsonKey(name: 'views_count')
-  final int viewsCount;
-  @override
-  @JsonKey(name: 'is_liked')
-  final bool isLiked;
+@override final  String id;
+@override final  String? title;
+@override final  String? description;
+@override@JsonKey(name: 'video_url') final  String? videoUrl;
+@override@JsonKey(name: 'thumbnail_url') final  String? thumbnailUrl;
+@override@JsonKey(name: 'likes_count') final  int likesCount;
+@override@JsonKey(name: 'views_count') final  int viewsCount;
+@override@JsonKey(name: 'is_liked') final  bool isLiked;
 
-  @override
-  String toString() {
-    return 'ShortItem(id: $id, title: $title, description: $description, videoUrl: $videoUrl, thumbnailUrl: $thumbnailUrl, likesCount: $likesCount, viewsCount: $viewsCount, isLiked: $isLiked)';
-  }
+/// Create a copy of ShortItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ShortItemCopyWith<_ShortItem> get copyWith => __$ShortItemCopyWithImpl<_ShortItem>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ShortItemImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.videoUrl, videoUrl) ||
-                other.videoUrl == videoUrl) &&
-            (identical(other.thumbnailUrl, thumbnailUrl) ||
-                other.thumbnailUrl == thumbnailUrl) &&
-            (identical(other.likesCount, likesCount) ||
-                other.likesCount == likesCount) &&
-            (identical(other.viewsCount, viewsCount) ||
-                other.viewsCount == viewsCount) &&
-            (identical(other.isLiked, isLiked) || other.isLiked == isLiked));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    title,
-    description,
-    videoUrl,
-    thumbnailUrl,
-    likesCount,
-    viewsCount,
-    isLiked,
-  );
-
-  /// Create a copy of ShortItem
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ShortItemImplCopyWith<_$ShortItemImpl> get copyWith =>
-      __$$ShortItemImplCopyWithImpl<_$ShortItemImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ShortItemImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$ShortItemToJson(this, );
 }
 
-abstract class _ShortItem implements ShortItem {
-  const factory _ShortItem({
-    required final String id,
-    final String? title,
-    final String? description,
-    @JsonKey(name: 'video_url') final String? videoUrl,
-    @JsonKey(name: 'thumbnail_url') final String? thumbnailUrl,
-    @JsonKey(name: 'likes_count') final int likesCount,
-    @JsonKey(name: 'views_count') final int viewsCount,
-    @JsonKey(name: 'is_liked') final bool isLiked,
-  }) = _$ShortItemImpl;
-
-  factory _ShortItem.fromJson(Map<String, dynamic> json) =
-      _$ShortItemImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String? get title;
-  @override
-  String? get description;
-  @override
-  @JsonKey(name: 'video_url')
-  String? get videoUrl;
-  @override
-  @JsonKey(name: 'thumbnail_url')
-  String? get thumbnailUrl;
-  @override
-  @JsonKey(name: 'likes_count')
-  int get likesCount;
-  @override
-  @JsonKey(name: 'views_count')
-  int get viewsCount;
-  @override
-  @JsonKey(name: 'is_liked')
-  bool get isLiked;
-
-  /// Create a copy of ShortItem
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ShortItemImplCopyWith<_$ShortItemImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShortItem&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.videoUrl, videoUrl) || other.videoUrl == videoUrl)&&(identical(other.thumbnailUrl, thumbnailUrl) || other.thumbnailUrl == thumbnailUrl)&&(identical(other.likesCount, likesCount) || other.likesCount == likesCount)&&(identical(other.viewsCount, viewsCount) || other.viewsCount == viewsCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,title,description,videoUrl,thumbnailUrl,likesCount,viewsCount,isLiked);
+
+@override
+String toString() {
+  return 'ShortItem(id: $id, title: $title, description: $description, videoUrl: $videoUrl, thumbnailUrl: $thumbnailUrl, likesCount: $likesCount, viewsCount: $viewsCount, isLiked: $isLiked)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ShortItemCopyWith<$Res> implements $ShortItemCopyWith<$Res> {
+  factory _$ShortItemCopyWith(_ShortItem value, $Res Function(_ShortItem) _then) = __$ShortItemCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String? title, String? description,@JsonKey(name: 'video_url') String? videoUrl,@JsonKey(name: 'thumbnail_url') String? thumbnailUrl,@JsonKey(name: 'likes_count') int likesCount,@JsonKey(name: 'views_count') int viewsCount,@JsonKey(name: 'is_liked') bool isLiked
+});
+
+
+
+
+}
+/// @nodoc
+class __$ShortItemCopyWithImpl<$Res>
+    implements _$ShortItemCopyWith<$Res> {
+  __$ShortItemCopyWithImpl(this._self, this._then);
+
+  final _ShortItem _self;
+  final $Res Function(_ShortItem) _then;
+
+/// Create a copy of ShortItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? videoUrl = freezed,Object? thumbnailUrl = freezed,Object? likesCount = null,Object? viewsCount = null,Object? isLiked = null,}) {
+  return _then(_ShortItem(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,videoUrl: freezed == videoUrl ? _self.videoUrl : videoUrl // ignore: cast_nullable_to_non_nullable
+as String?,thumbnailUrl: freezed == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+as String?,likesCount: null == likesCount ? _self.likesCount : likesCount // ignore: cast_nullable_to_non_nullable
+as int,viewsCount: null == viewsCount ? _self.viewsCount : viewsCount // ignore: cast_nullable_to_non_nullable
+as int,isLiked: null == isLiked ? _self.isLiked : isLiked // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+// dart format on
